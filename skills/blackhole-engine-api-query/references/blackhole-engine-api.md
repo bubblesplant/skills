@@ -1,0 +1,32503 @@
+# 基本介绍 {#基本介绍 .样式3}
+
+## 简介 {#简介 .样式4}
+
+BlackHole Engine
+Plus是具有自主知识产权的BIM+GIS轻量化渲染引擎。基于webgl
+2.0和webassembly标准，可在浏览器上无插件运行，可轻松管理多类型、大规模的BIM模型数据，并提供精确的空间分析计算能力。引擎
+API提供多种功能的接口，可方便用户根据需要进行二次开发，创建更加丰富的功能特性。
+
+**技术栈**
+
+WebGl 2.0
+
+Canvas
+
+WebAssembly
+
+JavaScript
+
+**支持的浏览器**
+
+Firefox 51+ (x64)
+
+Chrome 56+ (x64)
+
+及所有支持WebGl 2.0的64位浏览器
+
+## 基本流程 {#基本流程 .样式4}
+
+引用BlackHole Engine的JavaScript的组件库(本地文件)
+
+\<script async type=\"text/javascript\"
+src=\"javascript/RealBIMWeb.js\"\>\</script\>
+
+\<script async type=\"text/javascript\"
+src=\"javascript/BlackHole3D.js\"\>\</script\>
+
+引用BlackHole Engine的JavaScript的组件库(服务器文件)
+
+\<script async type=\"text/javascript\"
+src=\"https://demo.bjblackhole.com/EngineWebSDk/RealBIMWeb.js\"\>\</script\>
+
+\<script async type=\"text/javascript\"
+src=\"https://demo.bjblackhole.com/EngineWebSDk/BlackHole3D.js\"\>\</script\>
+
+引用预加载文件
+
+注：初始化如果不是直接加载模型，可以将RealBIMWeb.preload.js文件添加在RealBIMWeb.js文件上方，可以预加载引擎资源文件，增加模型场景渲染速度
+
+\<script async type=\"text/javascript\"
+src=\"javascript/RealBIMWeb.preload.js\"\>\</script\>
+
+定义canvas元素，用于在该canvas元素中显示模型
+
+注：初始化的时候必须定义canvas元素的width、height。
+
+Html部分：
+
+\<div class=\"emscripten_border\"\>
+
+\<canvas class=\"emscripten\" id=\"canvas\"
+oncontextmenu=\"event.preventDefault() \"tabindex=\"1\"\>\</canvas\>
+
+\</div\>
+
+CSS部分：
+
+div.emscripten_border {
+
+display:block;
+
+position:relative;
+
+}
+
+canvas.emscripten {
+
+border: 0px none;
+
+background-color: #000000;
+
+}
+
+初始化JavaScript显示组件
+
+// 初始化的时候必须先获取canvas实例对象，然后才可调用引擎相关接口
+
+BlackHole3D = typeof BlackHole3D !== \"undefined\" ? BlackHole3D : {};
+
+BlackHole3D\[\"canvas\"\] = (function () {
+
+var canvas = document.getElementById(\'canvas\');
+
+return canvas;
+
+})();
+
+初始化引擎系统
+
+// 页面加载时添加相关监听事件
+
+window.onload = function (event) {
+
+BlackHole3D = CreateBlackHoleWebSDK(BlackHole3D);
+
+}
+
+## 名词解释 {#名词解释 .样式4}
+
+文档中会涉及到三维相关的专业名词，现对部分名词做以下解释：
+
+**构件**
+
+构件是模型管理的最小单位，由三角面片和顶点组成，每个构件都有自己的全局ID，位置、颜色等几何信息，也可以附加属性信息。每个模型都视为由若干个构件组成。
+
+**相机**
+
+相机是图形学中的一个重要概念，开发人员可以理解成三维模型的视角信息，包括相机坐标和相机方向。
+
+**选择集**
+
+选择集是当前选中的构件集合的简称，可以通过鼠标单击添加单构件到选择集，也可以按住Ctrl键单击进行多选、按住Ctrl键拖动鼠标进行框选，另外还可以通过调用接口往选择集添加单个或多个构件ID。选择集有自己的属性信息，可以单独设置。当鼠标单击模型之外的区域，当前选择集自动清空。
+
+**矢量**
+
+矢量是BlackHole
+Engine里面一类元素的总称，包括锚点、标签、电子围栏等统称为矢量元素。
+
+**包围盒**
+
+引擎中是指AABB包围盒，即边平行于坐标轴的最小六面体。
+
+**天空盒**
+
+天空盒是一个全景视图，分为六张纹理，表示沿主轴（上、下、前、后、左、右）可见的六个方向。正确的天空盒纹理图片的边缘可以无缝的合并，在里面的任何方向看，都会是一副连续的画面，例如下图所示：
+
+![1623848171(1)](./images/media/image1.png){width="5.761111111111111in"
+height="4.298611111111111in"}
+
+# 引擎模块 {#引擎模块 .样式3}
+
+## 基础
+
+## initEngineSys {#initenginesys .样式4}
+
+**功能：**
+
+引擎底层初始化完成后，开始执行场景初始化，加载公共资源
+
+注：初始化成功，会触发RESystemEngineCreated事件
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***sysInfo***   引擎设置参数（构造函数 RESysInfo）
+
+  ---- --------------- ------------------------------------------------------
+
+**RESysInfo 模型解析：**
+
+  ---- -------------------- -----------------------------------------------------
+   1   ***workerjsPath***   相对于html页面的RealBIMWeb_Worker.js的路径
+
+   2   ***renderWidth***    初始化图形窗口的宽度
+
+   3   ***renderHieght***   初始化图形窗口的高度
+
+   4   ***commonUrl***      引擎调用的公共资源的路径
+
+   5   ***userName***       引擎资源发布服务配套的用户名
+
+   6   ***passWord***       引擎资源发布服务配套的密码
+
+   7   ***mainWndName***    表示主窗口的名称,对应document.title，默认值
+                            \"BlackHole\"
+  ---- -------------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+var sysInfo = new BlackHole3D.RESysInfo();
+
+sysInfo.workerjsPath = \"javascript/RealBIMWeb_Worker.js\";
+
+sysInfo.renderWidth = BlackHole3D.canvas.clientWidth;
+
+sysInfo.renderHieght = BlackHole3D.canvas.clientHeight;
+
+sysInfo.commonUrl = \"\";
+
+sysInfo.userName = \"\";
+
+sysInfo.passWord = \"\";
+
+BlackHole3D.initEngineSys(sysInfo);
+
+## addAuthorPath {#addauthorpath .样式4}
+
+**功能：**
+
+添加一个HTTP路径授权信息
+
+**参数：**
+
+  --- -------------------- -------------------------------------------------------
+   1  ***identifyName***   表示信息的逻辑标识名（默认RealEngineInitAuthorPath）
+
+   2  ***filePath***       授权文件路径
+  --- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.addAuthorPath(\"RealEngineInitAuthorPath\", \"url\");
+
+## addPathIndex {#addpathindex .样式4}
+
+**功能：**
+
+添加一个HTTP路径索引信息
+
+**参数：**
+
+  --- -------------------- -------------------------------------------------------
+   1  ***identifyName***   表示信息的逻辑标识名（默认RealEngineInitPathIndex）
+
+   2  ***rootURL***        表示路径索引对应的根文件夹
+
+   3  ***filePath***       授权文件路径
+  --- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.addPathIndex(\"RealEngineInitPathIndex\", \"url\", \"url\");
+
+## addUrlExtParam {#addurlextparam .样式4}
+
+**功能：**
+
+添加一个URL自定义参数字段信息
+
+**参数：**
+
+  ---- ------------------- -------------------------------------------------------
+   1   ***urlWildcard***   表示要匹配的URL通配符
+
+   2   ***paramStr***      表示匹配的URL需要添加的自定义参数字段 字符串
+  ---- ------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，true成功，false失败
+
+**调用示例：**
+
+BlackHole3D.addUrlExtParam(\"http://realbim.bjblackhole.cn:8008/default.aspx\*\",
+\"serviceid=1673873620058771458\");
+
+// 天地图
+
+BlackHole3D.addUrlExtParam(\"https://t\*.tianditu.gov.cn/DataServer\*\",
+\"tk=77bea377d5702f44536cb4420cebcfad\");
+
+## delAllURLExtParams {#delallurlextparams .样式4}
+
+**功能：**
+
+删除所有的URL自定义参数字段信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.delAllURLExtParams();
+
+## addUrlExtHeader {#addurlextheader .样式4}
+
+**功能：**
+
+添加一个URL自定义请求头信息
+
+注：需要对应服务器配置过相应的请求头信息才有效
+
+**参数：**
+
+  ---- ------------------- --------------------------------------------------------------
+   1   ***urlWildcard***   表示要匹配的URL通配符
+
+   2   ***headerStr***     表示匹配的URL需要添加的自定义请求头 字符串
+                           \"HeaderName0:HeaderValue0\|HeaderName1:HeaderValue1\|\...\"
+  ---- ------------------- --------------------------------------------------------------
+
+**返回值：**
+
+布尔类型，true成功，false失败
+
+**调用示例：**
+
+BlackHole3D.addUrlExtHeader(\"http://realbim.bjblackhole.cn:8008/\*\",
+\"Content-type:application/testtype\|Content-type:application/testtype02\");
+
+## delAllURLExtHeaders {#delallurlextheaders .样式4}
+
+**功能：**
+
+删除所有的URL自定义请求头信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.delAllURLExtHeaders();
+
+## releaseEngine {#releaseengine .样式4}
+
+**功能：**
+
+释放引擎所占用的浏览器资源，方法执行成功，引擎窗口所占用的资源自动释放，不能进行任何操作；需区别于卸载项目的接口，卸载项目后，引擎仍处于初始化成功状态，可再次加载新的项目
+
+注：如果需要将显存释放，需要执行WEBGl的显存释放
+
+**参数：**
+
++:-:+----------------------+-----------------------------------------------------------------------------------------------------------------+
+| 1 | ***clearWebWorker*** | 表示释放引擎资源的时候是否同步清除已创建的webWorker，选填项，不填则默认为false;                                 |
+|   |                      |                                                                                                                 |
+|   |                      | true:表示清除，此时会同步释放引擎所占用的浏览器内存资源，但是下次初始化需重新创建，需要一定时间（大概几秒钟）； |
+|   |                      |                                                                                                                 |
+|   |                      | false:表示不清除，此时引擎所占用的浏览器内存资源不会释放，同时下次初始化不需重新创建                            |
++---+----------------------+-----------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.releaseEngine();
+
+//释放显存
+
+## getVersion {#getversion .样式4}
+
+**功能：**
+
+获取当前WebSDK的版本
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，当前版本号
+
+**调用示例：**
+
+console.log(\"当前 WebSDK 运行版本\", BlackHole3D.getVersion());
+
+## 效果展示
+
+## setViewMode {#setviewmode .样式4}
+
+**功能：**
+
+设置窗口的显示模式，此接口适用于需要双屏显示，以及需要单双屏切换的应用场景
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
++:-:+------------------+-------------------------------------------------------------------------------------------------+
+| 1 | ***viewport0***  | 第0个视图要显示的场景内容 REVpTypeEm 枚举类型                                                   |
+|   |                  |                                                                                                 |
+|   |                  | None //该视图不显示任何内容                                                                     |
+|   |                  |                                                                                                 |
+|   |                  | BIM //该视图显示BIM场景模型                                                                     |
+|   |                  |                                                                                                 |
+|   |                  | CAD //该视图显示CAD图纸                                                                         |
+|   |                  |                                                                                                 |
+|   |                  | Panorama //该视图显示360全景图                                                                  |
++---+------------------+-------------------------------------------------------------------------------------------------+
+| 2 | ***viewport1***  | 第1个视图要显示的场景内容 REVpTypeEm 枚举类型                                                   |
+|   |                  |                                                                                                 |
+|   |                  | None //该视图不显示任何内容                                                                     |
+|   |                  |                                                                                                 |
+|   |                  | BIM //该视图显示BIM场景模型                                                                     |
+|   |                  |                                                                                                 |
+|   |                  | CAD //该视图显示CAD图纸                                                                         |
+|   |                  |                                                                                                 |
+|   |                  | Panorama //该视图显示360全景图                                                                  |
++---+------------------+-------------------------------------------------------------------------------------------------+
+| 3 | ***screenMode*** | 视图0与视图1在屏幕上的排列方式 REVpRankEm 枚举类型                                              |
+|   |                  |                                                                                                 |
+|   |                  | Single//视图0/视图1任一为空字符串：屏幕中只显示一个内容有效的视图                               |
+|   |                  |                                                                                                 |
+|   |                  | LR//屏幕自左向右依次显示视图0、视图1                                                            |
+|   |                  |                                                                                                 |
+|   |                  | TB//屏幕自下向上依次显示视图0、视图1                                                            |
+|   |                  |                                                                                                 |
+|   |                  | 例：\<\"\",\"BIM\"\>/\<\"\",\"CAD\"\>/\<\"\",\"360\"\>/\<\"BIM\",\"CAD\"\>/\<\"BIM\",\"360\"\>/ |
+|   |                  |                                                                                                 |
+|   |                  | \<\"360\",\"CAD\"\>/\<\"360\",\"360\"\>                                                         |
+|   |                  |                                                                                                 |
+|   |                  | 视图组合为\<\"CAD\",\"CAD\"\>/\<\"\",\"\"\>的情况，目前暂不支持                                 |
++---+------------------+-------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置横向双屏显示，左边为BIM场景，右边为全景场景
+
+BlackHole3D.setViewMode(BlackHole3D.REVpTypeEm.BIM,
+BlackHole3D.REVpTypeEm.Panorama, BlackHole3D.REVpRankEm.LR);
+
+//设置横向双屏显示，左边为BIM场景，右边为CAD
+
+BlackHole3D.setViewMode(BlackHole3D.REVpTypeEm.BIM,
+BlackHole3D.REVpTypeEm.CAD, BlackHole3D.REVpRankEm.LR);
+
+//设置上下双屏显示，上边为CAD，下边为全景场景
+
+BlackHole3D.setViewMode(BlackHole3D.REVpTypeEm.CAD,
+BlackHole3D.REVpTypeEm.Panorama, BlackHole3D.REVpRankEm.TB);
+
+//设置横向单屏显示CAD
+
+BlackHole3D.setViewMode(BlackHole3D.REVpTypeEm.CAD,
+BlackHole3D.REVpTypeEm.None, BlackHole3D.REVpRankEm.Single);
+
+## setViewSyn {#setviewsyn .样式4}
+
+**功能：**
+
+设置360相机与BIM相机是否同步，初始化完成后默认不同步；设为同步时，相机的朝向默认使用第一个窗口的朝向
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***isSync***   是否同步
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setViewSyn(false);
+
+## getViewSyn {#getviewsyn .样式4}
+
+**功能：**
+
+获取当前设置的360相机与BIM相机是否同步状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，同步返回true，不同步返回false
+
+**调用示例：**
+
+BlackHole3D.getViewSyn();
+
+## getScreenSnapshot {#getscreensnapshot .样式4}
+
+**功能：**
+
+生成屏幕快照
+
+**参数：**
+
+无
+
+**返回值：**
+
+base64类型
+
+**调用示例：**
+
+BlackHole3D.getScreenSnapshot();
+
+## m_re_em_window_width {#m_re_em_window_width .样式4}
+
+**功能：**
+
+引擎图形窗口(canvas)的宽度
+
+**注：全局变量，场景初始化时必须赋值，每次图形窗口尺寸发生变化都需要重新赋值**
+
+**调用示例：**
+
+//图形窗口改变时，需实时传递给引擎，否则模型会变形
+
+window.onresize = function (event) {
+
+BlackHole3D\[\"m_re_em_window_width\"\] =
+BlackHole3D.canvas.clientWidth;
+
+BlackHole3D\[\"m_re_em_window_height\"\] =
+BlackHole3D.canvas.clientHeight;
+
+}
+
+## m_re_em_window_height {#m_re_em_window_height .样式4}
+
+**功能：**
+
+引擎图形窗口(canvas)的高度
+
+**注：全局变量，场景初始化时必须赋值，每次图形窗口尺寸发生变化都需要重新赋值**
+
+**调用示例：**
+
+//图形窗口改变时，需实时传递给引擎，否则模型会变形
+
+window.onresize = function (event) {
+
+BlackHole3D\[\"m_re_em_window_width\"\] =
+BlackHole3D.canvas.clientWidth;
+
+BlackHole3D\[\"m_re_em_window_height\"\] =
+BlackHole3D.canvas.clientHeight;
+
+}
+
+## g_re_em_force_engine_dir {#g_re_em_force_engine_dir .样式4}
+
+**功能：**
+
+引擎SDK资源加载路径（使用服务器路径）
+
+**注：SDK文件RealBIMWeb.js加载之前调用**
+
+**调用示例：**
+
+\<script\>
+
+g_re_em_force_engine_dir =
+\"https://demo.bjblackhole.com/EngineWebSDk/RealBIMWeb.js\";
+
+\</script\>
+
+\<script async type=\"text/javascript\"
+src=\"https://demo.bjblackhole.com/EngineWebSDk/RealBIMWeb.js\"\>\</script\>
+
+\<script async type=\"text/javascript\"
+src=\"https://demo.bjblackhole.com/EngineWebSDk/BlackHole3D.js\"\>\</script\>
+
+## 操作
+
+## setEscKeyExitOpEnable {#setesckeyexitopenable .样式4}
+
+**功能：**
+
+设置是否允许ESC键退出测量/剖切操作
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   是否允许
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setEscKeyExitOpEnable(false);
+
+## getEscKeyExitOpEnable {#getesckeyexitopenable .样式4}
+
+**功能：**
+
+获取是否允许ESC键退出测量/剖切操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，允许返回true，不允许返回false
+
+**调用示例：**
+
+BlackHole3D.getEscKeyExitOpEnable();
+
+## setCamRevLR {#setcamrevlr .样式4}
+
+**功能：**
+
+设置是否翻转鼠标左右相机拖动键操作行为
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***reverseLR***   是否翻转
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setCamRevLR(false);
+
+## getCamRevLR {#getcamrevlr .样式4}
+
+**功能：**
+
+获取鼠标是否翻转了左右相机拖动键操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，翻转返回true，不翻转返回false
+
+**调用示例：**
+
+BlackHole3D.getCamRevLR();
+
+## setOperationMode {#setoperationmode .样式4}
+
+**功能：**
+
+设置当前的操作模式
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***operationMode***   模式类型 0:鼠标操作操作 1:触控操作
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setOperationMode(0);
+
+## getOperationMode {#getoperationmode .样式4}
+
+**功能：**
+
+获取当前的操作模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+数字类型，0:鼠标操作操作 1:触控操作
+
+**调用示例：**
+
+BlackHole3D.getOperationMode();
+
+## setCamModeOnMidBtnDown {#setcammodeonmidbtndown .样式4}
+
+**功能：**
+
+设置鼠标中键按下对应的旋转中心
+
+**参数：**
+
++:-:+---------------------+-----------------------------------------------------+
+| 1 | ***operationMode*** | 模式类型                                            |
+|   |                     |                                                     |
+|   |                     | -1:相机空闲模式                                     |
+|   |                     |                                                     |
+|   |                     | 0:相机围绕选择点旋转                                |
+|   |                     |                                                     |
+|   |                     | 1:相机以视点为中心旋转视角                          |
+|   |                     |                                                     |
+|   |                     | 2:相机平移                                          |
++---+---------------------+-----------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setCamModeOnMidBtnDown(0);
+
+## getCamModeOnMidBtnDown {#getcammodeonmidbtndown .样式4}
+
+**功能：**
+
+获取鼠标中键按下对应的旋转中心
+
+**参数：**
+
+无
+
+**返回值：**
+
+数字类型，-1:相机空闲模式 0:相机围绕选择点旋转
+1:相机以视点为中心旋转视角 2:相机平移
+
+**调用示例：**
+
+BlackHole3D.getCamModeOnMidBtnDown();
+
+## setCamModeOnLeftBtnDown {#setcammodeonleftbtndown .样式4}
+
+**功能：**
+
+设置鼠标左键按下对应的相机操作
+
+**参数：**
+
++:-:+---------------------+-----------------------------------------------------+
+| 1 | ***operationMode*** | 模式类型                                            |
+|   |                     |                                                     |
+|   |                     | -1:相机空闲模式                                     |
+|   |                     |                                                     |
+|   |                     | 0:相机围绕选择点旋转                                |
+|   |                     |                                                     |
+|   |                     | 1:相机以视点为中心旋转视角                          |
+|   |                     |                                                     |
+|   |                     | 2:相机平移                                          |
++---+---------------------+-----------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setCamModeOnLeftBtnDown(2);
+
+## getCamModeOnLeftBtnDown {#getcammodeonleftbtndown .样式4}
+
+**功能：**
+
+获取鼠标左键按下对应的相机操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+数字类型，-1:相机空闲模式 0:相机围绕选择点旋转
+1:相机以视点为中心旋转视角 2:相机平移
+
+**调用示例：**
+
+BlackHole3D.getCamModeOnLeftBtnDown();
+
+## setCamModeOnRightBtnDown {#setcammodeonrightbtndown .样式4}
+
+**功能：**
+
+设置鼠标右键按下对应的相机操作
+
+**参数：**
+
++:-:+---------------------+-----------------------------------------------------+
+| 1 | ***operationMode*** | 模式类型                                            |
+|   |                     |                                                     |
+|   |                     | -1:相机空闲模式                                     |
+|   |                     |                                                     |
+|   |                     | 0:相机围绕选择点旋转                                |
+|   |                     |                                                     |
+|   |                     | 1:相机以视点为中心旋转视角                          |
+|   |                     |                                                     |
+|   |                     | 2:相机平移                                          |
++---+---------------------+-----------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setCamModeOnRightBtnDown(1);
+
+## getCamModeOnRightBtnDown {#getcammodeonrightbtndown .样式4}
+
+**功能：**
+
+获取鼠标右键按下对应的相机操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+数字类型，-1:相机空闲模式 0:相机围绕选择点旋转
+1:相机以视点为中心旋转视角 2:相机平移
+
+**调用示例：**
+
+BlackHole3D.getCamModeOnRightBtnDown();
+
+## setCtrlSelectedMode {#setctrlselectedmode .样式4}
+
+**功能：**
+
+设置Ctrl+点选已选构件模式
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***operationMode***   模式类型 0:反选构件 1:穿透构件
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setCtrlSelectedMode(0);
+
+## getCtrlSelectedMode {#getctrlselectedmode .样式4}
+
+**功能：**
+
+获取Ctrl+点选已选构件模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+数字类型，0:反选构件 1:穿透构件
+
+**调用示例：**
+
+BlackHole3D.getCtrlSelectedMode();
+
+## setCamFixCenterPos {#setcamfixcenterpos .样式4}
+
+**功能：**
+
+设置相机操作固定中心点
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***centerPos***   中心点坐标 \[x,y,z\]
+
+   2   ***enable***      是否生效（默认有效）
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setCamFixCenterPos(\[100,100,100\],true);
+
+## getCamFixCenterPosEnable {#getcamfixcenterposenable .样式4}
+
+**功能：**
+
+获取相机操作固定中心点是否生效
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，true:生效 false:不生效
+
+**调用示例：**
+
+BlackHole3D.getCamFixCenterPosEnable();
+
+## setScreenVirRotate {#setscreenvirrotate .样式4}
+
+**功能：**
+
+设置屏幕的虚拟旋转
+
+**注：不能将canvas直接进行css的样式旋转，自主控制旋转与重置**
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***rotateType***   旋转类型 0: 0度 1: 顺时针90度 2: 顺时针180度 3:
+                          顺时针270度
+
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.setScreenVirRotate(1);
+
+## getScreenVirRotate {#getscreenvirrotate .样式4}
+
+**功能：**
+
+获取屏幕的虚拟旋转类型
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0: 0度 1: 顺时针90度 2: 顺时针180度 3: 顺时针270度
+
+**调用示例：**
+
+BlackHole3D.getScreenVirRotate();
+
+## getCurInteractState {#getcurinteractstate .样式4}
+
+**功能：**
+
+获取当前的交互操作状态
+
+**注：多个状态间会存在互斥逻辑**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型
+
++----------------+--------------------------------------------------+
+| ***state***    | 交互操作状态类型                                 |
+|                |                                                  |
+|                | -1: 内部交互状态                                 |
+|                |                                                  |
+|                | 0: 正常浏览状态                                  |
+|                |                                                  |
+|                | 1: 标注编辑状态                                  |
+|                |                                                  |
+|                | 2: 显示标注框状态                                |
+|                |                                                  |
+|                | 3: ViewCube操作状态                              |
+|                |                                                  |
+|                | 4: 场景剖切                                      |
+|                |                                                  |
+|                | 5: 场景剖切包围体变换操作                        |
+|                |                                                  |
+|                | 6: 测量线编辑状态                                |
+|                |                                                  |
+|                | 7: 框选框拖动状态                                |
+|                |                                                  |
+|                | 8: 框选放大状态                                  |
+|                |                                                  |
+|                | 9: 位置编辑状态                                  |
+|                |                                                  |
+|                | 10: 控制配准状态                                 |
+|                |                                                  |
+|                | 11: 挤出操作区域的编辑状态                       |
+|                |                                                  |
+|                | 12: 单体化操作区域的编辑状态                     |
+|                |                                                  |
+|                | 13: 水面区域的编辑状态                           |
+|                |                                                  |
+|                | 14: 连续管道编辑状态                             |
+|                |                                                  |
+|                | 15: 实例编辑模式                                 |
+|                |                                                  |
+|                | 16: 通用矢量编辑状态                             |
+|                |                                                  |
+|                | 17: 粒子编辑状态                                 |
+|                |                                                  |
+|                | 18: 点光源编辑状态                               |
++----------------+--------------------------------------------------+
+
+**调用示例：**
+
+BlackHole3D.getCurInteractState();
+
+# 监听事件 {#监听事件 .样式3}
+
+## 系统
+
+## RESystemReady {#resystemready .样式4}
+
+**功能：**
+
+系统初始化完成回调
+
+## RESystemEngineCreated {#resystemenginecreated .样式4}
+
+**功能：**
+
+系统引擎创建完成回调
+
+## RESystemRenderReady {#resystemrenderready .样式4}
+
+**功能：**
+
+系统引擎渲染器初始化完成
+
+注：此事件完成之前页面可根据需要先不显示canvas，监听到该事件才显示
+
+## RESystemMouseHover  {#resystemmousehover .样式4}
+
+**功能：**
+
+鼠标悬停事件，默认关闭
+
+## RESystemMouseMove  {#resystemmousemove .样式4}
+
+**功能：**
+
+鼠标移动事件，默认关闭
+
+## RESystemFrameSel  {#resystemframesel .样式4}
+
+**功能：**
+
+按住Ctrl框选，结束后触发该事件
+
+注：框选数据多时，数据返回时间大于事件响应时间，这里获取选择集的id需要添加一个0毫秒的延迟处理
+
+## RESystemRenderVisible  {#resystemrendervisible .样式4}
+
+**功能：**
+
+判断当前渲染窗口是否可见的监听事件
+
+## RESystemKeyDown  {#resystemkeydown .样式4}
+
+**功能：**
+
+键盘按键按下完成事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
++--------------------+--------------------------------------------------+
+| ***canvasid***     | 当前回调对应的 canvas 标识                       |
++--------------------+--------------------------------------------------+
+| ***keyOperation*** | 按键操作：                                       |
+|                    |                                                  |
+|                    | \"Ctrl+Z\"：撤销操作                             |
+|                    |                                                  |
+|                    | \"Ctrl+Y\"：回撤操作                             |
++--------------------+--------------------------------------------------+
+
+## 模型相关
+
+## REDataSetLoadFinish  {#redatasetloadfinish .样式4}
+
+**功能：**
+
+场景模型加载完成回调
+
+## REDataSetLoadProgress {#redatasetloadprogress .样式4}
+
+**功能：**
+
+数据集模型加载进度反馈
+
+注：模型开始加载时，会多次触发该事件
+
+## REExitEntityEditMode  {#reexitentityeditmode .样式4}
+
+**功能：**
+
+单构件鼠标添加模式添加实例结束回调事件
+
+## REAddEntityFinish  {#readdentityfinish .样式4}
+
+**功能：**
+
+单构件添加完成回调事件
+
+## REGolElemBoneDestLoc  {#regolelembonedestloc .样式4}
+
+**功能：**
+
+设置全局元素骨骼的目标方位回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***boneid***      骨骼的全局id
+
+  ***destloc***     目标仿射变换数据（Object 类型）
+  ----------------- --------------------------------------------------
+
+**Object模型解析：**
+
+  ----------------------- --------------------------------------------------------------------------------------------------------
+  ***autoScale***         表示元素的自动缩放系数
+
+  ***localScale***        表示元素在以自身中心点为原点的局部世界空间中的缩放分量
+
+  ***localRotate***       表示元素在以自身中心点为原点的局部世界空间中的旋转分量(欧拉角：绕X/Y/Z轴的旋转角度-360.0\*k\~360.0\*j)
+
+  ***centerVirOrig***     表示元素中心点的缩放/旋转/平移变换所在的虚拟坐标系坐标原点的世界空间位置
+
+  ***centerVirScale***    表示元素中心点在虚拟坐标系下的缩放分量
+
+  ***centerVirRotate***   表示元素中心点在虚拟坐标系下的旋转分量(欧拉角：绕X/Y/Z轴的旋转角度-360.0\*k\~360.0\*j)
+
+  ***centerVirOffset***   表示元素中心点在虚拟坐标系下的平移分量
+  ----------------------- --------------------------------------------------------------------------------------------------------
+
+## RELODLevelChange  {#relodlevelchange .样式4}
+
+**功能：**
+
+LOD分级触发回调事件
+
+## 二维图纸相关
+
+## RECADLoadFinish {#recadloadfinish .样式4}
+
+**功能：**
+
+二维图纸加载完成事件，图纸加载完成后会触发该事件
+
+注：该事件调用完成才可以调用图纸相关的其他接口
+
+## REMiniMapLoadCAD  {#reminimaploadcad .样式4}
+
+**功能：**
+
+小地图中的CAD数据加载完成事件
+
+## RECADMeasurementDrawFinish  {#recadmeasurementdrawfinish .样式4}
+
+**功能：**
+
+CAD测量操作结束回调事件
+
+## RECADCommentDrawFinish  {#recadcommentdrawfinish .样式4}
+
+**功能：**
+
+标注完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
++-----------------+--------------------------------------------------+
+| ***canvasid***  | 当前回调对应的 canvas 标识                       |
++-----------------+--------------------------------------------------+
+| ***style***     | 样式类型                                         |
+|                 |                                                  |
+|                 | 0：箭头                                          |
+|                 |                                                  |
+|                 | 1：云线框                                        |
+|                 |                                                  |
+|                 | 2：矩形                                          |
+|                 |                                                  |
+|                 | 3：椭圆                                          |
+|                 |                                                  |
+|                 | 4：文字                                          |
++-----------------+--------------------------------------------------+
+| ***commentId*** | 标注标识                                         |
++-----------------+--------------------------------------------------+
+
+## RECADSwitchLayoutFinished  {#recadswitchlayoutfinished .样式4}
+
+**功能：**
+
+CAD切换图层完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***layoutId***    CAD图层标识
+
+  ***succeed***     成功为 1，失败为 0
+  ----------------- --------------------------------------------------
+
+## 全景相关
+
+## REDataSetLoadPanFinish {#redatasetloadpanfinish .样式4}
+
+**功能：**
+
+全景场景加载完成事件
+
+注：监听到此事件并不会直接在图形窗口显示全景图，需要调用setViewMode接口设置窗口显示模式才可以
+
+## REPanLoadSingleFinish  {#repanloadsinglefinish .样式4}
+
+**功能：**
+
+全景场景中某一帧全景图设置成功的事件
+
+## REPanCamAutoForwardFinish  {#repancamautoforwardfinish .样式4}
+
+**功能：**
+
+全景图的自动前进后退完成回调事件
+
+## REPanLocateCam  {#repanlocatecam .样式4}
+
+**功能：**
+
+全景图的相机定位回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## 矢量相关
+
+## REEditWaterFinish  {#reeditwaterfinish .样式4}
+
+**功能：**
+
+编辑水面操作完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ----------------- -------------------------------------------------
+   1   ***canvasid***    当前回调对应的 canvas 标识
+
+   2   ***succeed***     成功为 1，失败为 0
+
+   3   ***errorType***   失败类型 0: 无类型 1：区域投影几何绘制失败
+                         2：未结束添加区域操作
+  ---- ----------------- -------------------------------------------------
+
+## REAddWaterRgnCheck  {#readdwaterrgncheck .样式4}
+
+**功能：**
+
+水面添加区域检查回调事件
+
+**注：区域点信息改变会触发回调**
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REAddWaterRgnFinish  {#readdwaterrgnfinish .样式4}
+
+**功能：**
+
+水面添加区域完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REEditExtrudeFinish  {#reeditextrudefinish .样式4}
+
+**功能：**
+
+编辑挤出操作完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ----------------- -------------------------------------------------
+   1   ***canvasid***    当前回调对应的 canvas 标识
+
+   2   ***succeed***     成功为 1，失败为 0
+
+   3   ***errorType***   失败类型 0: 无类型 1：区域投影几何绘制失败
+                         2：未结束添加区域操作
+  ---- ----------------- -------------------------------------------------
+
+## REAddExtrudeRgnCheck  {#readdextrudergncheck .样式4}
+
+**功能：**
+
+挤出添加区域检查回调事件
+
+**注：区域点信息改变会触发回调**
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REAddExtrudeRgnFinish  {#readdextrudergnfinish .样式4}
+
+**功能：**
+
+挤出添加区域完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REEditMonomerFinish  {#reeditmonomerfinish .样式4}
+
+**功能：**
+
+编辑单体化操作完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ----------------- -------------------------------------------------
+   1   ***canvasid***    当前回调对应的 canvas 标识
+
+   2   ***succeed***     成功为 1，失败为 0
+
+   3   ***errorType***   失败类型 0: 无类型 1：区域投影几何绘制失败
+                         2：未结束添加区域操作
+  ---- ----------------- -------------------------------------------------
+
+## REAddMonomerRgnCheck  {#readdmonomerrgncheck .样式4}
+
+**功能：**
+
+单体化添加区域检查回调事件
+
+**注：区域点信息改变会触发回调**
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REAddMonomerRgnFinish  {#readdmonomerrgnfinish .样式4}
+
+**功能：**
+
+单体化添加区域完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REEditShpFinish  {#reeditshpfinish .样式4}
+
+**功能：**
+
+编辑矢量操作完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ----------------- -------------------------------------------------
+   1   ***canvasid***    当前回调对应的 canvas 标识
+
+   2   ***succeed***     成功为 1，失败为 0
+
+   3   ***errorType***   失败类型 0: 无类型 1：区域投影几何绘制失败
+                         2：未结束添加区域操作
+  ---- ----------------- -------------------------------------------------
+
+## REAddShpRgnCheck  {#readdshprgncheck .样式4}
+
+**功能：**
+
+矢量添加区域检查回调事件
+
+**注：区域点信息改变会触发回调**
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***canvasid***   当前回调对应的 canvas 标识
+
+   2   ***succeed***    成功为 1，失败为 0
+  ---- ---------------- -------------------------------------------------
+
+## REAddShpRgnFinish  {#readdshprgnfinish .样式4}
+
+**功能：**
+
+矢量添加区域完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***succeed***     成功为 1，失败为 0
+  ----------------- --------------------------------------------------
+
+## REShpAddClipFace  {#reshpaddclipface .样式4}
+
+**功能：**
+
+矢量添加切割面回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***succeed***     成功为 1，失败为 0
+  ----------------- --------------------------------------------------
+
+## REShpClipFinish  {#reshpclipfinish .样式4}
+
+**功能：**
+
+矢量切割完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***succeed***     成功为 1，失败为 0
+  ----------------- --------------------------------------------------
+
+## 相机相关
+
+## RELocateCam  {#relocatecam .样式4}
+
+**功能：**
+
+调整相机方位完成事件
+
+## RECameraMove  {#recameramove .样式4}
+
+**功能：**
+
+相机运动的监听事件
+
+## 功能模块相关
+
+## REEarthworkRgnFinish  {#reearthworkrgnfinish .样式4}
+
+**功能：**
+
+当前填挖方区域结束回调
+
+## REEarthworkCalcProgress {#reearthworkcalcprogress .样式4}
+
+**功能：**
+
+当前填挖方区域计算的进度
+
+注：在计算过程中或不停触发该事件，返回值包括计算进度、开挖体积、开挖面积、填土体积、填土面积，当计算进度为1时，表示计算完成
+
+## RELoadFEMFinish  {#reloadfemfinish .样式4}
+
+**功能：**
+
+有限元中的FEM文件加载完成事件
+
+## REElevationUpdateFinish  {#reelevationupdatefinish .样式4}
+
+**功能：**
+
+标高数据更新完成回调事件
+
+注：相机调整会触发标高数据更新
+
+## REAxisGridUpdateFinish  {#reaxisgridupdatefinish .样式4}
+
+**功能：**
+
+轴网数据更新完成回调事件
+
+## REAddContPipeSuccessEvent  {#readdcontpipesuccessevent .样式4}
+
+**功能：**
+
+连续管道编辑右键结束编辑回调事件
+
+## REGenPipeCenterLineProgress  {#regenpipecenterlineprogress .样式4}
+
+**功能：**
+
+连续管道生成中心线进度回调事件
+
+## REWorldPosChange  {#reworldposchange .样式4}
+
+**功能：**
+
+世界坐标点变化触发回调事件
+
+## REEditControlPosMatchFinish  {#reeditcontrolposmatchfinish .样式4}
+
+**功能：**
+
+位置编辑的控制点配准模式匹配完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ---- ----------------- -------------------------------------------------
+   1   ***canvasid***    当前回调对应的 canvas 标识
+
+   2   ***succeed***     成功为 1，失败为 0
+
+   3   ***errorType***   失败类型 0: 无类型 1：表示控制点没有采够
+                         2：表示项目选择集为空
+  ---- ----------------- -------------------------------------------------
+
+## REMeasureFinish  {#remeasurefinish .样式4}
+
+**功能：**
+
+测量完成回调事件
+
+**注：只有结束当前步骤测量，才会触发回调**
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ------------------- --------------------------------------------------
+  ***canvasid***      当前回调对应的 canvas 标识
+
+  ***measureId***     测量对象标识
+
+  ***measureData***   测量结果
+  ------------------- --------------------------------------------------
+
+## RECalcHeightRangeFinish  {#recalcheightrangefinish .样式4}
+
+**功能：**
+
+获取闭合几何数据范围内高度最大最小值完成回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***min***         最小值
+
+  ***max***         最大值
+  ----------------- --------------------------------------------------
+
+## REAnimPlayScriptState  {#reanimplayscriptstate .样式4}
+
+**功能：**
+
+动画播放脚本状态回调事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ------------------ --------------------------------------------------
+  ***canvasid***     当前回调对应的 canvas 标识
+
+  ***scriptId***     脚本标识
+
+  ***curTimeLen***   当前时间进度
+  ------------------ --------------------------------------------------
+
+## 探测
+
+## RESystemSel  {#resystemsel .样式4}
+
+**功能：**
+
+引擎探测事件
+
+**注：可通过getCurSelInfo接口获取拾取信息**
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ----------------- --------------------------------------------------
+
+## REPanSelShpElement {#repanselshpelement .样式4}
+
+**功能：**
+
+全景场景鼠标拾取事件，鼠标点击全景场景后会触发该事件
+
+注：可通过getCurShpProbeRet接口获取拾取信息
+
+## RECADSelElement  {#recadselelement .样式4}
+
+**功能：**
+
+二维图元点击事件，点击某一个二维图元，会触发该事件
+
+**返回值：**
+
+对象类型（detail对象获取）
+
+  ----------------- --------------------------------------------------
+  ***canvasid***    当前回调对应的 canvas 标识
+
+  ***elemid***      选中的元素标识，没有选中返回空字符串
+
+  ***fileid***      选中元素所属的文件标识
+
+  ***pos***         选中等定位点的世界坐标信息【x，y】
+  ----------------- --------------------------------------------------
+
+## RECADSelAnchor  {#recadselanchor .样式4}
+
+**功能：**
+
+二维图元锚点点击事件，点击某一个锚点，会触发该事件
+
+## RECADSelShpAnchor  {#recadselshpanchor .样式4}
+
+**功能：**
+
+二维图元矢量锚点点击事件，点击某一个自定义锚点，会触发该事件
+
+## RESystemSelElement  {#resystemselelement .样式4}
+
+**功能：**
+
+鼠标探测模型事件（左键单击和右键单击）
+
+## RESystemSelShpElement  {#resystemselshpelement .样式4}
+
+**功能：**
+
+鼠标探测矢量元素事件
+
+## RESystemUIEvent  {#resystemuievent .样式4}
+
+**功能：**
+
+鼠标点击图形界面系统按钮监听事件
+
+## REMiniMapCADSelShpAnchor  {#reminimapcadselshpanchor .样式4}
+
+**功能：**
+
+小地图中的CAD锚点点击事件
+
+## REElemSelRegFinish  {#reelemselregfinish .样式4}
+
+**功能：**
+
+范围选择构件完成回调事件
+
+## RECustomProbeFinish  {#recustomprobefinish .样式4}
+
+**功能：**
+
+自定义场景探测的指令完成回调事件
+
+# 公共模块（Common）
+
+## 性能
+
+## setMaxResMemMB {#setmaxresmemmb .样式4}
+
+**功能：**
+
+设置渲染时引擎最大限制的显存占用空间(以MB为单位)
+
+注：参考当前浏览模型的机器的显存或系统显存，建议设为比实际内存小500MB。
+
+调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+  --- ------------ --------------------------------------------------------
+   1  ***size***   显存占用空间值(以MB为单位)
+
+  --- ------------ --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setMaxResMemMB(5000);
+//设置渲染时引擎最大允许的显存占用为5000MB
+
+## getMaxResMemMB {#getmaxresmemmb .样式4}
+
+**功能：**
+
+获取当前设置的渲染时引擎最大限制的显存占用空间(以MB为单位)
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，当前设置的渲染时引擎最大允许的显存占用空间(以MB为单位)
+
+**调用示例：**
+
+var test = BlackHole3D.Common.getMaxResMemMB();
+
+## setExpectMaxInstMemMB {#setexpectmaxinstmemmb .样式4}
+
+**功能：**
+
+设置渲染时引擎期望分配的显存空间(以MB为单位)
+
+注：参考当前浏览模型的机器的显存或系统显存，建议设为实际显存大小的85%左右。
+
+调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+  --- ------------ --------------------------------------------------------
+   1  ***size***   显存占用空间值(以MB为单位)
+
+  --- ------------ --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setExpectMaxInstMemMB(3500);
+//设置渲染时引擎建议显存占用为3500MB
+
+## getExpectMaxInstMemMB {#getexpectmaxinstmemmb .样式4}
+
+**功能：**
+
+获取当前设置的渲染时引擎期望分配的显存空间(以MB为单位)
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，当前设置的渲染时引擎建议分配的显存空间(以MB为单位)
+
+**调用示例：**
+
+var test = BlackHole3D.Common.getExpectMaxInstMemMB();
+
+## setExpectMaxInstDrawFaceNum {#setexpectmaxinstdrawfacenum .样式4}
+
+**功能：**
+
+设置模型每帧最大渲染面数
+
+注：范围100万到4000万面，值越大，看到的模型效果越好，越精细，但是性能会下降。
+
+推荐值1000万。
+
+调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+  --- ------------ --------------------------------------------------------
+   1  ***size***   每帧渲染的面数
+
+  --- ------------ --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setExpectMaxInstDrawFaceNum(10000000);
+//设置模型每帧最大渲染面数为1000万面
+
+## getExpectMaxInstDrawFaceNum {#getexpectmaxinstdrawfacenum .样式4}
+
+**功能：**
+
+获取当前设置的每帧最大渲染面数
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，当前设置的每帧最大渲染面数
+
+**调用示例：**
+
+var test = BlackHole3D.Common.getExpectMaxInstDrawFaceNum();
+
+## setMaxTexGroupAtlasSize {#setmaxtexgroupatlassize .样式4}
+
+**功能：**
+
+设置模型最大纹理组拼接纹理尺寸
+
+**注：在 Model.loadDataSet 函数调用之前设置**
+
+**参数：**
+
+  --- ------------ --------------------------------------------------------
+   1  ***size***   最大纹理组拼接纹理尺寸，默认值8192
+
+  --- ------------ --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setMaxTexGroupAtlasSize(8192);
+
+## getMaxTexGroupAtlasSize {#getmaxtexgroupatlassize .样式4}
+
+**功能：**
+
+获取模型最大纹理组拼接纹理尺寸
+
+**注：调用在 RESystemEngineCreated 事件之后**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，当前设置的最大纹理组拼接纹理尺寸
+
+**调用示例：**
+
+BlackHole3D.Common.getMaxTexGroupAtlasSize();
+
+## setPageLoadLev {#setpageloadlev .样式4}
+
+**功能：**
+
+设置页面调度等级，等级越高，模型加载越快，对硬件要求越高。
+
+注：PC端推荐设为2，手机端设为1。
+
+调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+  --- ------------- --------------------------------------------------------
+   1  ***level***   页面调度等级
+
+  --- ------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setPageLoadLev(2);
+
+## getPageLoadLev {#getpageloadlev .样式4}
+
+**功能：**
+
+获取当前设置的页面调度等级
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，页面调度等级
+
+**调用示例：**
+
+var test = BlackHole3D.Common.getPageLoadLev();
+
+## setTotalResMaxLoadNum {#settotalresmaxloadnum .样式4}
+
+**功能：**
+
+设置每帧允许的最大资源加载总数,
+设为0，则引擎停止资源加载请求；为1，则开启资源加载请求
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+  --- ------------- --------------------------------------------------------
+   1  ***count***   每帧允许的资源加载设定参数
+
+  --- ------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setTotalResMaxLoadNum(0); //停止资源加载请求
+
+## getTotalResMaxLoadNum {#gettotalresmaxloadnum .样式4}
+
+**功能：**
+
+获取每帧允许的最大资源加载总数
+
+注：调用在 RESystemEngineCreated 事件之后
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，每帧允许的最大资源加载总数
+
+**调用示例：**
+
+var test = BlackHole3D.Common.getTotalResMaxLoadNum();
+
+## setUseWebCache {#setusewebcache .样式4}
+
+**功能：**
+
+设置网络资源加载是否使用缓存，默认使用
+
+注：调用在 RESystemReady事件之后
+
+**参数：**
+
+  --- ------------- --------------------------------------------------------
+   1  ***isUse***   使用缓存状态
+
+  --- ------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setUseWebCache(false);
+
+## getUseWebCache {#getusewebcache .样式4}
+
+**功能：**
+
+获取网络资源加载是否使用缓存
+
+注：调用在 RESystemReady事件之后
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，使用返回true，不使用返回false
+
+**调用示例：**
+
+var test = BlackHole3D.Common.getUseWebCache();
+
+## 渲染效果
+
+## setBorderEmisEnable {#setborderemisenable .样式4}
+
+**功能：**
+
+设置边缘高光效果的启用状态。
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------
+   1  ***enable***   表示是否开启引擎："true"表示开启；"false"表示关闭
+
+  --- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setBorderEmisEnable(true);
+
+## getBorderEmisEnable {#getborderemisenable .样式4}
+
+**功能：**
+
+获取边缘高光效果的启用状态。
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 开启返回true，关闭返回false
+
+**调用示例：**
+
+BlackHole3D.Common.getBorderEmisEnable();
+
+## setShadowState {#setshadowstate .样式4}
+
+**功能：**
+
+设置阴影开关
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------
+   1  ***enable***   表示是否开启阴影："true"表示开启；"false"表示关闭
+
+  --- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setShadowState(true);
+
+## getShadowState {#getshadowstate .样式4}
+
+**功能：**
+
+引擎默认自带阴影渲染效果
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 开启返回true，关闭返回false
+
+**调用示例：**
+
+BlackHole3D.Common.getShadowState();
+
+## setGhostState {#setghoststate .样式4}
+
+**功能：**
+
+设置光晕开关效果
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------
+   1  ***enable***   表示是否开启光晕："true"表示开启；"false"表示关闭
+
+  --- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setGhostState(true);
+
+## getGhostState {#getghoststate .样式4}
+
+**功能：**
+
+获取当前场景光晕开关状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 开启返回true，关闭返回false
+
+**调用示例：**
+
+BlackHole3D.Common.getGhostState();
+
+## setAOState {#setaostate .样式4}
+
+**功能：**
+
+设置环境遮蔽开关，系统初始化完成后默认打开
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------
+   1  ***enable***   表示是否开启环境遮蔽："true"表示开启；"false"表示关闭
+
+  --- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setAOState(true);
+
+## getAOState {#getaostate .样式4}
+
+**功能：**
+
+获取当前设置的环境遮蔽开关状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 开启返回true，关闭返回false
+
+**调用示例：**
+
+BlackHole3D.Common.getAOState();
+
+## setSceAOInfo {#setsceaoinfo .样式4}
+
+**功能：**
+
+设置场景环境遮蔽信息
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***sceAOInfo***   场景环境遮蔽信息 (RESceAOInfo 类型)
+
+  --- ----------------- -------------------------------------------------------
+
+**RESceAOInfo模型解析：**
+
+  --- ----------------------- ---------------------------------------------------------------------------
+   1  ***quality***           表示环境遮蔽的质量等级(0-\>残影多，效率高；1-\>残影少，效率低)
+
+   2  ***minLum***            表示环境遮挡后的最小环境亮度系数(0\~1)，若大于等于1则表示关闭环境遮挡效果
+
+   3  ***cornerExpectAO***    表示在模型直角褶皱处的期望被遮挡强度(0\~1)
+
+   4  ***sampRadius***        表示环境遮挡的随机采样点在世界空间下的基准半径
+
+   5  ***sampRadiusTrans***   表示环境遮挡的随机采样点基准半径随相机距离的自动缩放系数，二维数组
+  --- ----------------------- ---------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var sceAOInfo = BlackHole3D.Common.getSceAOInfo();
+
+sceAOInfo.quality = 1;
+
+sceAOInfo.minLum = 0.1;
+
+sceAOInfo.cornerExpectAO = 0.9;
+
+sceAOInfo.sampRadius = 1.0;
+
+sceAOInfo.sampRadiusTrans = \[0.0, 0.144337565\];
+
+BlackHole3D.Common.setSceAOInfo(sceAOInfo);
+
+## getSceAOInfo {#getsceaoinfo .样式4}
+
+**功能：**
+
+获取场景环境遮蔽信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型，（RESceAOInfo对象类型）
+
+  --- ----------------------- ---------------------------------------------------------------------------
+   1  ***quality***           表示环境遮蔽的质量等级(0-\>残影多，效率高；1-\>残影少，效率低)
+
+   2  ***minLum***            表示环境遮挡后的最小环境亮度系数(0\~1)，若大于等于1则表示关闭环境遮挡效果
+
+   3  ***cornerExpectAO***    表示在模型直角褶皱处的期望被遮挡强度(0\~1)
+
+   4  ***sampRadius***        表示环境遮挡的随机采样点在世界空间下的基准半径
+
+   5  ***sampRadiusTrans***   表示环境遮挡的随机采样点基准半径随相机距离的自动缩放系数，二维数组
+  --- ----------------------- ---------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Common.getSceAOInfo();
+
+## setReflState {#setreflstate .样式4}
+
+**功能：**
+
+设置场景实时反射开关状态
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------
+   1  ***enable***   表示是否开启反射效果："true"表示开启；"false"表示关闭
+
+  --- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setReflState(false);
+
+## getReflState {#getreflstate .样式4}
+
+**功能：**
+
+设置场景实时反射开关状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 开启返回true，关闭返回false
+
+**调用示例：**
+
+BlackHole3D.Common.getReflState();
+
+## setSceOITLev {#setsceoitlev .样式4}
+
+**功能：**
+
+设置场景模型的OIT渲染等级（Order Independent Transparency）
+
+**参数：**
+
++-------------+---------------------------------------------------------------------------------------------------------------+
+| ***level*** | OIT渲染等级：                                                                                                 |
+|             |                                                                                                               |
+|             | 0.  \>关闭OIT，默认状态，此时渲染负载低，半透明模型渲染负载可能不正确；                                       |
+|             |                                                                                                               |
+|             |     1-\>开启OIT，（渲染负载更高，准确度更高，不推荐，如果场景中有大量半透明模型，渲染顺序不对，则推荐此设置） |
++-------------+---------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setSceOITLev(1);
+
+## getSceOITLev {#getsceoitlev .样式4}
+
+**功能：**
+
+获取场景模型的OIT渲染等级（Order Independent Transparency）
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，当前设置的场景模型OIT渲染等级
+
+**调用示例：**
+
+BlackHole3D.Common.getSceOITLev();
+
+## setShpOITLev {#setshpoitlev .样式4}
+
+**功能：**
+
+设置场景矢量的OIT渲染等级（Order Independent Transparency）
+
+**注：场景矢量包含了标签、锚点、自定义矢量、UI**
+
+**参数：**
+
++-------------+-------------------------------------------------------------------------------------------------------+
+| ***level*** | OIT渲染等级：                                                                                         |
+|             |                                                                                                       |
+|             | 0-\>关闭OIT，默认状态，此时渲染负载低，半透明矢量渲染负载可能不正确；                                 |
+|             |                                                                                                       |
+|             | 1.  \>开启OIT，矢量OIT等级1（渲染负载低等，少量半透明矢量，渲染顺序不对，则推荐此设置）；             |
+|             |                                                                                                       |
+|             | 2.  \>开启OIT，矢量OIT等级2（渲染负载中等，如果场景中有大量半透明矢量，渲染顺序不对，则推荐此设置）； |
+|             |                                                                                                       |
+|             | 3.  \>开启OIT，矢量OIT等级3（渲染负载更高，准确度更高，不推荐）；                                     |
++-------------+-------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setShpOITLev(1);
+
+## getShpOITLev {#getshpoitlev .样式4}
+
+**功能：**
+
+获取场景矢量的OIT渲染等级（Order Independent Transparency）
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，当前设置的场景矢量的OIT渲染等级
+
+**调用示例：**
+
+BlackHole3D.Common.getShpOITLev();
+
+## setCurRenderStateData {#setcurrenderstatedata .样式4}
+
+**功能：**
+
+根据元素属性状态数据设置当前渲染的属性状态
+
+注：仅限永久性变色（颜色、透明度）
+
+**参数：**
+
+  --- ------------------ -------------------------------------------------------
+   1  ***renderData***   渲染的元素属性状态数据（Uint8Array
+                         类型）getCurRenderStateData获取
+
+  --- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//获取当前渲染的元素属性状态信息
+
+var curAttrData = BlackHole3D.Common.getCurRenderStateData();
+
+//设置BIM构件颜色
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"机房01\";
+
+elemAttr.elemIdList = \[1062\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,0,0,255);
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+//设置瓦片的颜色
+
+var dataSetId = \"地形01\";
+
+var clr = new BlackHole3D.REColor(0, 255, 0, 255);
+
+BlackHole3D.Grid.setDataSetClr(dataSetId, clr);
+
+//设置到之前保存的元素属性状态
+
+BlackHole3D.Common.setCurRenderStateData(curAttrData);
+
+## getCurRenderStateData {#getcurrenderstatedata .样式4}
+
+**功能：**
+
+获取当前的渲染元素属性状态数据
+
+注：仅限永久性变色（颜色、透明度）配合setCurRenderStateData使用
+
+**参数：**
+
+无
+
+**返回值：**
+
+Uint8Array类型，当前场景渲染的元素属性信息
+
+**调用示例：**
+
+BlackHole3D.Common.getCurRenderStateData();
+
+## setShadowInfo {#setshadowinfo .样式4}
+
+**功能：**
+
+设置阴影详细信息
+
+**参数：**
+
+  --- ------------------ -------------------------------------------------------
+   1  ***shadowInfo***   阴影信息 (REShadowInfo 类型)
+
+  --- ------------------ -------------------------------------------------------
+
+**REShadowInfo模型解析：**
+
+  ---- ---------------------------- ----------------------------------------------------
+   1   ***enable***                 表示是否启用阴影效果
+
+   2   ***quality***                表示阴影质量等级(0\~5)
+
+   3   ***dynSMSize***              表示动态阴影图的尺寸
+
+   4   ***staticSMSize***           表示静态阴影图的尺寸
+
+   5   ***maxDynSMNum***            表示动态阴影图的最大个数
+
+   6   ***maxStaticSMNum***         表示静态阴影图的最大个数
+
+   7   ***minDynSMUpdateLen***      表示动态阴影图的最小更新帧间隔
+
+   8   ***minStaticSMUpdateLen***   表示静态阴影图的最小更新帧间隔
+
+   9   ***hiResoDist***             表示最高精度阴影的作用距离
+
+   10  ***filterKernelSize***       表示软阴影的过滤半径相对于阴影图一个纹素尺寸的倍数
+
+   11  ***depthBiasRatio***         表示阴影深度的偏移比例(用以消除自阴影)
+  ---- ---------------------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var shadowInfo = new BlackHole3D.REShadowInfo();
+
+shadowInfo.quality = 1;
+
+shadowInfo.dynSMSize = 1024;
+
+shadowInfo.staticSMSize = 1024;
+
+shadowInfo.maxDynSMNum = 3;
+
+shadowInfo.maxStaticSMNum = 5;
+
+shadowInfo.minDynSMUpdateLen = 1;
+
+shadowInfo.minStaticSMUpdateLen = 1;
+
+shadowInfo.hiResoDist = 6.1;
+
+shadowInfo.filterKernelSize = 2.0;
+
+shadowInfo.depthBiasRatio = 0.001;
+
+BlackHole3D.Common.setShadowInfo(shadowInfo);
+
+## getShadowInfo {#getshadowinfo .样式4}
+
+**功能：**
+
+获取当前阴影详细信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型，（REShadowInfo对象类型）
+
+  ---- ---------------------------- ----------------------------------------------------
+   1   ***enable***                 表示是否启用阴影效果
+
+   2   ***quality***                表示阴影质量等级(0\~5)
+
+   3   ***dynSMSize***              表示动态阴影图的尺寸
+
+   4   ***staticSMSize***           表示静态阴影图的尺寸
+
+   5   ***maxDynSMNum***            表示动态阴影图的最大个数
+
+   6   ***maxStaticSMNum***         表示静态阴影图的最大个数
+
+   7   ***minDynSMUpdateLen***      表示动态阴影图的最小更新帧间隔
+
+   8   ***minStaticSMUpdateLen***   表示静态阴影图的最小更新帧间隔
+
+   9   ***hiResoDist***             表示最高精度阴影的作用距离
+
+   10  ***filterKernelSize***       表示软阴影的过滤半径相对于阴影图一个纹素尺寸的倍数
+
+   11  ***depthBiasRatio***         表示阴影深度的偏移比例(用以消除自阴影)
+  ---- ---------------------------- ----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Common.getShadowInfo();
+
+## getSceBV {#getscebv .样式4}
+
+**功能：**
+
+获取整个场景的包围盒（BIM + Grid）
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 包围盒信息, 数组形式：\[Xmin, Xmax, Ymin, Ymax,Zmin, Zmax\]
+
+**调用示例：**
+
+var aabbList = BlackHole3D.Common.getSceBV();
+
+console.log(aabbList);
+
+## setSceCustomBV {#setscecustombv .样式4}
+
+**功能：**
+
+设置自定义场景包围盒
+
+注：影响右侧viewcube作用范围
+
+**参数：**
+
+  --- ---------------- -------------------------------------------------------
+   1  ***arrBound***   包围盒范围，\[Xmin, Xmax, Ymin, Ymax, Zmin, Zmax\]
+
+   2  ***enable***     是否有效（默认有效）
+  --- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let customBV = \[-100,100,-100,100,-100,100\];
+
+BlackHole3D.Common.setSceCustomBV(customBV, true);
+
+## getSceCustomBV {#getscecustombv .样式4}
+
+**功能：**
+
+获取自定义场景包围盒
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 包围盒信息,
+数组形式：\[\[Xmin、Ymin、Zmin\],\[Xmax、Ymax、Zmax\]\]
+
+**调用示例：**
+
+BlackHole3D.Common.getSceCustomBV();
+
+## setFakeSphMode {#setfakesphmode .样式4}
+
+**功能：**
+
+设置场景是否进入伪球面模式
+
+**注**：**需要再加载模型之前设置**，即：RESystemReady 回调中。
+
+进入伪球面模式会默认设置引擎参照坐标系为EPSG:3857，如本身已经设置或需要设置其他坐标系，则需要再合适的时候调整。
+
+伪球面模式默认低精度地图影像，如需要高精度的地图影像需要自行下载对应的地形资源。
+
+测试使用的资源地址：https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_skymap
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------
+   1  ***enable***   是否开启
+
+  --- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setFakeSphMode(true);
+
+## getFakeSphMode {#getfakesphmode .样式4}
+
+**功能：**
+
+获取场景是否进入伪球面模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 开启返回true，关闭返回false
+
+**调用示例：**
+
+BlackHole3D.Common.getFakeSphMode();
+
+## setSceLightAttenu {#setscelightattenu .样式4}
+
+**功能：**
+
+设置场景(环境光/方向光)光强的调节系数
+
+**参数：**
+
+  --- ------------------------ ------------------------------------------------------
+   1  ***coefficientRange***   系数范围，二维数组
+                               【背光面的强度，向光面的强度】，默认值【1, 1】
+
+  --- ------------------------ ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setSceLightAttenu(\[4.0, 0.25\]);
+
+## getSceLightAttenu {#getscelightattenu .样式4}
+
+**功能：**
+
+获取场景(环境光/方向光)光强的调节系数
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，【背光面的强度，向光面的强度】
+
+**调用示例：**
+
+BlackHole3D.Common.getSceLightAttenu();
+
+## setShpCoverDottedEnable {#setshpcoverdottedenable .样式4}
+
+**功能：**
+
+设置矢量被不透明物体遮蔽的区域是否使用点阵图
+
+**注：锚点、标签的矢量元素不受该接口影响**
+
+**参数：**
+
+  -------------- --------------------------------------------------------
+  ***enable***   是否使用点阵图
+
+  -------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Common.setShpCoverDottedEnable(true);
+
+## getShpCoverDottedEnable {#getshpcoverdottedenable .样式4}
+
+**功能：**
+
+获取矢量被不透明物体遮蔽的区域是否使用点阵图
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值类型，true：使用 false：不使用
+
+**调用示例：**
+
+BlackHole3D.Common.getShpCoverDottedEnable();
+
+## 字体
+
+## addGolFont {#addgolfont .样式4}
+
+**功能：**
+
+增加一种全局字体样式
+
+**注：系统目前仅支持字体类型为 \"宋体\"**
+
+**参数：**
+
+  --- ---------------- -------------------------------------------------------
+   1  ***fontInfo***   字体信息（REFontInfo类型）
+
+  --- ---------------- -------------------------------------------------------
+
+**REFontInfo模型解析：**
+
+  --- -------------------- ---------------------------------------------------------------------------------
+   1  ***fontId***         自定义的全局字体的id，不可重复
+
+   2  ***width***          字体的宽
+
+   3  ***height***         字体的高
+
+   4  ***weight***         字体的粗细，0表示默认粗细；
+                           ==0：原始粗细，\<0：文字变细，\>0：文字变粗，数值建议为最大为宽高乘积的64分之一
+
+   5  ***antiAliasing***   抗锯齿，默认false
+  --- -------------------- ---------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+var fontInfo = new BlackHole3D.REFontInfo();
+
+fontInfo.fontId = \"font01\";
+
+fontInfo.width = 20;
+
+fontInfo.height = 20;
+
+fontInfo.weight = 20;
+
+BlackHole3D.Common.addGolFont(fontInfo);
+
+## getGolFont {#getgolfont .样式4}
+
+**功能：**
+
+获取一个全局字体对象的信息
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***fontId***   自定义的全局字体的id
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（REFontInfo对象类型）
+
+  ---- -------------------- ---------------------------------------------------
+   1   ***fontId***         自定义的全局字体的id，不可重复
+
+   2   ***fontType***       字体的逻辑类型名
+
+   3   ***width***          字体的宽
+
+   4   ***height***         字体的高
+
+   5   ***weight***         字体的粗细，0表示默认粗细；
+                            ==0：原始粗细，\<0：文字变细，\>0：文字变粗
+
+   6   ***antiAliasing***   抗锯齿
+  ---- -------------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Common.getGolFont(\"font01\");
+
+## delGolFont {#delgolfont .样式4}
+
+**功能：**
+
+删除一种全局字体样式
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***fontId***   自定义的全局字体的id
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Common.delGolFont(\"font01\");
+
+## getGolFontNum {#getgolfontnum .样式4}
+
+**功能：**
+
+获取全局字体数量
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，字体个数。
+
+**调用示例：**
+
+BlackHole3D.Common.getGolFontNum();
+
+## getAllGolFont {#getallgolfont .样式4}
+
+**功能：**
+
+获取全部字体信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，全部字体信息（REFontInfo 类型）
+
+**调用示例：**
+
+BlackHole3D.Common.getAllGolFont();
+
+# 灯光（Light）
+
+## addSpotLights {#addspotlights .样式4}
+
+**功能：**
+
+添加一组聚光灯
+
+注：全局聚光灯和局部聚光灯在效果上没有区别，在信息获取中有相对坐标系的差异。
+
+当模型位置进行偏移，局部聚光灯会跟随项目偏移，全局聚光灯不会。
+
+灯光的效果为真实灯光效果，会和太阳光进行影响复杂计算，在太阳光下的灯光显示没有夜晚的灯光显示效果明显
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***dataSetId***    聚光灯所属的数据集标识，为空串则表示为全局聚光灯
+
+   2   ***spotLights***   聚光灯信息集合 （RESpotLightInfo 类型）
+  ---- ------------------ ------------------------------------------------------
+
+**RESpotLightInfo模型解析：**
+
+  ---- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------
+   1   ***lightId***              表示光源的唯一标识名
+
+   2   ***selfRotate***           表示光源的自身旋转分量（四元数）
+
+   3   ***selfOffset***           表示光源的坐标点
+
+   4   ***lightClr***             表示光源的颜色 （REColor 类型）
+
+   5   ***brightness***           表示光源的亮度，光源亮度会反映到最大的影响半径
+
+   6   ***emissionBodyRadius***   表示光源的发光体半径，相同亮度在反射效果下发光体半径越大，反射光效果越发散，反之越聚集
+
+   7   ***openAngle***            表示聚光灯相对于自身局部空间下-Z轴的开合角度(单位为角度0\~180，以-z轴向两边分别打开的角度，180即为两边打开的360度点光源)，默认180度
+
+   8   ***fadeAngle***            表示聚光灯相对于自身局部空间下-Z轴的开合角度后的衰减角度(单位为角度0\~180)，默认30度
+
+   9   ***hasShadow***            是否需要阴影，默认不需要
+  ---- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加是否成功，true：成功，false：失败
+
+**调用示例：**
+
+//设置傍晚效果
+
+BlackHole3D.SkyBox.setLightLocate(\[ 0.4772745704596695,
+0.878729102891812, 0.006644405427817107 \]);
+
+//设置夜晚效果
+
+BlackHole3D.SkyBox.setLightLocate(\[ 0.2740470492756192,
+0.9138706255340241, 0.2995641743756717 \]);
+
+// 添加灯光
+
+let spotLight = new BlackHole3D.RESpotLightInfo();
+
+spotLight.lightId = \"light001\";
+
+spotLight.selfOffset = \[13.261326877094588, 56.03715383840854, 4\];
+
+spotLight.lightClr = new BlackHole3D.REColor(255, 0, 0);
+
+spotLight.brightness = 200;
+
+spotLight.emissionBodyRadius = 0.1;
+
+spotLight.openAngle = 90.0;
+
+spotLight.fadeAngle = 20.0;
+
+spotLight.hasShadow = true;
+
+let spotLight2 = new BlackHole3D.RESpotLightInfo();
+
+spotLight2.lightId = \"light002\";
+
+spotLight2.selfOffset = \[13.261326877094588, 60, 3\];
+
+spotLight2.lightClr = new BlackHole3D.REColor(0, 255, 0);
+
+spotLight2.brightness = 100;
+
+spotLight2.emissionBodyRadius = 0.3;
+
+spotLight2.openAngle = 100.0;
+
+spotLight2.fadeAngle = 20.0;
+
+spotLight2.hasShadow = true;
+
+let spotLight3 = new BlackHole3D.RESpotLightInfo();
+
+spotLight3.lightId = \"light003\";
+
+spotLight3.selfOffset = \[16, 57, 3\];
+
+spotLight3.lightClr = new BlackHole3D.REColor(0, 0, 255);
+
+spotLight3.brightness = 400;
+
+spotLight3.emissionBodyRadius = 0.2;
+
+spotLight3.openAngle = 150.0;
+
+spotLight3.fadeAngle = 30.0;
+
+spotLight3.hasShadow = true;
+
+BlackHole3D.Light.addSpotLights(\"dataSet01\", \[spotLight, spotLight2,
+spotLight3\]);
+
+## getSpotLightInfo {#getspotlightinfo .样式4}
+
+**功能：**
+
+获取聚光灯信息
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***dataSetId***   聚光灯所属的数据集标识，为空串则表示为全局聚光灯
+
+   2   ***lightId***     表示光源的标识名
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+对象类型（RESpotLightInfo对象类型）
+
+  ---- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------
+   1   ***lightId***              表示光源的唯一标识名
+
+   2   ***selfRotate***           表示光源的自身旋转分量（四元数）
+
+   3   ***selfOffset***           表示光源的坐标点
+
+   4   ***lightClr***             表示光源的颜色 （REColor 类型）
+
+   5   ***brightness***           表示光源的亮度，光源亮度会反映到最大的影响半径
+
+   6   ***emissionBodyRadius***   表示光源的发光体半径，相同亮度在反射效果下发光体半径越大，反射光效果越发散，反之越聚集
+
+   7   ***openAngle***            表示聚光灯相对于自身局部空间下-Z轴的开合角度(单位为角度0\~180，以-z轴向两边分别打开的角度，180即为两边打开的360度点光源)，默认180度
+
+   8   ***fadeAngle***            表示聚光灯相对于自身局部空间下-Z轴的开合角度后的衰减角度(单位为角度0\~180)，默认30度
+
+   9   ***hasShadow***            是否需要阴影，默认不需要
+  ---- -------------------------- -------------------------------------------------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+// 获取位于数据集内部空间的聚光灯信息
+
+BlackHole3D.Light.getSpotLightInfo(\"dataSet01\", \"light001\");
+
+// 获取设置了世界坐标标识的位于引擎世界空间的全局聚光灯信息
+
+BlackHole3D.Light.getSpotLightInfo(\"\", \"light001\");
+
+## getAllSpotLightIds {#getallspotlightids .样式4}
+
+**功能：**
+
+获取所有的聚光灯标识
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***dataSetId***   聚光灯所属的数据集标识，为空串则表示为全局聚光灯
+
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数组，聚光灯id集合
+
+**调用示例：**
+
+BlackHole3D.Light.getAllSpotLightIds(\"dataSet01\");
+
+## delSpotLights {#delspotlights .样式4}
+
+**功能：**
+
+删除一组聚光灯
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***dataSetId***   聚光灯所属的数据集标识，为空串则表示为全局聚光灯
+
+   2   ***lightIds***    聚光灯标识集合
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，删除是否成功，true：成功，false：失败
+
+**调用示例：**
+
+BlackHole3D.Light.delSpotLights(\"dataSet01\", \[\"light001\"\]);
+
+## delAllSpotLights {#delallspotlights .样式4}
+
+**功能：**
+
+删除所有的聚光灯
+
+**参数：**
+
+  ---- ----------------- --------------------------------------------------------------
+   1   ***dataSetId***   聚光灯所属的数据集标识，为空串则表示为全局聚光灯
+
+   2   ***isAll***       表示是否删除系统中所有的全局和局部聚光灯（不考虑数据集标识）
+  ---- ----------------- --------------------------------------------------------------
+
+**返回值：**
+
+布尔值，删除是否成功，true：成功，false：失败
+
+**调用示例：**
+
+// 删除所有数据集内部聚光灯
+
+BlackHole3D.Light.delAllSpotLights(\"dataSet01\", false);
+
+// 删除全局聚光灯
+
+BlackHole3D.Light.delAllSpotLights(\"\", false);
+
+// 删除所有聚光灯
+
+BlackHole3D.Light.delAllSpotLights(\"\", true);
+
+# 模型加载（Model）
+
+## loadDataSet {#loaddataset .样式4}
+
+**功能：**
+
+加载一个或多个模型资源
+
+**注：如果有某个模型资源包加载失败，不会影响其他资源包的加载，控制台会打印每一个资源包的加载情况，成功为1，失败为0；要在RESystemEngineCreated监听事件之后调用**
+
+**加载完成回调函数：REDataSetLoadFinish**
+
+**在加载地形矢量模型的情况下，dataSetCRS、groundDisplay、terrSuffix这三个参数如果全部相同，将归属于同一个全局地形实例下，如果有一个不同，则分属不同，在模型编辑状态下，同属表象为整体。getDataSetTerrId获取分属的全局实例标识**
+
+**参数：**
+
+  ------------------- ---------------------------------------------------------------------
+  ***dataSetList***   数据集集合 （Object 类型）
+
+  ***clearLoaded***   是否清除掉已经加载好的项目，**场景中如果没有模型时不能设置为false**
+  ------------------- ---------------------------------------------------------------------
+
+**Object模型解析：**
+
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***dataSetId***        | 数据集的唯一标识名，不能为空不可重复，重复前边的数据集会被自动覆盖                                                                                                                                                                                                                                         |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***resourcesAddress*** | 数据集资源包地址                                                                                                                                                                                                                                                                                           |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***useTransInfo***     | 表示该项目是否需要调整位置，默认false                                                                                                                                                                                                                                                                      |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***transInfo***        | 项目的偏移信息，依次为缩放、旋转（四元数）、平移                                                                                                                                                                                                                                                           |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***minLoadDist***      | 项目模型的最小加载距离，\>0表示绝对距离，\<0表示距离阈值相对于项目包围盒尺寸的倍数，=0表示永不卸载                                                                                                                                                                                                         |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***maxLoadDist***      | 项目模型的最大加载距离，\>0表示绝对距离，\<0表示距离阈值相对于项目包围盒尺寸的倍数，=0表示永不卸载                                                                                                                                                                                                         |
+|                        |                                                                                                                                                                                                                                                                                                            |
+|                        | 建议：为避免模型频繁加载、卸载，需设置缓冲带，范围越大越好，即卸载距离的绝对值大于加载距离绝对值的1.2倍以上即可                                                                                                                                                                                            |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***dataSetCRS***       | 当前子项的坐标系标识（此值和setEngineWorldCRS接口设置的世界坐标系标识中任何一个值为空，都不会进行局部空间到世界空间的转换过程）                                                                                                                                                                            |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***dataSetCRSNorth***  | 当前子项的项目北与正北方向的夹角（右手坐标系，逆时针为正）                                                                                                                                                                                                                                                 |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***useAssginVer***     | 表示是否加载指定版本，默认 false                                                                                                                                                                                                                                                                           |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***assginVer***        | 指定版本号，加载指定版本的时候，会用此版本号                                                                                                                                                                                                                                                               |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***useAssginVer2***    | 表示是否加载第二个指定版本，默认 false                                                                                                                                                                                                                                                                     |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***assginVer2***       | 指定第二个版本号，加载指定版本的时候，会用此版本号                                                                                                                                                                                                                                                         |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***dividePrior***      | 项目内模型的细分优先级(值越小优先级越高)                                                                                                                                                                                                                                                                   |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***engineOrigin***     | 参考坐标系标识dataSetCRS下的基点坐标                                                                                                                                                                                                                                                                       |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***preciseCRS***       | 表示在进行地理信息坐标系定位时是否采用精确计算模式                                                                                                                                                                                                                                                         |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***groundDisplay***    | 表示项目中的地形矢量是否需要贴地显示(将禁用影像图片显示)                                                                                                                                                                                                                                                   |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***terrSuffix***       | 表示项目中的地形系统标识后缀，同样投影参数/概览信息/标识后缀的地形数据将合并为一个地形系统进行显示**（1、如果地形矢量为不贴地，那么这个参数不能为空。编辑模式下：1\>如果地形矢量允许可以独立编辑则此参数需要唯一，2\>允许多个地形矢量同时编辑则此参数相同；2、如果地形矢量为贴地，那么这参数传空字符串）** |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***dataSetSGContent*** | 表示项目对应的主场景组文件内容字符串                                                                                                                                                                                                                                                                       |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***useWMS***           | 表示是否使用Web地图发布服务信息                                                                                                                                                                                                                                                                            |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***wmsInfo***          | Web地图发布服务信息 （REWMSInfo 类型），**useWMS=true有效**                                                                                                                                                                                                                                                |
++------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+**REWMSInfo模型解析：**
+
++--------------------------+-------------------------------------------------------------+
+| ***layerId***            | 表示图层标识                                                |
++--------------------------+-------------------------------------------------------------+
+| ***selfCrs***            | 表示资源自身的地理投影坐标系                                |
++--------------------------+-------------------------------------------------------------+
+| ***layerName***          | 表示图层名称                                                |
++--------------------------+-------------------------------------------------------------+
+| ***reqFmt***             | 表示资源请求模板                                            |
++--------------------------+-------------------------------------------------------------+
+| ***layerType***          | 表示图层类型 1：表示影像 2：矢量标注                        |
++--------------------------+-------------------------------------------------------------+
+| ***revertResX***         | 表示资源索引水平翻转（0，1）                                |
++--------------------------+-------------------------------------------------------------+
+| ***revertResY***         | 表示资源索引垂直翻转（0，1）                                |
++--------------------------+-------------------------------------------------------------+
+| ***revertU***            | 表示资源内容水平翻转（0，1）                                |
++--------------------------+-------------------------------------------------------------+
+| ***revertV***            | 表示资源内容垂直翻转（0，1）                                |
++--------------------------+-------------------------------------------------------------+
+| ***lodRange***           | 表示资源层级范围（二元素数组类型）                          |
++--------------------------+-------------------------------------------------------------+
+| ***picTransp***          | 表示资源是否支持透明通道，默认false                         |
++--------------------------+-------------------------------------------------------------+
+| ***resLonLatBound***     | 表示地图资源的经纬度范围（四元素数组类型）【lonMin, lonMax, |
+|                          | latMin, latMax】                                            |
++--------------------------+-------------------------------------------------------------+
+| ***tilingSchemeType***   | 切片方案类型（默认3857切片方案）                            |
+|                          |                                                             |
+|                          | 0：用户自定义                                               |
+|                          |                                                             |
+|                          | 1：WebMercatorTilingScheme（3857切片方案）                  |
+|                          |                                                             |
+|                          | 2：GeoGraphicTilingScheme（4326切片方案（经纬度切片方案）） |
+|                          |                                                             |
+|                          | 3：天地图切片方案                                           |
++--------------------------+-------------------------------------------------------------+
+| ***customTilingScheme*** | 表示用户自定义切片方案（RETilingScheme                      |
+|                          | 类型），只有tilingSchemeType=0生效                          |
++--------------------------+-------------------------------------------------------------+
+
+**RETilingScheme模型解析：**
+
+  -------------------- --------------------------------------------------------------------------------
+  ***base***           表示资源基点，（二元素数组类型）
+
+  ***size***           表示资源大小，（二元素数组类型）
+
+  ***rootNum***        表示顶级瓦片数量，（二元素数组类型）
+
+  ***biasLOD***        表示统一资源ID中的lod索引的偏移
+
+  ***worCRSScale***    表示引擎世界空间在 dataSetCRS
+                       指定的参考坐标系下进行的二次缩放系数，（二元素数组类型）
+
+  ***lodRangeList***   表示层级范围集合，层级范围和层级瓦片范围要对应数量，（二维二元素数组类型）
+
+  ***boundList***      表示层级瓦片范围集合，层级范围和层级瓦片范围要对应数量，（二维四元素数组类型）
+
+  ***biasRootXY***     表示根节点索引偏移，（二元素数组类型）
+  -------------------- --------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 加载瓦片模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"瓦片模型\",
+
+\"resourcesAddress\":
+\"https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_qxsy\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 加载CAD矢量资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"CAD矢量\",
+
+\"resourcesAddress\":
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res01&path=res_cadshp001\",
+
+\"groundDisplay\": false,
+
+\"terrSuffix\": \"CADSHP\",
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 加载地形矢量资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"地形资源\",
+
+\"resourcesAddress\":
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=res_terrain_shx_2\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 加载 WMS 资源（自定义）
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'WMS1\',
+
+useWMS: true,
+
+wmsInfo: {
+
+layerId: 1,
+
+selfCrs: \'EPSG:3857\',
+
+layerName: \'天地图影像图-Web墨卡托1111\',
+
+reqFmt:
+\'http://36.138.229.240:7125/ls/mapserver/image/1906902073705275394/{z}/{x}/{y}.png\',
+
+layerType: 1,
+
+revertResX: 0,
+
+revertResY: 1,
+
+revertU: 0,
+
+revertV: 0,
+
+tilingSchemeType: 0,
+
+customTilingScheme: {
+
+base: \[-20037508.342789, -20037508.342789\],
+
+size: \[40075016.685578, 40075016.685578\],
+
+worCRSScale: \[(2.0 \* Math.PI \* 6378137.0) / 360.0, (2.0 \* Math.PI \*
+6378137.0) / 360.0\],
+
+rootNum: \[1, 1\],
+
+biasLOD: 0,
+
+lodRangeList: \[\[15, 18\]\],
+
+boundList: \[\[26307, 65536 / 2 - 13112 - 1, 26309, 65536 / 2 - 13110 -
+1\]\],
+
+biasRootXY: \[0, 0\],
+
+},
+
+},
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 加载 WMS 资源（WebMercatorTilingScheme（3857切片方案））
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'WMS1_new\',
+
+useWMS: true,
+
+wmsInfo: {
+
+layerId: 5,
+
+selfCrs: \'EPSG:3857\',
+
+layerName: \'天地图矢量底图注记-Web墨卡托211\',
+
+reqFmt:
+\'http://36.138.229.240:7125/ls/mapserver/image/1906902073705275394/{z}/{x}/{y}.png\',
+
+layerType: 1,
+
+revertResX: 0,
+
+revertResY: 1,
+
+revertU: 0,
+
+revertV: 0,
+
+lodRange: \[15, 18\],
+
+resLonLatBound: \[109.0261450407931, 33.793854312359635,
+109.03624087552515, 33.80205676471956\],
+
+tilingSchemeType: 1,
+
+},
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+## getAllDataSetId {#getalldatasetid .样式4}
+
+**功能：**
+
+获取当前加载的所有数据集ID
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，数据集id集合
+
+**调用示例：**
+
+var test = BlackHole3D.Model.getAllDataSetId();
+
+## unloadDataSet {#unloaddataset .样式4}
+
+**功能：**
+
+根据数据集ID卸载某一个数据集
+
+**注：**卸载完成回调函数REDataSetLoadFinish
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集的唯一标识名，字符串类型；
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId = \"dataSet01\"；
+
+BlackHole3D.Model.unloadDataSet(dataSetId);
+
+## unloadAllDataSet {#unloadalldataset .样式4}
+
+**功能：**
+
+卸载所有数据集
+
+**注：**卸载完成回调函数REDataSetLoadFinish
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Model.unloadAllDataSet();
+
+## refreshAllDataSet {#refreshalldataset .样式4}
+
+**功能：**
+
+刷新所有数据集模型
+
+注：针对当前加载的所有模型，用来释放引擎窗口占用的硬件资源，设为true，则模型正常加载，设为false，则模型会自动卸载，再次设为true时，引擎无需再次初始化，模型可立即再次加载。
+
+调用时间：引擎初次初始化完成后的任意时间
+
+**参数：**
+
+  --- ------------------- --------------------------------------------------------
+   1  ***loadNewData***   刷新场景后是否重新加载数据
+
+  --- ------------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var loadNewData= false;
+
+BlackHole3D.Model.refreshAllDataSet(loadNewData); //释放引擎占用的资源
+
+## getAllDataSetReady {#getalldatasetready .样式4}
+
+**功能：**
+
+获取项目所有数据集加载状态
+
+注：要在REDataSetLoadFinish监听事件之后调用
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Model.getAllDataSetReady();
+
+## getDataSetReady {#getdatasetready .样式4}
+
+**功能：**
+
+获取指定数据集加载状态
+
+注：要在REDataSetLoadFinish监听事件之后调用
+
+**参数：**
+
+  --- ----------------- --------------------------------------------------------
+   1  ***dataSetId***   数据集的唯一标识名
+
+  --- ----------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Model.getDataSetReady(\"dataSet01\");
+
+# 相机（Camera）
+
+## 属性信息
+
+## getCamLocate {#getcamlocate .样式4}
+
+**功能：**
+
+获取当前相机方位
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RECamLoc对象类型）
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***camPos***      相机位置（三元数）
+
+   2   ***camRotate***   相机的朝向（四元数）
+
+   3   ***camDir***      相机的朝向（欧拉角）
+  ---- ----------------- ------------------------------------------------------
+
+**调用示例：**
+
+console.log(BlackHole3D.Camera.getCamLocate());
+
+## getCamLocByGISCoord {#getcamlocbygiscoord .样式4}
+
+**功能：**
+
+获取gis相机在目标坐标下转换的相机数据
+
+**注：**如果是 \`Cesium\` 数据来源，由于 \`Cesium\` 处理了俯仰角
+\`pitch - 90°\`，需要调整为黑洞使用的原始数据，即 \`pitch +
+90°\`。黑洞的偏航角 \`heading\` 范围为 \`\<0°，360°\> \| \<0°，-360°\>\`
+具有方向性，以 \`0°\`
+为起点，正值方向为逆时针，负值方向为顺时针，\`Cesium\` 的偏航角
+\`heading\` 范围为
+\`\<0°，360°\>\`，这里需要按照实际来源数据的偏转方向进行调整，是否需要
+\`\* -1.0\` 进行调整
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***srcCRS***      表示源坐标系描述符
+
+   2   ***destCRS***     表示目标坐标系描述符
+
+   3   ***gisCamLoc***   gis相机信息 （REGisCamLoc对象类型）
+  ---- ----------------- ------------------------------------------------------
+
+**REGisCamLoc模型解析：**
+
+  ---- --------------- ----------------------------------------------------
+   1   ***lon***       经度
+
+   2   ***lat***       纬度
+
+   3   ***height***    高程
+
+   4   ***heading***   航向 注：黑洞的偏航角 \`heading\` 范围为
+                       \`\<0°，360°\> \| \<0°，-360°\>\` 具有方向性，以
+                       \`0°\` 为起点，正值方向为逆时针，负值方向为顺时针
+
+   5   ***pitch***     俯仰（角度值，取值范围0-90），平视为90，俯视为0
+
+   6   ***roll***      横摇（一般为0，gis没有横滚）
+  ---- --------------- ----------------------------------------------------
+
+**返回值：**
+
+对象类型（RECamLoc对象类型）
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***camPos***      相机位置（三元数）
+
+   2   ***camRotate***   相机的朝向（四元数）
+
+   3   ***camDir***      相机的朝向（欧拉角）
+  ---- ----------------- ------------------------------------------------------
+
+**调用示例：**
+
+var srcCRS = \"EPSG:4326\";
+
+var destCRS =
+\'PROJCS\[\"CGCS2000_3_Degree_GK_CM_116E\",GEOGCS\[\"GCS_China_Geodetic_Coordinate_System_2000\",DATUM\[\"D_China_2000\",SPHEROID\[\"CGCS2000\",6378137.0,298.257222101\]\],PRIMEM\[\"Greenwich\",0.0\],UNIT\[\"Degree\",0.0174532925199433\]\],PROJECTION\[\"Gauss_Kruger\"\],PARAMETER\[\"False_Easting\",500000.0\],PARAMETER\[\"False_Northing\",0.0\],PARAMETER\[\"Central_Meridian\",116.0\],PARAMETER\[\"Scale_Factor\",1.0\],PARAMETER\[\"Latitude_Of_Origin\",0.0\],UNIT\[\"Meter\",1.0\]\]\';
+
+var gisCamItem = new BlackHole3D.REGisCamLoc();
+
+gisCamItem.lon = 111.51292176126812
+
+gisCamItem.lat = 0.00010756262745702583;
+
+gisCamItem.height = 28.941125869750977;
+
+gisCamItem.roll = 0;
+
+gisCamItem.pitch = 47.71478695023874;
+
+gisCamItem.heading = -51.70158553934607;
+
+var bimCam = BlackHole3D.Camera.getCamLocByGISCoord(srcCRS, destCRS,
+gisCamItem);
+
+console.log(bimCam)
+
+// Cesium的gis数据
+
+let gisCamList = \[
+
+{
+
+longitude: 121.42865402855159,
+
+latitude: 31.40258606733405,
+
+height: 999.9999999986059,
+
+heading: 75.99307559984568,
+
+pitch: -59.99999999999999,
+
+},
+
+\];
+
+let gisCamItem_temp = gisCamList\[0\];
+
+let gisCamItem = {};
+
+gisCamItem.lon = gisCamItem_temp.longitude;
+
+gisCamItem.lat = gisCamItem_temp.latitude;
+
+gisCamItem.height = gisCamItem_temp.height;
+
+gisCamItem.roll = 0;
+
+gisCamItem.pitch = gisCamItem_temp.pitch + 90;
+
+gisCamItem.heading = gisCamItem_temp.heading \* -1.0;
+
+let bimCam = BlackHole3D.Camera.getCamLocByGISCoord(GISCRS, BIMCRS,
+gisCamItem);
+
+BlackHole3D.Camera.setCamLocateTo(bimCam, 0, 1.0);
+
+## getGISCoordByCamLoc {#getgiscoordbycamloc .样式4}
+
+**功能：**
+
+获取引擎相机在目标坐标下转换的gis相机数据
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***srcCRS***    表示源坐标系描述符
+
+   2   ***destCRS***   表示目标坐标系描述符
+
+   3   ***camLoc***    Bim相机信息 （RECamLoc对象类型）
+  ---- --------------- ------------------------------------------------------
+
+**camLoc模型解析：**
+
+  ---- ----------------- ----------------------------------------------------
+   1   ***camPos***      相机位置（三元数）
+
+   2   ***camRotate***   相机的朝向（四元数）
+
+   3   ***camDir***      相机的朝向（欧拉角）
+  ---- ----------------- ----------------------------------------------------
+
+**返回值：**
+
+对象类型（REGisCamLoc对象类型）
+
+  ---- --------------- ------------------------------------------------------------------------------------------------------------------------
+   1   ***lon***       经度
+
+   2   ***lat***       纬度
+
+   3   ***height***    高程
+
+   4   ***heading***   航向（角度值，取值范围-180-180），如果gis取值范围是0-360，需要处理范围，以0为分界点，小于0则取反，大于0则用360减去数值
+
+   5   ***pitch***     俯仰（角度值，取值范围0-90），平视为90，俯视为0
+
+   6   ***roll***      横摇（一般为0，gis没有横滚）
+  ---- --------------- ------------------------------------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+var srcCRS =
+\'PROJCS\[\"CGCS2000_3_Degree_GK_CM_116E\",GEOGCS\[\"GCS_China_Geodetic_Coordinate_System_2000\",DATUM\[\"D_China_2000\",SPHEROID\[\"CGCS2000\",6378137.0,298.257222101\]\],PRIMEM\[\"Greenwich\",0.0\],UNIT\[\"Degree\",0.0174532925199433\]\],PROJECTION\[\"Gauss_Kruger\"\],PARAMETER\[\"False_Easting\",500000.0\],PARAMETER\[\"False_Northing\",0.0\],PARAMETER\[\"Central_Meridian\",116.0\],PARAMETER\[\"Scale_Factor\",1.0\],PARAMETER\[\"Latitude_Of_Origin\",0.0\],UNIT\[\"Meter\",1.0\]\]\';
+
+var destCRS = \"EPSG:4326\";
+
+//获取当前相机
+
+var bimCamLoc = BlackHole3D.Camera.getCamLocate();
+
+//转换为gis相机
+
+var gisCamLoc = BlackHole3D.Camera.getGISCoordByCamLoc(srcCRS, destCRS,
+bimCamLoc);
+
+console.log(gisCamLoc)
+
+## getQuatByAxis {#getquatbyaxis .样式4}
+
+**功能：**
+
+获取轴信息转换四元数信息
+
+**参数：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***axisInfo***   轴信息（REAxisInfo对象类型）
+
+  ---- ---------------- ------------------------------------------------------
+
+**REAxisInfo模型解析：**
+
+  ---- ---------------- ----------------------------------------------------
+   1   ***up***         上轴向量（三元数组）
+
+   2   ***viewLine***   视角方向（三元数组向量值）
+  ---- ---------------- ----------------------------------------------------
+
+**返回值：**
+
+数组类型，四元数信息
+
+**调用示例：**
+
+// 加载bim模型
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 获取四元数信息
+
+var axisinfo = new BlackHole3D.REAxisInfo()
+
+axisinfo.up = \[0.4817415244246926, 0.058006665286526746,
+0.8743914057373334\];
+
+axisinfo.viewLine = \[-0.8681207623922139, -0.10453072433917104,
+0.4852212583684785\];
+
+var quat = BlackHole3D.Camera.getQuatByAxis(axisinfo);
+
+// 设置相机
+
+var camLoc = new BlackHole3D.RECamLoc();
+
+camLoc.camPos = \[-17.67137894670247, 33.72876597317039,
+18.885930805623875\];
+
+camLoc.camRotate = quat;
+
+BlackHole3D.Camera.setCamLocateTo(camLoc, 0, 1);
+
+## getAxisByQuat {#getaxisbyquat .样式4}
+
+**功能：**
+
+获取四元数信息转换轴信息
+
+**参数：**
+
+  ---- -------------- ------------------------------------------------------
+   1   ***rotate***   四元数信息（四元数组）
+
+  ---- -------------- ------------------------------------------------------
+
+**返回值：**
+
+对象类型（REAxisInfo对象类型）
+
+  ---- ---------------- ----------------------------------------------------
+   1   ***up***         上轴向量（三元数组）
+
+   2   ***viewLine***   视角方向（三元数组向量值）
+  ---- ---------------- ----------------------------------------------------
+
+**调用示例：**
+
+// 加载bim模型
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 获取当前相机位置
+
+var camLoc = BlackHole3D.Camera.getCamLocate();
+
+// 获取轴信息
+
+var axisInfo = BlackHole3D.Camera.getAxisByQuat(camLoc.camRotate);
+
+## getConvRotateQ2D {#getconvrotateq2d .样式4}
+
+**功能：**
+
+将相机四元数朝向转换为方向朝向
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***camRotate***   相机朝向（四元素数组）
+
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，相机方向朝向
+
+**调用示例：**
+
+var camLoc = BlackHole3D.Camera.getCamLocate();
+
+var camDir = BlackHole3D.Camera.getConvRotateQ2D(camLoc.camRotate);
+
+## getConvRotateD2Q {#getconvrotated2q .样式4}
+
+**功能：**
+
+将相机方向朝向转换为四元数朝向
+
+**参数：**
+
+  ---- -------------- ------------------------------------------------------
+   1   ***camDir***   相机朝向（三元素数组）
+
+  ---- -------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，相机四元数朝向
+
+**调用示例：**
+
+var camLoc = BlackHole3D.Camera.getCamLocate();
+
+var camRotate = BlackHole3D.Camera.getConvRotateD2Q(camLoc.camDir);
+
+## getCurNorthAngleXOY {#getcurnorthanglexoy .样式4}
+
+**功能：**
+
+获取当前北方向夹角（二维）
+
+**注：逆时针范围【0-360】**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，夹角度数
+
+**调用示例：**
+
+var angle = BlackHole3D.Camera.getCurNorthAngleXOY();
+
+## 相机操作
+
+## setCamLocateTo {#setcamlocateto .样式4}
+
+**功能：**
+
+调整相机到目标方位
+
+注：RELocateCam事件获取调整完成信息
+
+**参数：**
+
++:-:+----------------+------------------------------------------------------------------------------------------------+
+| 1 | ***camLoc***   | 相机方位信息（RECamLoc 类型）                                                                  |
++---+----------------+------------------------------------------------------------------------------------------------+
+| 2 | ***locDelay*** | 转动相机前的延时时间（秒）默认0                                                                |
++---+----------------+------------------------------------------------------------------------------------------------+
+| 3 | ***locTime***  | 相机的运动速度（秒） 默认1.0                                                                   |
+|   |                |                                                                                                |
+|   |                | \>=0，表示相机从当前方位到目标方位的绝对时间，例：5，则表示相机用5秒的时间匀速定位到目标点；   |
+|   |                |                                                                                                |
+|   |                | \<0，表示相机定位到目标方位过程中的运动速度(米/秒)，例-5，表示相机用5米/秒的速度定位到目标方位 |
++---+----------------+------------------------------------------------------------------------------------------------+
+
+**RECamLoc模型解析：**
+
+  ---- ----------------- -----------------------------------------------------
+   1   ***camPos***      相机位置（三元数）
+
+   2   ***camRotate***   相机的朝向（四元数）注：camRotate、camDir必须填一个
+
+   3   ***camDir***      相机的朝向（欧拉角）注：camRotate、camDir必须填一个
+  ---- ----------------- -----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+document.addEventListener(\"RELocateCam\",function(e){console.log(\"定位完成\")});
+
+var camLoc = new BlackHole3D.RECamLoc();
+
+camLoc.camPos = \[0.0,0.0,200.5\];
+
+camLoc.camRotate = \[0,0,0,1\];
+
+//camLoc.camDir = \[-0.59,-0.62,0.5\];
+
+var locDelay = 0.5;
+
+var locTime = -10;
+
+BlackHole3D.Camera.setCamLocateTo(camLoc,locDelay, locTime);
+
+## setCamLocateDefault {#setcamlocatedefault .样式4}
+
+**功能：**
+
+调整相机到默认视角方位
+
+**参数：**
+
++:-:+----------------------+-----------------------------------------------------------------------------------+
+| 1 | ***locType***        | 表示相机朝向（RECamDirEm 枚举类型）                                               |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_FRONT//面-主视图（前视图）                                                |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BACK//面-后视图                                                           |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_LEFT//面-左视图                                                           |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_RIGHT//面-右视图                                                          |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOP//面-俯视图（上视图）                                                  |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOM//面-仰视图（下视图）                                               |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPFRONT//棱-上前                                                         |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPRIGHT//棱-上右                                                         |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPBACK//棱-上后                                                          |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPLEFT//棱-上左                                                          |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_LEFTFRONT//棱-左前                                                        |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_RIGHTFRONT//棱-前右                                                       |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_RIGHTBACK//棱-右后                                                        |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_LEFTBACK//棱-后左                                                         |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMFRONT//棱-下前                                                      |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMRIGHT//棱-下右                                                      |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMBACK//棱-下后                                                       |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMLEFT//棱-下左                                                       |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPRIGHTBACK//顶点-上右后                                                 |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPLEFTBACK//顶点-上左后                                                  |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPLEFTFRONT//顶点-上左前                                                 |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_TOPRIGHTFRONT//顶点-上右前                                                |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMRIGHTBACK//顶点-下右后                                              |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMLEFTBACK//顶点-下左后                                               |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMLEFTFRONT//顶点-下左前                                              |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_BOTTOMRIGHTFRONT//顶点-下右前                                             |
+|   |                      |                                                                                   |
+|   |                      | CAM_DIR_DEFAULT//默认视角                                                         |
++---+----------------------+-----------------------------------------------------------------------------------+
+| 2 | ***scanAllDataSet*** | 是否定位到整个数据集，默认true，true表示定位到整个场景，false表示相机原地调整方向 |
++---+----------------------+-----------------------------------------------------------------------------------+
+
+![](./images/media/image2.png){width="2.0006944444444446in"
+height="1.8569444444444445in"}
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamLocateDefault(BlackHole3D.RECamDirEm.CAM_DIR_DEFAULT,
+true);
+
+## setCamLocateToElem {#setcamlocatetoelem .样式4}
+
+**功能：**
+
+调整相机方位到对准构件集合，支持同时将相机对准多个不同项目的构件集合
+
+注：***locType参数不设置默认当前相机视角***
+
+**参数：**
+
+  ------- ----------------- ------------------------------------------------------------------
+     1    ***locIDList***   多数据集的目标构件ID集合
+
+   **2**  ***backDepth***   相机后退强度（如果相机距离构件太近或太远，都可以通过此参数调整）
+  ------- ----------------- ------------------------------------------------------------------
+
+**\**
+
++:-----:+---------------+-------------------------------------------------------+
+| **3** | ***locType*** | 表示相机朝向（RECamDirEm 枚举类型）                   |
+|       |               |                                                       |
+|       |               | CAM_DIR_FRONT//面-主视图（前视图）                    |
+|       |               |                                                       |
+|       |               | CAM_DIR_BACK//面-后视图                               |
+|       |               |                                                       |
+|       |               | CAM_DIR_LEFT//面-左视图                               |
+|       |               |                                                       |
+|       |               | CAM_DIR_RIGHT//面-右视图                              |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOP//面-俯视图（上视图）                      |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOM//面-仰视图（下视图）                   |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPFRONT//棱-上前                             |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPRIGHT//棱-上右                             |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPBACK//棱-上后                              |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPLEFT//棱-上左                              |
+|       |               |                                                       |
+|       |               | CAM_DIR_LEFTFRONT//棱-左前                            |
+|       |               |                                                       |
+|       |               | CAM_DIR_RIGHTFRONT//棱-前右                           |
+|       |               |                                                       |
+|       |               | CAM_DIR_RIGHTBACK//棱-右后                            |
+|       |               |                                                       |
+|       |               | CAM_DIR_LEFTBACK//棱-后左                             |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMFRONT//棱-下前                          |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMRIGHT//棱-下右                          |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMBACK//棱-下后                           |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMLEFT//棱-下左                           |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPRIGHTBACK//顶点-上右后                     |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPLEFTBACK//顶点-上左后                      |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPLEFTFRONT//顶点-上左前                     |
+|       |               |                                                       |
+|       |               | CAM_DIR_TOPRIGHTFRONT//顶点-上右前                    |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMRIGHTBACK//顶点-下右后                  |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMLEFTBACK//顶点-下左后                   |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMLEFTFRONT//顶点-下左前                  |
+|       |               |                                                       |
+|       |               | CAM_DIR_BOTTOMRIGHTFRONT//顶点-下右前                 |
+|       |               |                                                       |
+|       |               | CAM_DIR_DEFAULT//默认视角                             |
+|       |               |                                                       |
+|       |               | CAM_DIR_CURRENT//当前视角                             |
++-------+---------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var locIDList = \[
+
+{\"dataSetId\":\"dataSetId01\",\"elemIdList\":\[1,2,3\]},
+
+{\"dataSetId\":\"dataSetId02\",\"elemIdList\":\[1,2,3\]}
+
+\];
+
+var backDepth = 2.0;
+
+BlackHole3D.Camera.setCamLocateToElem(locIDList, backDepth);
+
+## setCamLocateToDataSet {#setcamlocatetodataset .样式4}
+
+**功能：**
+
+调整相机方位到对准某个数据集
+
+注：***locType参数不设置默认当前相机视角***
+
+**参数：**
+
++:-----:+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| 1     | ***dataSetId*** | 数据集的唯一标识名，为空字符串则表示全部数据集                                                                                            |
++-------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| **2** | ***backDepth*** | 相机后退强度（此参数必须大于0，例：backdepth=1.0，则表示相机的位置距离模型集合的包围盒中心点的距离，为模型集合包围盒的斜对角线长度的1倍） |
++-------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| **3** | ***locType***   | 表示相机朝向（RECamDirEm 枚举类型）                                                                                                       |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_FRONT//面-主视图（前视图）                                                                                                        |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BACK//面-后视图                                                                                                                   |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_LEFT//面-左视图                                                                                                                   |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_RIGHT//面-右视图                                                                                                                  |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOP//面-俯视图（上视图）                                                                                                          |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOM//面-仰视图（下视图）                                                                                                       |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPFRONT//棱-上前                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPRIGHT//棱-上右                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPBACK//棱-上后                                                                                                                  |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPLEFT//棱-上左                                                                                                                  |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_LEFTFRONT//棱-左前                                                                                                                |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_RIGHTFRONT//棱-前右                                                                                                               |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_RIGHTBACK//棱-右后                                                                                                                |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_LEFTBACK//棱-后左                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMFRONT//棱-下前                                                                                                              |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMRIGHT//棱-下右                                                                                                              |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMBACK//棱-下后                                                                                                               |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMLEFT//棱-下左                                                                                                               |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPRIGHTBACK//顶点-上右后                                                                                                         |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPLEFTBACK//顶点-上左后                                                                                                          |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPLEFTFRONT//顶点-上左前                                                                                                         |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPRIGHTFRONT//顶点-上右前                                                                                                        |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMRIGHTBACK//顶点-下右后                                                                                                      |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMLEFTBACK//顶点-下左后                                                                                                       |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMLEFTFRONT//顶点-下左前                                                                                                      |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMRIGHTFRONT//顶点-下右前                                                                                                     |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_DEFAULT//默认视角                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_CURRENT//当前视角                                                                                                                 |
++-------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//相机定位到场景节点
+
+var dataSetId = \"dataSet01\";
+
+var backDepth = 2.0;
+
+BlackHole3D.Camera.setCamLocateToDataSet(dataSetId, backDepth);
+
+## setCamLocateToBound {#setcamlocatetobound .样式4}
+
+**功能：**
+
+调整相机定位到包围盒（枚举朝向）
+
+**参数：**
+
++:-----:+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| 1     | ***arrBound***  | 包围盒范围，\[\[Xmin、Ymin、Zmin\],\[Xmax、Ymax、Zmax\]\]                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | **注意：此处最小值应小于最大值，否则范围无效**                                                                                            |
++-------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| **2** | ***backDepth*** | 相机后退强度（此参数必须大于0，例：backdepth=1.0，则表示相机的位置距离模型集合的包围盒中心点的距离，为模型集合包围盒的斜对角线长度的1倍） |
++-------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| **3** | ***locType***   | 表示相机朝向（RECamDirEm 枚举类型）                                                                                                       |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_FRONT//面-主视图（前视图）                                                                                                        |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BACK//面-后视图                                                                                                                   |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_LEFT//面-左视图                                                                                                                   |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_RIGHT//面-右视图                                                                                                                  |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOP//面-俯视图（上视图）                                                                                                          |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOM//面-仰视图（下视图）                                                                                                       |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPFRONT//棱-上前                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPRIGHT//棱-上右                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPBACK//棱-上后                                                                                                                  |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPLEFT//棱-上左                                                                                                                  |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_LEFTFRONT//棱-左前                                                                                                                |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_RIGHTFRONT//棱-前右                                                                                                               |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_RIGHTBACK//棱-右后                                                                                                                |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_LEFTBACK//棱-后左                                                                                                                 |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMFRONT//棱-下前                                                                                                              |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMRIGHT//棱-下右                                                                                                              |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMBACK//棱-下后                                                                                                               |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMLEFT//棱-下左                                                                                                               |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPRIGHTBACK//顶点-上右后                                                                                                         |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPLEFTBACK//顶点-上左后                                                                                                          |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPLEFTFRONT//顶点-上左前                                                                                                         |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_TOPRIGHTFRONT//顶点-上右前                                                                                                        |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMRIGHTBACK//顶点-下右后                                                                                                      |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMLEFTBACK//顶点-下左后                                                                                                       |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMLEFTFRONT//顶点-下左前                                                                                                      |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_BOTTOMRIGHTFRONT//顶点-下右前                                                                                                     |
+|       |                 |                                                                                                                                           |
+|       |                 | CAM_DIR_DEFAULT//默认视角                                                                                                                 |
++-------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var arrBound = \[\[3.473900079727173, 13.618400573730469,
+-0.6100000143051147\], \[20.67770004272461, 62.56829833984375,
+6.166500091552734\]\];
+
+BlackHole3D.Camera.setCamLocateToBound(arrBound,1.0,BlackHole3D.RECamDirEm.CAM_DIR_DEFAULT);
+
+## setCamLocateToBoundByDir {#setcamlocatetoboundbydir .样式4}
+
+**功能：**
+
+调整相机定位到包围盒（相机朝向）
+
+**参数：**
+
++-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***arrBound***  | 包围盒范围，\[\[Xmin、Ymin、Zmin\],\[Xmax、Ymax、Zmax\]\]                                                                                 |
+|                 |                                                                                                                                           |
+|                 | **注意：此处最小值应小于最大值，否则范围无效**                                                                                            |
++-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***backDepth*** | 相机后退强度（此参数必须大于0，例：backdepth=1.0，则表示相机的位置距离模型集合的包围盒中心点的距离，为模型集合包围盒的斜对角线长度的1倍） |
++-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| camDir          | 相机朝向（三元素数组）                                                                                                                    |
++-----------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var arrBound = \[\[3.473900079727173, 13.618400573730469,
+-0.6100000143051147\], \[20.67770004272461, 62.56829833984375,
+6.166500091552734\]\];
+
+var camDir = \[0, 1, 0\];
+
+BlackHole3D.Camera.setCamLocateToBoundByDir(arrBound,1.0,camDir);
+
+## resetCamLocate {#resetcamlocate .样式4}
+
+**功能：**
+
+相机复位
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.resetCamLocate();
+
+## getCamForcedInitLoc {#getcamforcedinitloc .样式4}
+
+**功能：**
+
+获取相机的强制初始方位信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REForceCamLoc对象类型）
+
+  ---- ----------------- ----------------------------------------------------
+   1   ***force***       是否强制相机初始方位
+
+   2   ***camPos***      相机位置（三元数）
+
+   3   ***camRotate***   相机的朝向（四元数）
+
+   4   ***camDir***      相机的朝向（欧拉角）
+  ---- ----------------- ----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamForcedInitLoc()
+
+## setCamForcedInitLoc {#setcamforcedinitloc .样式4}
+
+**功能：**
+
+设置相机的强制初始方位
+
+注：可以在加载模型之前设置
+
+**参数：**
+
+  ---- ------------------- ------------------------------------------------------
+   1   ***forceCamLoc***   强制相机方位信息（REForceCamLoc类型）
+
+  ---- ------------------- ------------------------------------------------------
+
+**REForceCamLoc模型解析：**
+
+  ---- ----------------- -----------------------------------------------------
+   1   ***force***       是否强制相机初始方位
+
+   2   ***camPos***      相机位置（三元数）
+
+   3   ***camRotate***   相机的朝向（四元数）注：camRotate、camDir必须填一个
+
+   4   ***camDir***      相机的朝向（欧拉角）注：camRotate、camDir必须填一个
+  ---- ----------------- -----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var forceCamLoc = new BlackHole3D.REForceCamLoc();
+
+forceCamLoc.force = true;
+
+forceCamLoc.camPos = \[8.358493400297508, 52.50357912019764,
+4.313767751405416\];
+
+forceCamLoc.camRotate = \[0.5005446775385528, -0.27213832861450266,
+-0.3925471059564452, 0.7220128291740741\];
+
+//forceCamLoc.camDir = \[0.7859494582786438, 0.509145130880376,
+-0.35079151177346235\];
+
+BlackHole3D.Camera.setCamForcedInitLoc(forceCamLoc);
+
+## setAutoCamAnimParams {#setautocamanimparams .样式4}
+
+**功能：**
+
+引擎支持整体模型绕Z轴自动旋转，此接口为设置相机自动旋转的相关参数
+
+**参数：**
+
+  ------- -------------------- -------------------------------------------------------
+   **1**  ***point***          自动旋转的参考中心点坐标，数组形式\[x,y,z\]
+
+   **2**  ***speed***          旋转一周所用时间，单位为秒，负值反向
+
+     3    ***rotateEnable***   是否开启自动旋转，默认关闭
+  ------- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var point = \[0.0,0.0,0.0\]; //绕原点旋转
+
+var speed = 60; //旋转速度为60秒一圈
+
+var rotateEnable = true; //开始旋转
+
+BlackHole3D.Camera.setAutoCamAnimParams(point, speed, rotateEnable);
+
+## getAutoCamAnimEnable {#getautocamanimenable .样式4}
+
+**功能：**
+
+引擎支持整体模型绕Z轴自动旋转，此接口为获取相机自动动画的启用状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，为true则相机正处于自动旋转状态；false则已退出自动旋转状态
+
+**调用示例：**
+
+BlackHole3D.Camera.getAutoCamAnimEnable();
+
+## exitCamLocating {#exitcamlocating .样式4}
+
+**功能：**
+
+退出当前的相机定位操作
+
+**注：Camera.setCamLocateTo接口调用方式有效**
+
+**参数：**
+
++------------+-------------------------------------------------------+
+| ***type*** | 表示相机退出定位后的终止方位在哪（默认为0）           |
+|            |                                                       |
+|            | 0: 当前方位                                           |
+|            |                                                       |
+|            | 1: 定位起始方位                                       |
+|            |                                                       |
+|            | 2: 定位最终结束方位                                   |
++------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，true表示成功；false表示失败
+
+**调用示例：**
+
+//相机定位
+
+var camLoc = new BlackHole3D.RECamLoc();
+
+camLoc.camPos = \[0.0,0.0,200.5\];
+
+camLoc.camRotate = \[0,0,0,1\];
+
+//camLoc.camDir = \[-0.59,-0.62,0.5\];
+
+var locDelay = 0.0;
+
+var locTime = 10;
+
+BlackHole3D.Camera.setCamLocateTo(camLoc,locDelay, locTime);
+
+//退出相机定位
+
+BlackHole3D.Camera.exitCamLocating()
+
+## 相机效果
+
+## setFixCurCam {#setfixcurcam .样式4}
+
+**功能：**
+
+设置固定当前的相机方位（BIM相机）
+
+注：只在360和bim双屏模式下生效
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setFixCurCam();
+
+## setCamBound {#setcambound .样式4}
+
+**功能：**
+
+设置相机位置的世界空间范围，相机只能在该范围内移动
+
+**参数：**
+
++:-:+-------------------+-------------------------------------------------------------------+
+| 1 | ***arrCamBound*** | 表示相机的移动范围，\[\[Xmin、Ymin、Zmin\],\[Xmax、Ymax、Zmax\]\] |
+|   |                   |                                                                   |
+|   |                   | **注意：此处最小值应小于最大值，否则范围无效**                    |
++---+-------------------+-------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var arrCamBound = \[\[-100,-100,-100\],\[100,100,100\]\];
+
+BlackHole3D.Camera.setCamBound(arrCamBound);
+
+## getCamBound {#getcambound .样式4}
+
+**功能：**
+
+获取相机位置的世界空间范围
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组,
+当前设置的相机移动范围（\[\[Xmin、Ymin、Zmin\],\[Xmax、Ymax、Zmax\]\]
+
+）
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamBound();
+
+## resetCamBound {#resetcambound .样式4}
+
+**功能：**
+
+重置相机位置的默认世界空间范围
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.resetCamBound();
+
+## setCamForcedNearFar {#setcamforcednearfar .样式4}
+
+**功能：**
+
+设置相机的强制近裁面/远裁面
+
+**注：此处应适当调整近裁面和远裁面的值，近裁面过小或者远裁面过大都会影响渲染效果**
+
+**参数：**
+
+  --- ------------------ -------------------------------------------------------------------------------------------------------------------------
+   1  ***arrNearFar***   二维数组\[强制近裁面,强制远裁面\](小于0表示使用资源中的设置；0\~1e37表示强制使用指定值；大于1e37表示强制使用自动计算值)
+
+  --- ------------------ -------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var arrNearFar= \[0.1,1000\];
+
+BlackHole3D.Camera.setCamForcedNearFar(arrNearFar);
+
+## getCamForcedNearFar {#getcamforcednearfar .样式4}
+
+**功能：**
+
+获取当前场景的近裁面/远裁面
+
+**参数：**
+
+无
+
+**返回值：**
+
+二维数组，当前场景的近裁面/远裁面
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamForcedNearFar();
+
+## setCamUpsideDown {#setcamupsidedown .样式4}
+
+**功能：**
+
+设置相机朝向，是否允许相机头朝下
+
+![1619605021(1)](./images/media/image3.png){width="5.764583333333333in"
+height="1.8923611111111112in"}
+
+注：此接口建议跟设置相机范围的接口setCamBound一起使用，为了限制用户将相机防止于模型的下方或者将模型倒置，建议先设置相机的运动范围，x\\y一般情况下不用做限制，直接给±1e20，或者其他较大的数值；Zmin建议≤当前模型包围盒的Zmin，Zmax建议≥当前模型包围盒Zmin即可
+
+**参数：**
+
+  --- -------------- ------------------------------------------------------
+   1  ***enable***   布尔变量，true表示允许；false表示不允许
+
+  --- -------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+例：当前模型的包围盒是\[\[-3,-3,0\],\[3,3,10\]\],可设置如下参数：
+
+var arrCamBound = \[\[-1000,-1000,-2\],\[1000,1000,100\]\];
+
+BlackHole3D.Camera.setCamBound(arrCamBound);
+
+BlackHole3D.Camera.setCamUpsideDown(false);
+
+## getCamUpsideDown {#getcamupsidedown .样式4}
+
+**功能：**
+
+获取当前是否允许头朝下
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔变量，true表示允许；false表示不允许
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamUpsideDown();
+
+## setCamPreferFPS {#setcampreferfps .样式4}
+
+**功能：**
+
+设置当相机运动或模型运动时是否偏向于渲染流畅性(即是否允许相机运动的过程中加载模型)
+
+**参数：**
+
++:-:+--------------+------------------------------------------------------+
+| 1 | ***prefer*** | 布尔变量（默认为true）：                             |
+|   |              |                                                      |
+|   |              | true表示偏向渲染流畅，此时不允许相机运动时加载模型； |
+|   |              |                                                      |
+|   |              | false表示不偏向渲染流畅，此时允许边运动边加载模型    |
++---+--------------+------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamPreferFPS(true);
+
+## getCamPreferFPS {#getcampreferfps .样式4}
+
+**功能：**
+
+获取当相机运动或模型运动时是否偏向于渲染流畅性(即是否允许相机运动的过程中加载模型)
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true表示允许；false表示不允许
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamPreferFPS();
+
+## setCamType {#setcamtype .样式4}
+
+**功能：**
+
+设置主场景的相机投影方式（正交投影、透视投影）
+
+注：调用在 REDataSetLoadSce事件之后
+
+**参数：**
+
+  --- ------------- ------------------------------------------------------
+   1  ***type***    0表示透视投影；1表示正交投影
+
+  --- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamType(1);
+
+## getCamType {#getcamtype .样式4}
+
+**功能：**
+
+获取主场景相机的投影类型
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，0表示透视投影；1表示正交投影
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamType(1);
+
+## setFreeCamMoveSpeed {#setfreecammovespeed .样式4}
+
+**功能：**
+
+设置相机在自由移动模式下的速度
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***speed***   速度
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setFreeCamMoveSpeed(10);
+
+## getFreeCamMoveSpeed {#getfreecammovespeed .样式4}
+
+**功能：**
+
+获取相机在自由移动模式下的速度
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型
+
+**调用示例：**
+
+BlackHole3D.Camera.getFreeCamMoveSpeed();
+
+## setCamBelowTerrain {#setcambelowterrain .样式4}
+
+**功能：**
+
+设置相机是否允许位于地形以下
+
+**注：默认不允许，仅限于地形数据，对倾斜摄影、BIM模型无效**
+
+**参数：**
+
+  -------------- --------------------------------------------------------
+  ***enable***   是否允许
+
+  -------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamBelowTerrain(true);
+
+## getCamBelowTerrain {#getcambelowterrain .样式4}
+
+**功能：**
+
+获取相机是否允许位于地形以下
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，是否允许相机位于地形以下
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamBelowTerrain();
+
+## setCamLockRotate {#setcamlockrotate .样式4}
+
+**功能：**
+
+设置相机是否锁定当前朝向
+
+**注：默认不锁定，锁定后建议移除ViewCude组件，防止操作冲突**
+
+**参数：**
+
+  --- ------------- ------------------------------------------------------
+   1  ***lock***    是否锁定
+
+  --- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamLockRotate(true);
+
+## getCamLockRotate {#getcamlockrotate .样式4}
+
+**功能：**
+
+获取相机是否锁定当前朝向
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，是否锁定当前朝向
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamLockRotate();
+
+## setCamAlignTerrainPage {#setcamalignterrainpage .样式4}
+
+**功能：**
+
+设置相机是否与地形页面LOD切换相同步，以获取更好地形页面LOD切换效果
+
+**参数：**
+
+  --- ------------- ------------------------------------------------------
+   1  ***align***   是否同步
+
+  --- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamAlignTerrainPage(true);
+
+## getCamAlignTerrainPage {#getcamalignterrainpage .样式4}
+
+**功能：**
+
+获取相机是否与地形页面LOD切换相同步
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，是否与地形页面LOD切换相同步
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamAlignTerrainPage();
+
+## 第三人称漫游
+
+## createTpp {#createtpp .样式4}
+
+**功能：**
+
+创建单构件对象并进入第三人称漫游
+
+**注：创建完成回调事件RECreateTPPFinish，创建以当前相机位置朝正下方探测，当能探测到实体目标，才会创建单构件对象，创建完成相机移动到相对位置，单构件模板必须具备\"walk\"和\"stand\"动画，单构件模板必须面部朝向（-y）方向，使用第三人称漫游默认开启碰撞检测、重力模拟功能**
+
+**参数：**
+
+  --------------- ------------------------------------------------------
+  ***tppInfo***   第三人称漫游信息（RETPPInfo 类型）
+
+  --------------- ------------------------------------------------------
+
+**RETPPInfo模型解析：**
+
+  -------------------- ----------------------------------------------------
+  ***dataSetId***      数据集标识
+
+  ***entityType***     实例类型名称
+
+  ***useEntityPos***   是否用自定义单构件位置
+
+  ***entityPos***      自定义单构件位置
+
+  ***useCustomCam***   是否用自定义相机信息
+
+  ***camPos***         相机的位置（三元素数组）
+
+  ***camRotate***      相机朝向（四元素数组）
+  -------------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_zhongyidong\',
+
+resourcesAddress:
+\'https://realbim.bjblackhole.cn:8009/default.aspx?dir=url_res02&path=res_zhongyidong\',
+
+},
+
+{
+
+dataSetId: \'renwu\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_xiaoren\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加监听事件
+
+document.addEventListener(\'RECreateTPPFinish\', RECreateTPPFinish);
+
+function RECreateTPPFinish(e) {
+
+console.log(\'\-- 创建单构件对象并进入第三人称漫游完成回调事件 \--\',
+e);
+
+if (!e.detail.succeed) {
+
+let error = \'\';
+
+switch (e.detail.result) {
+
+case 1:
+
+error = \'单构件模板数据集加载失败\';
+
+break;
+
+case 2:
+
+error = \'单构件模板类型不存在\';
+
+break;
+
+case 3:
+
+error = \'当前相机正下方空间探测失败，无法选中\';
+
+break;
+
+case 4:
+
+error = \'单构件对象添加失败\';
+
+break;
+
+case 5:
+
+error = \'当前已存在第三人称漫游\';
+
+break;
+
+default:
+
+break;
+
+}
+
+alert(\`创建第三人称漫游失败, 失败原因：（\${error}）\`);
+
+}
+
+}
+
+// 加载单构件
+
+let typeNames_renwu = BlackHole3D.Entity.getAllTypeNames(\'renwu\');
+
+let ttpInfo = new BlackHole3D.RETPPInfo();
+
+ttpInfo.dataSetId = \'renwu\';
+
+ttpInfo.entityType = typeNames_renwu\[0\];
+
+BlackHole3D.Camera.createTpp(ttpInfo);
+
+## delTPP {#deltpp .样式4}
+
+**功能：**
+
+退出第三人称漫游
+
+**参数：**
+
+  ----------------- --------------------------------------------------------
+  ***delEntity***   是否删除当前绑定的单构件
+
+  ----------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.delTPP(true);
+
+## setTPPSportAnimName {#settppsportanimname .样式4}
+
+**功能：**
+
+设置运动模式的动画名称
+
+**注：单构件模板必须具备\"walk\"和\"stand\"动画**
+
+**参数：**
+
+  ---------------- --------------------------------------------------------
+  ***animName***   动画标识
+
+  ---------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值，true表示成功；false表示失败
+
+**调用示例：**
+
+BlackHole3D.Camera.setTPPSportAnimName(\'walk\');
+
+## getTPPSportAnimName {#gettppsportanimname .样式4}
+
+**功能：**
+
+获取运动模式的动画名称
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，动画名称
+
+**调用示例：**
+
+BlackHole3D.Camera.getTPPSportAnimName();
+
+## setTPPIdleAnimName {#settppidleanimname .样式4}
+
+**功能：**
+
+设置空闲模式的动画名称
+
+**注：单构件模板必须具备\"walk\"和\"stand\"动画**
+
+**参数：**
+
+  ---------------- --------------------------------------------------------
+  ***animName***   动画标识
+
+  ---------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值，true表示成功；false表示失败
+
+**调用示例：**
+
+BlackHole3D.Camera.setTPPIdleAnimName(\'stand\');
+
+## getTPPIdleAnimName {#gettppidleanimname .样式4}
+
+**功能：**
+
+获取空闲模式的动画名称
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，动画名称
+
+**调用示例：**
+
+BlackHole3D.Camera.getTPPIdleAnimName();
+
+## setTPPGradeAbility {#settppgradeability .样式4}
+
+**功能：**
+
+设置单构件的爬坡能力
+
+**参数：**
+
+  -------------------- --------------------------------------------------------------------------------
+  ***gradeAbility***   表示单构件的爬升能力,\>=0表示绝对高度；\<0表示相对于视点包围球半径的倍数的负数
+
+  -------------------- --------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setTPPGradeAbility(0.5);
+
+## getTPPGradeAbility {#gettppgradeability .样式4}
+
+**功能：**
+
+获取单构件的爬升能力
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，爬升高度
+
+**调用示例：**
+
+BlackHole3D.Camera.getTPPGradeAbility();
+
+## setTPPSphereCollider {#settppspherecollider .样式4}
+
+**功能：**
+
+设置碰撞球信息
+
+**注：设置球心点坐标会受到爬坡能力高度影响，如果精确控制点位，需要关闭爬坡能力**
+
+**参数：**
+
+  -------------------------- ---------------------------------------------------
+  ***sphereColliderInfo***   碰撞球信息（RETPPSphereColliderInfo 类型）
+
+  -------------------------- ---------------------------------------------------
+
+**RETPPSphereColliderInfo模型解析：**
+
+  -------------------- ----------------------------------------------------
+  ***radius***         碰撞球半径
+
+  ***useCustomPos***   是否自定义碰撞球的球心位置
+
+  ***pos***            球心坐标 （三元素数组）
+  -------------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let \_sphereColliderInfo = new BlackHole3D.RETPPSphereColliderInfo();
+
+\_sphereColliderInfo.radius = 0.5;
+
+\_sphereColliderInfo.useCustomPos = true;
+
+\_sphereColliderInfo.pos = \[x,y,z\];
+
+BlackHole3D.Camera.setTPPSphereCollider(\_sphereColliderInfo);
+
+## getTPPSphereCollider {#gettppspherecollider .样式4}
+
+**功能：**
+
+获取碰撞球信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RETPPSphereColliderInfo对象类型）
+
+  -------------------- ------------------------------------------------------
+  ***radius***         碰撞球半径
+
+  ***useCustomPos***   是否自定义碰撞球的球心位置
+
+  ***pos***            球心坐标 （三元素数组）
+  -------------------- ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Camera.getTPPSphereCollider();
+
+## setCamTPPElem {#setcamtppelem .样式4}
+
+**功能：**
+
+设置相机是否锁定当前朝向
+
+**注：当前场景唯一对象，再次设置替换绑定对象，当前暂只支持单构件模式绑定使用，使用当前相机位置和朝向进行绑定**
+
+**参数：**
+
+  --------------------- ------------------------------------------------------
+  ***tppFollowInfo***   相机跟随信息（RETPPFollowInfo 类型）
+
+  --------------------- ------------------------------------------------------
+
+**RETPPFollowInfo模型解析：**
+
+  ----------------- ----------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***elemId***      构件标识
+  ----------------- ----------------------------------------------------
+
+**返回值：**
+
+布尔值，是否成功
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_zhongyidong\',
+
+resourcesAddress:
+\'https://realbim.bjblackhole.cn:8009/default.aspx?dir=url_res02&path=res_zhongyidong\',
+
+},
+
+{
+
+dataSetId: \'renwu\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_xiaoren\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 加载单构件
+
+BlackHole3D.Entity.enterEditMode();
+
+let entityList = \[\];
+
+let typeNames_renwu = BlackHole3D.Entity.getAllTypeNames(\'renwu\');
+
+if (typeNames_renwu.length) {
+
+let entity = new BlackHole3D.REEntityInfo();
+
+entity.dataSetId = \'renwu\';
+
+entity.entityType = typeNames_renwu\[0\];
+
+entity.elemId = 1;
+
+entity.scale = \[1.0, 1.0, 1.0\];
+
+entity.rotate = \[0.0, 0.0, 0.0, 1.0\];
+
+entity.offset = \[140.0, 12.0, -0.15\];
+
+entityList.push(entity);
+
+}
+
+BlackHole3D.Entity.addEntities(entityList);
+
+BlackHole3D.Entity.exitEditMode();
+
+// 设置相机跟随
+
+let camFollowInfo = new BlackHole3D.RETPPFollowInfo();
+
+camFollowInfo.dataSetId = \'renwu\';
+
+camFollowInfo.elemId = 1;
+
+BlackHole3D.Camera.setCamTPPElem(camFollowInfo);
+
+## getCamTPPElem {#getcamtppelem .样式4}
+
+**功能：**
+
+获取相机跟随构件信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RETPPFollowInfo对象类型）
+
+  ----------------- -------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***elemId***      构件标识
+  ----------------- -------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamTPPElem();
+
+## getIsTPP {#getistpp .样式4}
+
+**功能：**
+
+获取是否在第三人称状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true正在第三人称状态，false不在状态
+
+**调用示例：**
+
+BlackHole3D.Camera.getIsTPP();
+
+## 碰撞检测
+
+## setCamCollideState {#setcamcollidestate .样式4}
+
+**功能：**
+
+设置碰撞检测的开启状态
+
+**注：使用第三人称漫游默认开启碰撞检测功能**
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   是否开启
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamCollideState(true);
+
+## getCamCollideState {#getcamcollidestate .样式4}
+
+**功能：**
+
+获取碰撞检测的开启状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，开启返回true，不开启返回false
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamCollideState();
+
+## 重力模拟
+
+## setCamGravityState {#setcamgravitystate .样式4}
+
+**功能：**
+
+设置重力模拟的开启状态
+
+**注：碰撞检测状态下有效，使用第三人称漫游默认开启重力模拟功能**
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   是否开启
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamGravityState(true);
+
+## getCamGravityState {#getcamgravitystate .样式4}
+
+**功能：**
+
+获取重力模拟的开启状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，开启返回true，不开启返回false
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamGravityState();
+
+## setCamGravityHeight {#setcamgravityheight .样式4}
+
+**功能：**
+
+设置重力模拟时的相机高度
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***height***   高度
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Camera.setCamGravityHeight(2);
+
+## getCamGravityHeight {#getcamgravityheight .样式4}
+
+**功能：**
+
+获取重力模拟时的相机高度
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型
+
+**调用示例：**
+
+BlackHole3D.Camera.getCamGravityHeight();
+
+# 天空盒（SkyBox）
+
+## setEnable {#setenable .样式4}
+
+**功能：**
+
+设置天空盒的启用状态，只有在天空盒禁用时，设置的背景颜色才可见；默认的背景颜色为白色。
+
+**参数：**
+
+  --- -------------- --------------------------------------------------------
+   1  ***enable***   设为"true"，启用天空盒；设为"false"，禁用天空盒；
+
+  --- -------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.SkyBox.setEnable(true);
+
+## getEnable {#getenable .样式4}
+
+**功能：**
+
+获取天空盒的启用状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true表示开启；false表示不开启
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getEnable();
+
+## setBackClr {#setbackclr .样式4}
+
+**功能：**
+
+设置天空盒的背景颜色
+
+注：需要关闭天空盒展示纯色背景，CAD无效
+
+**参数：**
+
+  --- ------------- --------------------------------------------------------
+   1  ***color***   颜色（REColor 类型）
+
+  --- ------------- --------------------------------------------------------
+
+**REColor模型解析：**
+
+  ---- ------------- -----------------------------------------------------
+   1   ***red***     红色（取值范围0\~255）
+
+   2   ***green***   绿色（取值范围0\~255）
+
+   3   ***blue***    蓝色（取值范围0\~255）
+  ---- ------------- -----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var color = new BlackHole3D.REColor();
+
+color.red = 128;
+
+color.green = 255;
+
+color.blue = 204;
+
+BlackHole3D.SkyBox.setBackClr(color);
+
+//或者直接赋值使用
+
+BlackHole3D.SkyBox.setBackClr(new BlackHole3D.REColor(128, 255, 204));
+
+## getBackClr {#getbackclr .样式4}
+
+**功能：**
+
+获取天空盒的背景颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REColor对象类型），当前设置的天空盒的背景颜色
+
+  ---- ------------- ------------------------------------------------------
+   1   ***red***     红色（取值范围0\~255）
+
+   2   ***green***   绿色（取值范围0\~255）
+
+   3   ***blue***    蓝色（取值范围0\~255）
+  ---- ------------- ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getBackClr()
+
+## setSkyInfo {#setskyinfo .样式4}
+
+**功能：**
+
+设置自定义天空盒
+
+注：自定义天空盒效果和大气散射效果互斥，CAD无效
+
+**参数：**
+
+  --- --------------- --------------------------------------------------------
+   1  ***skyInfo***   天空信息（RESkyInfo类型）
+
+  --- --------------- --------------------------------------------------------
+
+**RESkyInfo模型解析：**
+
++:-:+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***skyTexPaths*** | 天空盒图片路径，字符串数组                                                                                                                                                                            |
+|   |                   |                                                                                                                                                                                                       |
+|   |                   | 顺序分别为X+、X-、Z+、Z-、Y+、Y-，例如下图所示：                                                                                                                                                      |
+|   |                   |                                                                                                                                                                                                       |
+|   |                   | ![lALPD4Bhtn-elq3NARzNAXg_376_284](./images/media/image4.png){width="3.9166666666666665in" height="2.9583333333333335in"}                                                                             |
++---+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 2 | ***sunMode***     | 光照模式：                                                                                                                                                                                            |
+|   |                   |                                                                                                                                                                                                       |
+|   |                   | 0：表示默认没有太阳                                                                                                                                                                                   |
+|   |                   |                                                                                                                                                                                                       |
+|   |                   | 1：使用天空盒自带的太阳/月亮                                                                                                                                                                          |
+|   |                   |                                                                                                                                                                                                       |
+|   |                   | 2：根据光照方向sunDir自动生成太阳                                                                                                                                                                     |
++---+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 3 | ***sunDir***      | 光源方向，设置方法为，将太阳放置屏幕空间中心位置，通过getCamLocate接口获取当前的相机方向camDir，取反即可，例如：获取到的方向camDir为\[-0.59, -0.62, 0.5\]，则此参数填\[0.59, 0.62,                    |
+|   |                   | -0.5\]即可,\[x,y,z\]类型，z值和相机查看方向的z值相反，即从天空中向下照射z为负值，从下向上照射为正值。从下向上在球形场景中效果明显，此效果下灯光效果最佳，不受太阳光源影响。在单独模型查看情况下无亮度 |
++---+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 4 | ***isNight***     | 表示是否晚上，true表示晚上，false表示白天（如果光源方向为自下向上，白天效果会增加天空盒的曝光度）                                                                                                     |
++---+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 5 | ***exposeScale*** | 曝光度，大于0，默认设为1即可，值越大，场景越亮                                                                                                                                                        |
++---+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置夕阳效果
+
+var skyInfo = new BlackHole3D.RESkyInfo();
+
+skyInfo.skyTexPaths = \[
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/right.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/left.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/front.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/back.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/top.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/bottom.jpg\"
+
+\];
+
+skyInfo.sunMode = 1;
+
+skyInfo.sunDir = \[-0.707005, 0.700468, -0.097413\];
+
+skyInfo.isNight = false;
+
+skyInfo.exposeScale = 1.0;
+
+BlackHole3D.SkyBox.setSkyInfo(skyInfo);
+
+//设置夜晚效果
+
+var skyInfo = new BlackHole3D.RESkyInfo();
+
+skyInfo.skyTexPaths = \[
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/right.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/left.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/front.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/back.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/top.jpg\",
+
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=skybox/bottom.jpg\"
+
+\];
+
+skyInfo.sunMode = 1;
+
+skyInfo.sunDir = \[-0.377973, -0.761482, -0.526576\];
+
+skyInfo.isNight = true;
+
+skyInfo.exposeScale = 1.0;
+
+BlackHole3D.SkyBox.setSkyInfo(skyInfo);
+
+## getSkyInfo {#getskyinfo .样式4}
+
+**功能：**
+
+获取当前设置的天空盒信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RESkyInfo对象类型）
+
+  ---- ------------------- -----------------------------------------------------
+   1   ***skyTexPaths***   天空盒图片路径，字符串数组
+
+   2   ***sunMode***       光照模式
+
+   3   ***sunDir***        光源方向
+
+   4   ***isNight***       表示是否晚上
+
+   5   ***exposeScale***   曝光度
+  ---- ------------------- -----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getSkyInfo()
+
+## resetSkyInfo {#resetskyinfo .样式4}
+
+**功能：**
+
+重置天空盒设置
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.SkyBox.resetSkyInfo()
+
+## setLightLocate {#setlightlocate .样式4}
+
+**功能：**
+
+设置全局光源方向
+
+**参数：**
+
++:-:+--------------+----------------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***sunDir*** | 光源方向，设置方法为，将天空背景的光源（例如太阳）放置屏幕空间中心位置，通过getCamLocate接口获取当前的相机方向camDir，取反即可， |
+|   |              |                                                                                                                                  |
+|   |              | 例如：获取到的方向camDir为\[-0.59, -0.62, 0.5\]，则此参数填\[0.59, 0.62, -0.5\]即可                                              |
+|   |              |                                                                                                                                  |
+|   |              | 如果想要模拟日出到日落的过程，则Y只保持不变，X\\Z分别取0\~π的正弦和余弦值，取反即可，详见调用示例                                |
++---+--------------+----------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//模拟日出到日落，太阳从0\~180，平均分为12个角度，模拟12个小时,此示例为平均模拟12个小时，可根据实际情况，给不同的时间段不一样的延时时间
+
+var suntime = 0;
+
+function sunshine() {
+
+if (suntime \< 12) {
+
+suntime += 1; console.log(suntime);
+
+var sunDir= \[\];
+
+sunDir\[0\] = -Math.cos(suntime / 12 \* (Math.PI));
+
+sunDir\[1\] = 0.6319452524185181;
+
+sunDir\[2\] = -Math.sin(suntime / 12 \* (Math.PI));
+
+BlackHole3D.SkyBox.setLightLocate(sunDir);
+
+setTimeout(\"sunshine()\", 1000);
+
+}
+
+};
+
+## getLightLocate {#getlightlocate .样式4}
+
+**功能：**
+
+获取当前设置的全局光源方向
+
+**参数：**
+
+无
+
+**返回值：**
+
+三元数组，当前的设置的光源方向
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getLightLocate()
+
+## setSkyAtmActive {#setskyatmactive .样式4}
+
+**功能：**
+
+设置天空大气散射的激活状态，系统初始化完成后默认激活天空大气散射
+
+注：自定义天空盒效果和大气散射效果互斥
+
+**参数：**
+
++:-:+--------------+--------------------------------------------------------------------+
+| 1 | ***active*** | 设为true，则激活大气散射，系统会自动禁用静态天空盒及相关光照参数； |
+|   |              |                                                                    |
+|   |              | 设为false，则关闭大气散射，系统会自动恢复静态天空盒及相关光照参数  |
++---+--------------+--------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.SkyBox.setSkyAtmActive(false);
+
+## getSkyAtmActive {#getskyatmactive .样式4}
+
+**功能：**
+
+获取天空大气散射的激活状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true标识激活，false标识关闭
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getSkyAtmActive();
+
+## setSkyAtmFogAmp {#setskyatmfogamp .样式4}
+
+**功能：**
+
+设置天空大气散射的雾效强度
+
+**参数：**
+
+  --- ----------- --------------------------------------------------------
+   1  ***amp***   大气散射的强度，默认值为1，取值范围0\~10
+
+  --- ----------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.SkyBox.setSkyAtmFogAmp(10);
+
+## getSkyAtmFogAmp {#getskyatmfogamp .样式4}
+
+**功能：**
+
+获取当前设置的天空大气散射的雾效强度
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，当前设置的天空大气散射的雾效强度
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getSkyAtmFogAmp();
+
+## setBackImgEnable {#setbackimgenable .样式4}
+
+**功能：**
+
+设置背景图的启用状态
+
+**注：1、背景图模式和天空盒模式为互斥模式，使用背景图需要禁用天空盒，**
+
+**2、球模式下无法使用背景图模式，3、需要在模型加载完成之后调用，即Model.loadDataSet函数执行之后调用，无需在完成回调中**
+
+**参数：**
+
+  --- -------------- --------------------------------------------------------
+   1  ***enable***   设为"true"，启用背景图；设为"false"，禁用背景图；
+
+  --- -------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.SkyBox.setBackImgEnable(true);
+
+## getBackImgEnable {#getbackimgenable .样式4}
+
+**功能：**
+
+获取背景图的启用状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true表示开启；false表示不开启
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getBackImgEnable();
+
+## setBackImgPath {#setbackimgpath .样式4}
+
+**功能：**
+
+设置背景图片路径
+
+**注：1、背景图模式和天空盒模式为互斥模式，使用背景图需要禁用天空盒，**
+
+**2、球模式下无法使用背景图模式，2、CAD无法使用背景图模式，4、需要在模型加载完成之后调用，即Model.loadDataSet函数执行之后调用，无需在完成回调中**
+
+**参数：**
+
+  --- --------------- --------------------------------------------------------
+   1  ***imgPath***   图片路径
+
+  --- --------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值，true表示成功；false表示失败
+
+**调用示例：**
+
+BlackHole3D.SkyBox.setBackImgPath(\"http://realbim.bjblackhole.cn:8000/TestPages/pic/devCenter/home_top_01.png\");
+
+## getBackImgPath {#getbackimgpath .样式4}
+
+**功能：**
+
+获取背景图片路径
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，图片路径
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getBackImgPath();
+
+## setBackImgFillMode {#setbackimgfillmode .样式4}
+
+**功能：**
+
+设置背景图片填充方式
+
+**注：1、背景图模式和天空盒模式为互斥模式，使用背景图需要禁用天空盒，**
+
+**2、球模式下无法使用背景图模式，3、需要在模型加载完成之后调用，即Model.loadDataSet函数执行之后调用，无需在完成回调中**
+
+**参数：**
+
++:-:+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***fillMode*** | 填充方式                                                                                                                                             |
+|   |                |                                                                                                                                                      |
+|   |                | 0: 拉伸 (让一张图片占满桌面 )                                                                                                                        |
+|   |                |                                                                                                                                                      |
+|   |                | 1: 适应 (图片也是等比缩放，只不过图片的最大边放大到屏幕最小边时就不再放大，也就是能保持图片比例的同时最大化显示图片 )                                |
+|   |                |                                                                                                                                                      |
+|   |                | 2: 填充                                                                                                                                              |
+|   |                | (图片也是等比缩放，按照图片的最小边来适应屏幕的最大边以达到填充屏幕效果，如果图片分辨率和屏幕的比例不一样的话，图片会有部分显示不了（超出屏幕之外）) |
++---+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+布尔值，true表示成功；false表示失败
+
+**调用示例：**
+
+BlackHole3D.SkyBox.setBackImgFillMode(1);
+
+## getBackImgFillMode {#getbackimgfillmode .样式4}
+
+**功能：**
+
+获取背景图片填充方式
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，填充类型
+
+**调用示例：**
+
+BlackHole3D.SkyBox.getBackImgFillMode();
+
+# 坐标（Coordinate）
+
+## addGeoCoord {#addgeocoord .样式4}
+
+**功能：**
+
+增加一套地理信息坐标数据的显示
+
+注：符合国际标准的GIS坐标系描述符可在以下网站进行查询：<https://epsg.io/>
+
+**参数：**
+
+  --- ------------------ -------------------------------------------------------
+   1  ***name***         坐标系的显示名称
+
+   2  ***displayCRS***   显示的坐标值的坐标参考系描述字符串
+  --- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Coordinate.addGeoCoord(\"WGS84\",\"EPSG:4326\");
+
+## addCustomCoord {#addcustomcoord .样式4}
+
+**功能：**
+
+增加一套自定义坐标系的显示；默认显示为引擎世界空间坐标。
+
+**参数：**
+
+  ------- --------------------- ------------------------------------------------------------
+     1    ***name***            自定义坐标系的名称；
+
+   **2**  ***refPotList***      表示引擎世界空间的4个标记点，以数组格式输入。
+
+   **3**  ***targetPotList***   表示与引擎世界空间4个标记点一一对应的自定义坐标系中的4个点
+  ------- --------------------- ------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+**注意：4个标记点不能共面，距离越远越精确**
+
+var name = \"工程坐标\";
+
+var refPotList = \[\[0,0,0\], \[1,0,0\], \[0,1,0\],
+\[0,0,1\]\];//\[A1,B1,C1,D1\]
+
+var targetPotList = \[\[0,0,0\], \[1,0,0\], \[0,1,0\], \[0,0,1\]\];
+//\[A2,B2,C2,D2\]
+
+BlackHole3D.Coordinate.addCustomCoord(name, refPotList, targetPotList);
+
+## delGeoCoord {#delgeocoord .样式4}
+
+**功能：**
+
+删除一套地理信息坐标数据的显示。
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***name***   表示要删除的地理坐标数据的名称；
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+//删除工程坐标
+
+var name = \"工程坐标\";
+
+BlackHole3D.Coordinate.delGeoCoord(name);
+
+## setCurrSelGeoCoord {#setcurrselgeocoord .样式4}
+
+**功能：**
+
+设置当前选中展示的地理信息坐标
+
+**注：**需要先增加一套地理信息坐标数据，展示需要 setGeoCoordVisible
+设置为允许
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***name***   坐标系的显示名称, 空字符串为默认地理信息坐标
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 添加一套地理坐标信息
+
+BlackHole3D.Coordinate.addGeoCoord(\"WGS84\",\"EPSG:4326\");
+
+// 设置当前选中显示的地理坐标数据
+
+BlackHole3D.Coordinate.setCurrSelGeoCoord(\"WGS84\");
+
+## setDataSetTransform {#setdatasettransform .样式4}
+
+**功能：**
+
+设置某个项目的整体坐标偏移
+
+**参数：**
+
+  ------- ----------------- -------------------------------------------------------
+     1    ***dataSetId***   数据集标识
+
+   **2**  ***locInfo***     表示偏移信息（RELocInfo 类型），单位米
+  ------- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+var locInfo = new BlackHole3D.RELocInfo();
+
+locInfo.scale = \[1, 1, 1\];
+
+locInfo.rotate = \[0, 0, 0, 1\];
+
+locInfo.offset = \[10, 0, 0\];
+
+BlackHole3D.Coordinate.setDataSetTransform(\"dataSet01\", locInfo);
+
+## getDataSetTransform {#getdatasettransform .样式4}
+
+**功能：**
+
+获取某个项目的整体坐标偏移信息
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（RELocInfo对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***scale***    缩放
+
+   2   ***rotate***   旋转
+
+   3   ***offset***   平移
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Coordinate.getDataSetTransform(\"dataSet01\");
+
+## setEngineWorldCRS {#setengineworldcrs .样式4}
+
+**功能：**
+
+设置带GIS数据项目的参考坐标系
+
+注意：此坐标系设置在引擎初始化完成设置，默认当前加载的所有GIS类数据都在此坐标系下，设置完成后，加载项目的接口，仅需要给BIM模型设置坐标系信息，即把BIM模型偏移到目标坐标系。
+
+说明：符合国际标准的GIS坐标系描述符可在以下网站进行查询：<https://epsg.io/>
+
+**参数：**
+
+  --- ---------------- ----------------------------------------------------------------------------------------------
+   1  ***worldCRS***   表示引擎世界空间对应的坐标参考系描述符(标准PROJ坐标系字符串)，为空串表示无特殊地理信息坐标系
+
+  --- ---------------- ----------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+//例如设置坐标系统一采用WGS 84的投影坐标系：
+
+var worldCRS = \"EPSG:3857\";
+
+BlackHole3D.Coordinate.setEngineWorldCRS(worldCRS);
+
+## getEngineWorldCRS {#getengineworldcrs .样式4}
+
+**功能：**
+
+获取当前设置的坐标参考系描述符
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串类型
+
+**调用示例：**
+
+BlackHole3D.Coordinate.getEngineWorldCRS();
+
+## getTransEngineCoords {#gettransenginecoords .样式4}
+
+**功能：**
+
+在当前设置的坐标系与其他目标GIS坐标系之间进行坐标转换
+
+注：只有在调用了setEngineWorldCRS
+接口，成功设置当前项目采用的坐标系后，该转换接口有效
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***forward***   | 转换顺序：                                            |
+|   |                 |                                                       |
+|   |                 | true-\>由当前设置的参考坐标到目标GIS坐标；            |
+|   |                 |                                                       |
+|   |                 | false-\>由目标GIS坐标转换到当前设置的参考坐标         |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***destCRS***   | 表示目标坐标系描述符；                                |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***coordList*** | 输入待转换的坐标数组（经纬度或者投影后的坐标）        |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+数组，表示目标坐标系的值
+
+**调用示例：**
+
+//先设置参考坐标系为EPSG:3857
+
+var worldCRS = \"EPSG:3857\";
+
+BlackHole3D.Coordinate.setEngineWorldCRS(worldCRS);
+
+//例如当前项目设置的参考坐标系为EPSG:3857
+，以下示例可以得到EPSG:3857和EPSG:4326的坐标换算值
+
+var forward = true;
+
+var destCRS = \"EPSG:4326\";
+
+var coordList = \[\[18001530, -18091018, -4.03480005264282\]\];
+
+var trans01 = BlackHole3D.Coordinate.getTransEngineCoords(forward,
+destCRS, coordList);
+
+console.log(trans01);
+
+var forward = false;
+
+var destCRS = \"EPSG:4326\";
+
+var coordList = \[\[161.71049536536088, -83.28852470887807,
+-0.4731102113037381\]\];
+
+var trans02 = BlackHole3D.Coordinate.getTransEngineCoords(forward,
+destCRS, coordList);
+
+console.log(trans02);
+
+## getTransGeoCoords {#gettransgeocoords .样式4}
+
+**功能：**
+
+进行任意两个标准地理信息坐标转换
+
+**参数：**
+
++:-:+-----------------+--------------------------------------------------------------+
+| 1 | ***srcCRS***    | 表示源坐标系描述符；                                         |
++---+-----------------+--------------------------------------------------------------+
+| 2 | ***destCRS***   | 表示目标坐标系描述符；                                       |
++---+-----------------+--------------------------------------------------------------+
+| 3 | ***coordList*** | 输入待转换的坐标数组，每个坐标是4个DOUBLE的数组\[x,y,z,w\]： |
+|   |                 |                                                              |
+|   |                 | 坐标顺序定义为：                                             |
+|   |                 |                                                              |
+|   |                 | 1.经纬度坐标系：x:经度 y:纬度 z：高程 w:测绘时间             |
+|   |                 |                                                              |
+|   |                 | 2.投影坐标系：x:东西方向坐标 y:南北方向投影 z：高程          |
+|   |                 | w:测绘时间                                                   |
++---+-----------------+--------------------------------------------------------------+
+
+**返回值：**
+
+数组，表示目标坐标系的值
+
+**调用示例：**
+
+var srcCRS = \"EPSG:4326\";
+
+var destCRS = \"EPSG:3857\";
+
+var coordList = \[\[12.0, 55.0, 0.0, 0.0\], \[13.0, 58.987, 0.0,
+0.0\]\];
+
+var trans01 = BlackHole3D.Coordinate.getTransGeoCoords(srcCRS, destCRS,
+coordList);
+
+console.log(trans01);
+
+var srcCRS = \"EPSG:3857\";
+
+var destCRS = \"EPSG:4326\";
+
+var coordList = \[\[1335833.8895192828, 7361866.113051185, 0, 0\]\];
+
+var trans02 = BlackHole3D.Coordinate.getTransGeoCoords(srcCRS, destCRS,
+coordList);
+
+console.log(trans02);
+
+## getWorldPosToScreenPos {#getworldpostoscreenpos .样式4}
+
+**功能：**
+
+获取三维空间的任意一点投影到屏幕空间的坐标值，以及当前顶点所关联的对象（例如前端标签）在三维空间里面的缩放值
+
+注：屏幕空间规定左下角为（0,0）
+
+**参数：**
+
+  --- ----------------- ----------------------------------------------------------------------------------------------------------------------
+   1  ***worldPos***    表示任意的三维空间坐标；
+
+   2  ***scaleDist***   表示与当前三维空间坐标关联的某对象在世界空间中的最小缩放距离，当worldPos与相机的距离大于该值，则对象开始缩放（选填）
+  --- ----------------- ----------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+三维数组：\[屏幕空间像素坐标x, 屏幕空间像素坐标y, 深度z,
+缩放系数w\]，当x、y超过窗口边界或z超过区间\[0,1\]时，表示当前三维坐标点在当前视口范围内不可见；w为当前返回的缩放系数；
+
+例如***scaleDist=*** 1000，***worldPos***与当前相机的距离为d，
+
+则当d≤1000时，w = 1；当d\>1000时，w = 1000/d;
+
+即：***scaleDist***越大， 缩放的灵敏度就越小
+
+**调用示例：**
+
+var screenpos =
+BlackHole3D.Coordinate.getWorldPosToScreenPos(\[18,61,0\],1000);
+
+console.log(screenpos)
+
+## getTransCoords {#gettranscoords .样式4}
+
+**功能：**
+
+根据仿射变换信息进行坐标转换
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------------------------------
+  ***coordList***   输入待转换的坐标数组
+
+  ***tranInfo***    依据的仿射变换信息（RELocInfo 类型）
+
+  ***forward***     转换方式，true：空间坐标进行正向的仿射变换；false：对空间坐标进行逆向的仿射变换
+  ----------------- ---------------------------------------------------------------------------------
+
+**返回值：**
+
+数组，表示目标坐标集合
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_jifang\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加几何矢量（初始点）
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'初始点\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'potShp001\';
+
+potShpInfo.pos = \[5.394, 14.598, 0.0\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 模型偏移
+
+var locInfo = new BlackHole3D.RELocInfo();
+
+locInfo.scale = \[1, 1, 1\];
+
+locInfo.rotate = \[0, 0, 0, 1\];
+
+locInfo.offset = \[10, 0, 0\];
+
+BlackHole3D.Coordinate.setDataSetTransform(\'res_jifang\', locInfo);
+
+// 获取模型偏移后的几何矢量相对位置
+
+var locInfo_end =
+BlackHole3D.Coordinate.getDataSetTransform(\'res_jifang\');
+
+var potList_end = BlackHole3D.Coordinate.getTransCoords(\[\[5.394,
+14.598, 0.0\]\], locInfo_end, true);
+
+// 添加几何矢量（偏移点）
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'偏移点\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'potShp002\';
+
+potShpInfo.pos = potList_end\[0\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+## getValueDispPrecision {#getvaluedispprecision .样式4}
+
+**功能：**
+
+获取坐标显示的精度
+
+**参数**：
+
+无
+
+**返回**值：
+
+数值类型，小数点后几位
+
+**调用示例：**
+
+BlackHole3D.Coordinate.getValueDispPrecision();
+
+## setValueDispPrecision {#setvaluedispprecision .样式4}
+
+**功能：**
+
+设置坐标显示的精度
+
+注：设置之后只有在此触发坐标调整才会生效，当前状态的坐标值不会改变
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***precision***   精度（正整数）
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Coordinate.setValueDispPrecision(3);
+
+## registerWorldPos {#registerworldpos .样式4}
+
+**功能：**
+
+注册一个世界空间坐标标记
+
+**注：世界坐标信息变动将会通过监听事件 REWorldPosChange 进行返回**
+
+**参数：**
+
+  ---- ---------------------- ------------------------------------------------------
+   1   ***coordinateInfo***   表示世界空间坐标信息 （REWorldPosInfo类型）
+
+  ---- ---------------------- ------------------------------------------------------
+
+**REWorldPosInfo模型解析：**
+
+  ------- --------------------- -----------------------------------------------
+   **1**  ***worldPosId***      表示世界空间坐标的标识名
+
+   **2**  ***viewportId***      表示世界空间坐标所归属的视口ID，默认为0单视口
+
+   **3**  ***pos***             表示世界空间坐标
+
+   **4**  ***scaleDist***       表示与 worldPoint
+                                关联的某对象在世界空间中的最小缩放距离，当
+                                worldPoint 与相机的距离大于该值则对象开始缩放
+  ------- --------------------- -----------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'世界坐标标记\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0, 1\],
+
+\[9200, 27000, 0\],
+
+\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 注册世界坐标标记点
+
+BlackHole3D.Coordinate.registerWorldPos({
+
+worldPosId: \'worldPos_1\',
+
+viewportId: 0,
+
+pos: \[12.698554620979571, 55.493914649115176, 1.8784023935654837\],
+
+scaleDist: 100,
+
+});
+
+BlackHole3D.Coordinate.registerWorldPos({
+
+worldPosId: \'worldPos_2\',
+
+viewportId: 0,
+
+pos: \[11.763586721521971, 31.494786373007653, 5.931485446789704\],
+
+scaleDist: 100,
+
+});
+
+//世界坐标点变化触发回调事件
+
+document.addEventListener(\"REWorldPosChange\", REWorldPosChange);
+
+// 创建div元素
+
+\<div id=\"movableDiv\"\>\</div\>
+
+\<div id=\"movableDiv2\"\>\</div\>
+
+\<style\>
+
+#movableDiv {
+
+width: 40px;
+
+height: 40px;
+
+background-color: red;
+
+position: absolute;
+
+cursor: pointer;
+
+transform: scale(1, 1);
+
+display: none;
+
+}
+
+#movableDiv2 {
+
+width: 40px;
+
+height: 40px;
+
+background-color: greenyellow;
+
+position: absolute;
+
+cursor: pointer;
+
+transform: scale(1, 1);
+
+display: none;
+
+}
+
+\</style\>
+
+// 获取div元素
+
+let movableDiv = document.getElementById(\'movableDiv\');
+
+let movableDiv2 = document.getElementById(\'movableDiv2\');
+
+let canvasDiv = document.getElementById(\'canvas\');
+
+let canvasWidth = canvasDiv.offsetWidth;
+
+let canvasHeight = canvasDiv.offsetHeight;
+
+// 初始化div是否已经存在的标志
+
+let isDivCreated = false;
+
+function REWorldPosChange(e) {
+
+let worldPosList = e.detail.states;
+
+if (worldPosList && worldPosList.length \> 0) {
+
+let state_obj1 = worldPosList.find((item) =\> item.name ==
+\'worldPos_1\');
+
+let state_obj2 = worldPosList.find((item) =\> item.name ==
+\'worldPos_2\');
+
+// console.log(\'\-\-\-- canvasWidth : \' + canvasWidth + \',
+canvasHeight : \' + canvasHeight);
+
+// console.log(\'\-\-\--\', worldPosList);
+
+if (state_obj1) {
+
+let alpha = false;
+
+let x = state_obj1.state\[0\];
+
+let y = state_obj1.state\[1\];
+
+let depth = Math.trunc((1 - state_obj1.state\[2\]) \* 1000000000);
+
+let scale = state_obj1.state\[3\];
+
+if (x \<= 0 \|\| y \<= 0 \|\| depth \<= 0 \|\| scale \<= 0 \|\| x \>=
+canvasWidth \|\| y \>= canvasHeight) {
+
+movableDiv.style.display = \`none\`;
+
+} else {
+
+movableDiv.style.display = \`block\`;
+
+}
+
+movableDiv.style.left = \`\${x - 20}px\`;
+
+movableDiv.style.top = \`\${canvasHeight - y - 20}px\`;
+
+movableDiv.style.transform = \`scale(\${scale}, \${scale})\`;
+
+movableDiv.style.zIndex = \`\${depth}\`;
+
+}
+
+if (state_obj2) {
+
+let x = state_obj2.state\[0\];
+
+let y = state_obj2.state\[1\];
+
+let depth = Math.trunc((1 - state_obj2.state\[2\]) \* 1000000000);
+
+let scale = state_obj2.state\[3\];
+
+if (x \<= 0 \|\| y \<= 0 \|\| depth \<= 0 \|\| scale \<= 0 \|\| x \>=
+canvasWidth \|\| y \>= canvasHeight) {
+
+movableDiv2.style.display = \`none\`;
+
+} else {
+
+movableDiv2.style.display = \`block\`;
+
+}
+
+movableDiv2.style.left = \`\${x - 20}px\`;
+
+movableDiv2.style.top = \`\${canvasHeight - y - 20}px\`;
+
+movableDiv2.style.transform = \`scale(\${scale}, \${scale})\`;
+
+movableDiv2.style.zIndex = \`\${depth}\`;
+
+}
+
+}
+
+}
+
+## unRegisterWorldPos {#unregisterworldpos .样式4}
+
+**功能：**
+
+注销一个世界空间坐标标记
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***worldPosId***   表示世界空间坐标的标识名
+
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Coordinate.unRegisterWorldPos(\'worldPos_1\');
+
+## unRegisterAllWorldPos {#unregisterallworldpos .样式4}
+
+**功能：**
+
+注销所有世界空间坐标标记
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Coordinate.unRegisterAllWorldPos();
+
+# 鼠标探测（Probe）
+
+## setMouseHoverEventTime {#setmousehovereventtime .样式4}
+
+**功能：**
+
+设置鼠标悬停事件的判断时间
+
+**参数：**
+
+  ---- ---------------- --------------------------------------------------
+   1   ***waitTime***   表示鼠标悬停事件的判断时间，单位为秒
+
+  ---- ---------------- --------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Probe.setMouseHoverEventTime(1.0);
+
+## getMouseHoverEventTime {#getmousehovereventtime .样式4}
+
+**功能：**
+
+获取当前设置的鼠标悬停事件的判断时间
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，当前设置的鼠标悬停事件的判断时间
+
+**调用示例：**
+
+BlackHole3D.Probe.getMouseHoverEventTime();
+
+## setMouseMoveEventEnable {#setmousemoveeventenable .样式4}
+
+**功能：**
+
+设置鼠标移动事件的开关
+
+**参数：**
+
++:-:+---------------+--------------------------------------------------+
+| 1 | ***enable***  | 表示鼠标移动事件的开关，布尔类型：               |
+|   |               |                                                  |
+|   |               | true：表示开启，允许发送鼠标移动事件             |
+|   |               |                                                  |
+|   |               | false：表示关闭，禁止发送鼠标移动事件            |
++---+---------------+--------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Probe.setMouseMoveEventEnable(true);
+
+## getMouseMoveEventEnable {#getmousemoveeventenable .样式4}
+
+**功能：**
+
+获取当前是否允许发送鼠标移动事件
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，true表示允许发送鼠标移动事件；false表示禁止发送鼠标移动事件
+
+**调用示例：**
+
+BlackHole3D.Probe.getMouseMoveEventEnable();
+
+## setElemsCanProbe {#setelemscanprobe .样式4}
+
+**功能：**
+
+设置构件是否可探测
+
+**参数：**
+
+  ------- ------------------- -----------------------------------------------------------
+     1    ***dataSetId***     数据集唯一标识
+
+   **2**  ***elemIdList***    要设置的构件ID集合,为空则表示设置所有构件的可探测性
+
+     3    ***probeEnable***   否可以探测，为true,表示可被探测；设为false,表示不可被探测
+  ------- ------------------- -----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 设置部分id不可被鼠标点击
+
+var elemIdList= \[684,685,686,687\];
+
+BlackHole3D.Probe.setElemsCanProbe(\"dataSetId01\", elemIdList, false);
+
+## getCurSelInfo {#getcurselinfo .样式4}
+
+**功能：**
+
+获取当前探测选中的信息
+
+**注：模型和矢量都可以使用这个接口，会判断类型返回对应的信息，获取当前所处空间下的探测信息，RESystemSel监听事件下有效**
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RESelInfo对象类型）
+
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***selType***         | 表示拾取到的最上层渲染对象类型：                                                          |
+|                       |                                                                                           |
+|                       | \"ShapeElem\"：表示锚点、标签等矢量对象；                                                 |
+|                       |                                                                                           |
+|                       | \"BIMElem\"：表示BIM模型对象；                                                            |
+|                       |                                                                                           |
+|                       | \"TerrainElem\"：表示新版本地形等非BIM模型对象；                                          |
+|                       |                                                                                           |
+|                       | \"GridElem\"：表示老版本地形、倾斜摄影等非BIM模型对象；                                   |
+|                       |                                                                                           |
+|                       | \"\"：表示没有拾取到任何对象；                                                            |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***dataSetId***       | 数据集唯一标识（\"ShapeElem\"、\"TerrainElem\"无此项）                                    |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***dataSetIdList***   | 数据集唯一标识集合**（\"TerrainElem\"类型返回，同一层级下的地形实例对象拥有多个数据集）** |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***elemId***          | 构件标识（BIMElem类型有效）                                                               |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***shpId***           | 矢量标识（ShapeElem类型有效）                                                             |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***selPos***          | 选择构件坐标                                                                              |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***selTargetCenter*** | 选择构件几何中心点（\"ShapeElem\"无此项）                                                 |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***selTargetBV***     | 选择构件包围盒信息（\"ShapeElem\"无此项）                                                 |
++-----------------------+-------------------------------------------------------------------------------------------+
+| ***selScrPos***       | 选择构件相对屏幕二维坐标（原点为屏幕左下角）                                              |
++-----------------------+-------------------------------------------------------------------------------------------+
+
+**调用示例：**
+
+//添加监听事件
+
+document.addEventListener(\'RESystemSel\', RESystemSel);
+
+//获取当前探测结果
+
+function RESystemSel(e) {
+
+BlackHole3D.Probe.getCurSelInfo()
+
+}
+
+## getCurProbeRet {#getcurproberet .样式4}
+
+**功能：**
+
+获取模型相关探测结果
+
+**注：对象类型不同，获取的数据对象属性不同，根据类型区分需要的数据，获取的是鼠标当前随处空间下的探测信息**
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REProbeInfo对象类型）
+
++:-:+---------------------+-------------------------------------------------------------------------------------------+
+| 1 | ***elemType***      | 表示拾取到的最上层渲染对象类型：                                                          |
+|   |                     |                                                                                           |
+|   |                     | \"ShapeElem\"：表示锚点、标签等矢量对象；                                                 |
+|   |                     |                                                                                           |
+|   |                     | \"BIMElem\"：表示BIM模型对象；                                                            |
+|   |                     |                                                                                           |
+|   |                     | \"TerrainElem\"：表示新版本地形等非BIM模型对象；                                          |
+|   |                     |                                                                                           |
+|   |                     | \"GridElem\"：表示老版本地形、倾斜摄影等非BIM模型对象；                                   |
+|   |                     |                                                                                           |
+|   |                     | \"\"：表示没有拾取到任何对象；                                                            |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 2 | ***dataSetId***     | 数据集唯一标识（\"ShapeElem\"、\"TerrainElem\"无此项）                                    |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 3 | ***dataSetIdList*** | 数据集唯一标识集合**（\"TerrainElem\"类型返回，同一层级下的地形实例对象拥有多个数据集）** |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 4 | ***elemId***        | 构件标识                                                                                  |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 5 | ***elemPos***       | 选择构件坐标                                                                              |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 6 | ***elemCenter***    | 选择构件几何中心点（\"ShapeElem\"无此项）                                                 |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 7 | ***elemBV***        | 选择构件包围盒信息（\"ShapeElem\"无此项）                                                 |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 8 | ***elemScrPos***    | 选择构件相对屏幕二维坐标（原点为屏幕左下角）                                              |
++---+---------------------+-------------------------------------------------------------------------------------------+
+
+**调用示例：**
+
+//添加监听事件
+
+document.addEventListener(\"RESystemSelElement\", RESystemSelElement);
+
+//获取当前探测结果
+
+function RESystemSelElement(){
+
+console.log(BlackHole3D.Probe.getCurProbeRet());
+
+}
+
+## getCurShpProbeRet {#getcurshpproberet .样式4}
+
+**功能：**
+
+获取矢量相关探测结果
+
+注：RESystemSelShpElement 监听事件需要判断**succeed = 1**
+才是矢量元素**，获取的是鼠标当前随处空间下的探测信息**
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REProbeShpInfo对象类型）
+
+  ---- ------------------ -----------------------------------------------------
+   1   ***elemId***       构件标识
+
+   2   ***elemPos***      选择构件坐标
+
+   3   ***elemScrPos***   选择构件相对屏幕二维坐标（原点为屏幕左下角）
+  ---- ------------------ -----------------------------------------------------
+
+**调用示例：**
+
+//添加监听事件
+
+document.addEventListener(\"RESystemSelShpElement\",
+RESystemSelShpElement);
+
+//获取当前探测结果
+
+function RESystemSelShpElement(){
+
+console.log(BlackHole3D.Probe.getCurShpProbeRet());
+
+}
+
+## getCurCombProbeRet {#getcurcombproberet .样式4}
+
+**功能：**
+
+获取当前鼠标探测到的最上层渲染对象信息，不绑定引擎监听事件，可在任意时刻调用
+
+**注：此接口为复合接口，模型和矢量都可以使用这个接口，会判断类型返回对应的信息，获取的是鼠标当前随处空间下的探测信息**
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（Object对象类型）
+
++:-:+---------------------+-------------------------------------------------------------------------------------------+
+| 1 | ***elemType***      | 表示拾取到的最上层渲染对象类型：                                                          |
+|   |                     |                                                                                           |
+|   |                     | \"ShapeElem\"：表示锚点、标签等矢量对象；                                                 |
+|   |                     |                                                                                           |
+|   |                     | \"BIMElem\"：表示BIM模型对象；                                                            |
+|   |                     |                                                                                           |
+|   |                     | \"TerrainElem\"：表示新版本地形等非BIM模型对象；                                          |
+|   |                     |                                                                                           |
+|   |                     | \"GridElem\"：表示老版本地形、倾斜摄影等非BIM模型对象；                                   |
+|   |                     |                                                                                           |
+|   |                     | \"\"：表示没有拾取到任何对象；                                                            |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 2 | ***dataSetId***     | 数据集唯一标识（\"ShapeElem\"、\"TerrainElem\"无此项）                                    |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 3 | ***dataSetIdList*** | 数据集唯一标识集合**（\"TerrainElem\"类型返回，同一层级下的地形实例对象拥有多个数据集）** |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 4 | ***elemId***        | 构件标识                                                                                  |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 5 | ***elemPos***       | 选择构件坐标                                                                              |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 6 | ***elemCenter***    | 选择构件几何中心点（\"ShapeElem\"无此项）                                                 |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 7 | ***elemBV***        | 选择构件包围盒信息（\"ShapeElem\"无此项）                                                 |
++---+---------------------+-------------------------------------------------------------------------------------------+
+| 8 | ***elemScrPos***    | 选择构件相对屏幕二维坐标（原点为屏幕左下角）                                              |
++---+---------------------+-------------------------------------------------------------------------------------------+
+
+**调用示例：**
+
+console.log(BlackHole3D.Probe.getCurCombProbeRet());
+
+## setProbeMode {#setprobemode .样式4}
+
+**功能：**
+
+设置鼠标的拾取模式
+
+ 
+
+**参数：**
+
++:-:+:-----------+:-------------------------------------------------------+
+| 1 | ***type*** | 拾取模式                                               |
+|   |            |                                                        |
+|   |            | 0：标准模式                                            |
+|   |            |                                                        |
+|   |            | 1：顶点捕捉模式                                        |
++---+------------+--------------------------------------------------------+
+
+ 
+
+**返回值：**
+
+无
+
+ 
+
+**调用示例：**
+
+BlackHole3D.Probe.setProbeMode(1);
+
+ 
+
+## getProbeMode {#getprobemode .样式4}
+
+**功能：**
+
+获取鼠标的拾取模式
+
+ 
+
+**参数：**
+
+无
+
+ 
+
+**返回值：**
+
+数值类型，0:标准模式 1:顶点捕捉模式
+
+ 
+
+**调用示例：**
+
+BlackHole3D.Probe.getProbeMode();
+
+ 
+
+## setCustomProbeExecute {#setcustomprobeexecute .样式4}
+
+**功能：**
+
+设置一个自定义场景探测的指令（求创建射线与射线最近的构件交集点的坐标）
+
+注：探测结果在 RECustomProbeFinish 监听事件中返回
+
+**参数：**
+
+  --- -------------- --------------------------------------------------------
+   1  ***rayPos***   表示世界空间下探测射线的位置（xyz）
+
+   2  ***rayDir***   表示世界空间下探测射线的朝向（欧拉朝向）
+
+   3  ***index***    表示自定义探测对应的批次（集合下标）
+  --- -------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值，true指令创建成功、false指令创建失败
+
+**调用示例：**
+
+//获取当前相机信息
+
+var camInfo = BlackHole3D.Camera.getCamLocate();
+
+//以加载模型相机的位置信息为出发点创建射线
+
+var res = BlackHole3D.Probe.setCustomProbeExecute(camInfo.camPos,
+camInfo.camDir, 1);
+
+//设置指令返回结果的监听事件
+
+document.addEventListener(\"RECustomProbeFinish\", RECustomProbeFinish);
+
+function RECustomProbeFinish(e) {
+
+if (e.detail.succeed) {
+
+console.log(\"selPos: \", e.detail.selPos);
+
+//以获取点位信息创建锚点
+
+var anc = new BlackHole3D.REAncInfo();
+
+anc.ancName = \"ray-model-unite\";
+
+anc.pos = e.detail.selPos;
+
+anc.textInfo = \"\";
+
+anc.picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/bubbler.png\";
+
+anc.picWidth = 60;
+
+anc.picHeight = 60;
+
+anc.ancSize = 60;
+
+anc.texBias = \[0,0\];
+
+anc.texFocus = \[30, 0\];
+
+BlackHole3D.Anchor.addAnc(\[anc\]);
+
+}
+
+}
+
+# 图形显示（Graphics）
+
+## 渲染设置
+
+## setSysUIPanelVisible {#setsysuipanelvisible .样式4}
+
+**功能：**
+
+设置引擎UI按钮是否可见
+
+注：此接口需要在模型加载进度到100%之后调用
+
+**参数：**
+
+  --- -------------- --------------------------------------------------------
+   1  ***enable***   设为"true"，可见；设为"false"，隐藏底部UI；
+
+  --- -------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//隐藏UI
+
+document.addEventListener(\"REDataSetLoadProgress\",
+function(e){LoadingProgress(e.detail.progress,e.detail.info);});
+
+function LoadingProgress(percent, info) {
+
+  if (percent == 100) {
+
+    BlackHole3D.Graphics.setSysUIPanelVisible(false);
+
+  }
+
+}
+
+## setViewCubeVisible {#setviewcubevisible .样式4}
+
+**功能：**
+
+设置引擎右上方ViewCube按钮是否可见
+
+注：此接口需要在模型加载进度到100%之后调用
+
+**参数：**
+
+  --- -------------- -------------------------------------------------------------
+   1  ***enable***   设为"true"，可见；设为"false"，隐藏引擎右上方ViewCube按钮；
+
+  --- -------------- -------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//隐藏ViewCube
+
+document.addEventListener(\"REDataSetLoadProgress\",
+function(e){LoadingProgress(e.detail.progress,e.detail.info);});
+
+function LoadingProgress(percent, info) {
+
+  if (percent == 100) {
+
+    BlackHole3D.Graphics.setViewCubeVisible(false);
+
+  }
+
+}
+
+## setSysUIColorStyle {#setsysuicolorstyle .样式4}
+
+**功能：**
+
+设置引擎UI工具条颜色风格，默认为浅色
+
+注：此接口需要在模型加载进度到100%之后调用
+
+当系统UI工具栏有自定义按钮需要改变风格RESystemUIEvent事件回调中的"Setting_Effect_UIClr_Style_Light"和"Setting_Effect_UIClr_Style_Dark"对应浅色和深色主题
+
+**参数：**
+
+  --- --------------- --------------------------------------------------------
+   1  ***useDark***   是否使用深色风格，默认浅色
+
+  --- --------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置UI采用深色系风格
+
+document.addEventListener(\"REDataSetLoadProgress\",
+function(e){LoadingProgress(e.detail.progress,e.detail.info);});
+
+function LoadingProgress(percent, info) {
+
+  if (percent == 100) {
+
+    BlackHole3D.Graphics.setSysUIColorStyle(true);
+
+  }
+
+}
+
+## getSysUIColorStyle {#getsysuicolorstyle .样式4}
+
+**功能：**
+
+获取引擎UI工具条颜色风格，默认为浅色
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0：浅色，1：深色
+
+**调用示例：**
+
+BlackHole3D.Graphics.getSysUIColorStyle();
+
+## setGeoCoordVisible {#setgeocoordvisible .样式4}
+
+**功能：**
+
+设置地理坐标系UI是否允许显示
+
+ 
+
+**参数：**
+
+  --- -------------- ---------------------------------------------------------
+   1  ***enable***   设为"true"，可见；设为"false"，隐藏界面左上角坐标系UI；
+
+  --- -------------- ---------------------------------------------------------
+
+ 
+
+**返回值：**
+
+无
+
+ 
+
+**调用示例：**
+
+BlackHole3D.Graphics.setGeoCoordVisible(false);
+
+ 
+
+## getGeoCoordVisible {#getgeocoordvisible .样式4}
+
+**功能：**
+
+获取地理坐标系UI显示状态
+
+ 
+
+**参数：**
+
+无
+
+ 
+
+**返回值：**
+
+布尔值，引擎界面左上角地理坐标系UI的显示状态，true表示显示，false表示隐藏
+
+ 
+
+**调用示例：**
+
+BlackHole3D.Graphics.getGeoCoordVisible();
+
+ 
+
+## setSysUIWgtVisible {#setsysuiwgtvisible .样式4}
+
+**功能：**
+
+设置引擎界面主功能面板中指定UI控件的显示状态
+
+ 
+
+**参数：**
+
++:-:+--------------+--------------------------------------------------------+
+| 1 | ***uiType*** | 控件类型（RESysWndMateEm 类型）                        |
+|   |              |                                                        |
+|   |              | PanelBtn_TerrainAlpha//底部主工具栏-地形透明度         |
+|   |              |                                                        |
+|   |              | PanelBtn_FocusBoxSel//底部主工具栏-框选放大            |
+|   |              |                                                        |
+|   |              | PanelBtn_Reset//底部主工具栏-重置操作                  |
+|   |              |                                                        |
+|   |              | PanelBtn_IsolateBuild//底部主工具栏-隔离构件           |
+|   |              |                                                        |
+|   |              | PanelBtn_HideBuild//底部主工具栏-隐藏构件              |
+|   |              |                                                        |
+|   |              | PanelBtn_RecoverDisplay//底部主工具栏-恢复显示         |
+|   |              |                                                        |
+|   |              | PanelBtn_Measure//底部主工具栏-测量                    |
+|   |              |                                                        |
+|   |              | PanelBtn_Cutting,//底部主工具栏-剖切                   |
+|   |              |                                                        |
+|   |              | PanelBtn_Setting//底部主工具栏-设置                    |
++---+--------------+--------------------------------------------------------+
+| 2 | ***enable*** | 是否显示                                               |
++---+--------------+--------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+ 
+
+**调用示例：**
+
+//隐藏设置按钮
+
+BlackHole3D.Graphics.setSysUIWgtVisible(BlackHole3D.RESysWndMateEm.PanelBtn_Setting,
+false);
+
+## getSysUIWgtVisible {#getsysuiwgtvisible .样式4}
+
+**功能：**
+
+获取引擎界面主功能面板中指定UI控件的显示状态
+
+ 
+
+**参数：**
+
++:-:+--------------+--------------------------------------------------------+
+| 1 | ***uiType*** | 控件类型（RESysWndMateEm 类型）                        |
+|   |              |                                                        |
+|   |              | PanelBtn_TerrainAlpha//底部主工具栏-地形透明度         |
+|   |              |                                                        |
+|   |              | PanelBtn_Reset//底部主工具栏-重置操作                  |
+|   |              |                                                        |
+|   |              | PanelBtn_IsolateBuild//底部主工具栏-隔离构件           |
+|   |              |                                                        |
+|   |              | PanelBtn_HideBuild//底部主工具栏-隐藏构件              |
+|   |              |                                                        |
+|   |              | PanelBtn_RecoverDisplay//底部主工具栏-恢复显示         |
+|   |              |                                                        |
+|   |              | PanelBtn_Measure//底部主工具栏-测量                    |
+|   |              |                                                        |
+|   |              | PanelBtn_Cutting,//底部主工具栏-剖切                   |
+|   |              |                                                        |
+|   |              | PanelBtn_Setting//底部主工具栏-设置                    |
+|   |              |                                                        |
+|   |              | SysWnd_AffineTransMode//位置编辑仿射变换窗口           |
++---+--------------+--------------------------------------------------------+
+
+**返回值：**
+
+布尔值，引擎界面主功能面板中指定UI控件的显示状态，true表示显示，false表示隐藏
+
+ 
+
+**调用示例：**
+
+//获取设置按钮的显示状态
+
+BlackHole3D.Graphics.getSysUIWgtVisible(BlackHole3D.RESysWndMateEm.PanelBtn_Setting);
+
+## resetInitialState {#resetinitialstate .样式4}
+
+**功能：**
+
+恢复图形界面的模型、地形、按钮等为初始加载完成状态
+
+ 
+
+**参数：**
+
+无
+
+ 
+
+**返回值：**
+
+无
+
+ 
+
+**调用示例：**
+
+BlackHole3D.Graphics.resetInitialState();
+
+## setSysPanelUIDockArea {#setsyspaneluidockarea .样式4}
+
+**功能：**
+
+设置系统UI面板的停靠方式
+
+**参数：**
+
++:-:+----------------+--------------------------------------------------------+
+| 1 | ***dockArea*** | 停靠方式                                               |
+|   |                |                                                        |
+|   |                | 0：下方停靠                                            |
+|   |                |                                                        |
+|   |                | 1：左侧停靠                                            |
+|   |                |                                                        |
+|   |                | 2：顶侧停靠                                            |
+|   |                |                                                        |
+|   |                | 3：右侧停靠                                            |
++---+----------------+--------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//左侧停靠
+
+BlackHole3D.Graphics.setSysPanelUIDockArea(1);
+
+## setPreLoadPicPath {#setpreloadpicpath .样式4}
+
+**功能：**
+
+预先载入一个指定的UI纹理
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***picPath***   图片地址
+
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var picPath = \"!(RealBIMAppFileCache)/webui/light/settings_nor.png\";
+
+BlackHole3D.Graphics.setPreLoadPicPath(picPath);
+
+## resetSysOptStateAndUI {#resetsysoptstateandui .样式4}
+
+**功能：**
+
+全部重置系统面板UI按钮和关联的状态
+
+ 
+
+**参数：**
+
+无
+
+ 
+
+**返回值：**
+
+无
+
+ 
+
+**调用示例：**
+
+BlackHole3D.Graphics.resetSysOptStateAndUI();
+
+## setViewCubeArea {#setviewcubearea .样式4}
+
+**功能：**
+
+设置 ViewCube 的区域位置
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------------------------------------
+   1   ***areaPos***   在范围内可以按照取值范围内的值进行调整，最大比例数值为9宫格排布方式（-1，1）左上角
+                       （1，1）右上角 （-1，-1）左下角 （1，-1）右下角 （0，1）上 （0，-1）下 （-1，0）左
+                       （1，0）右 （0，0）中
+
+  ---- --------------- ------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Graphics.setViewCubeArea(\[-1,-1\]);
+
+## getViewCubeArea {#getviewcubearea .样式4}
+
+**功能：**
+
+获取 ViewCube 的区域位置
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，获取 ViewCube 的区域位置
+
+**调用示例：**
+
+BlackHole3D.Graphics.getViewCubeArea();
+
+## setLocalLanguage {#setlocallanguage .样式4}
+
+**功能：**
+
+设置语言环境
+
+**注：需要在引擎加载完成后调用，即 RESystemEngineCreated 回调**
+
+**参数：**
+
+  ------------ -------------------------------------------------------
+  ***type***   语言类型 0: 中文 1: 英文， 默认中文
+
+  ------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Graphics.setLocalLanguage(1);
+
+## getLocalLanguage {#getlocallanguage .样式4}
+
+**功能：**
+
+获取语言环境
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0: 中文 1: 英文
+
+**调用示例：**
+
+BlackHole3D.Graphics.getLocalLanguage();
+
+## 窗口（Wnd）
+
+## setTabItemVisable {#settabitemvisable .样式4}
+
+**功能：**
+
+设置Tab窗口的显示状态
+
+**参数：**
+
+  --- --------------- -------------------------------------------------------
+   1  ***uiID***      组件唯一标识
+
+   2  ***visable***   是否显示
+  --- --------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+//将位置编辑弹窗的移动配准Tab隐藏
+
+BlackHole3D.Graphics.setTabItemVisable(\"PosMatchPage\", false);
+
+//将位置编辑弹窗的控制点配准Tab隐藏
+
+BlackHole3D.Graphics.setTabItemVisable(\"ControlPosMatchPage\", false);
+
+## getTabItemVisable {#gettabitemvisable .样式4}
+
+**功能：**
+
+获取Tab窗口的显示状态
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***uiID***   组件唯一标识
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值类型，显示返回true，不显示返回false
+
+**调用示例：**
+
+BlackHole3D.Graphics.getTabItemVisable(\"PosMatchPage\");
+
+## 按钮（Button）
+
+## createSysPanelBtn {#createsyspanelbtn .样式4}
+
+**功能：**
+
+创建系统UI面板通用样式的按钮并添加到面板上
+
+注：按钮点击事件回调函数名RESystemUIEvent
+
+统一样式, 只支持两种子按钮状态（宽高比1:1 48像素）
+
+按钮添加的自定义图片需要进行预加载**setPreLoadPicPath**，放在系统初始化完成的监听中**RESystemEngineCreated**
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***btnInfo***      按钮信息 （REUIBtnInfo 类型）
+
+  ***beforeUiID***   在这个组件之前插入（默认在最后面）
+  ------------------ -------------------------------------------------------
+
+**REUIBtnInfo模型解析：**
+
+  ----------------------- -----------------------------------------------
+  ***uiID***              组件唯一标识，重复使用创建失败
+
+  ***stateParList***      按钮各个子状态的状态相关参数集合（
+                          REUIBtnStateInfo 类型）
+
+  ***activeStateId***     按钮的初始子状态id, stateParList 对象列表 index
+                          下标
+
+  ***visible***           是否可见，默认可见
+  ----------------------- -----------------------------------------------
+
+**REUIBtnStateInfo模型解析：**
+
+  ---------------- -------------------------------------------------------
+  ***hintText***   鼠标悬浮提示
+
+  ***texPath***    按钮图像路径
+  ---------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+//添加系统UI面板单次点击按钮
+
+var btnInfo = new BlackHole3D.REUIBtnInfo();
+
+btnInfo.uiID = \"btn_001\";
+
+var statePar1 = new BlackHole3D.REUIBtnStateInfo();
+
+statePar1.text = \"\";
+
+statePar1.hintText = \"自定义按钮\";
+
+statePar1.texPath =
+\"!(RealBIMAppFileCache)/webui/light/settings_nor.png\";
+
+btnInfo.stateParList = \[statePar1\];
+
+BlackHole3D.Graphics.createSysPanelBtn(btnInfo);
+
+//添加系统UI面板多次点击按钮
+
+var btnInfo = new BlackHole3D.REUIBtnInfo();
+
+btnInfo.uiID = \"btn_001\";
+
+btnInfo.activeStateId = 0;
+
+var statePar1 = new BlackHole3D.REUIBtnStateInfo();
+
+statePar1.hintText = \"自定义按钮\";
+
+statePar1.texPath =
+\"!(RealBIMAppFileCache)/webui/light/settings_nor.png\";
+
+var statePar2 = new BlackHole3D.REUIBtnStateInfo();
+
+statePar2.hintText = \"自定义按钮\";
+
+statePar2.texPath =
+\"!(RealBIMAppFileCache)/webui/light/settings_sel.png\";
+
+btnInfo.stateParList = \[statePar1, statePar2\];
+
+BlackHole3D.Graphics.createSysPanelBtn(btnInfo);
+
+//鼠标点击图形界面系统按钮监听事件
+
+document.addEventListener(\"RESystemUIEvent\", RESystemUIEvent);
+
+function RESystemUIEvent(e) {
+
+console.log(\'\-- 鼠标点击图形界面系统按钮监听事件 \--\', e.detail);
+
+if (e.detail.btnname == \"btn_001\") {
+
+if (e.detail.btnstate == 0) {
+
+BlackHole3D.Graphics.setBtnActiveState(\"btn_001\", 1);
+
+} else {
+
+BlackHole3D.Graphics.setBtnActiveState(\"btn_001\", 0);
+
+}
+
+}
+
+}
+
+## setBtnActiveState {#setbtnactivestate .样式4}
+
+**功能：**
+
+设置按钮当前的子状态
+
+**参数：**
+
+  --- --------------------- -------------------------------------------------------
+   1  ***uiID***            组件唯一标识
+
+   2  ***activeStateId***   按钮的初始子状态id, stateParList 对象列表 index 下标
+  --- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Graphics.setBtnActiveState(\"btn_001\", 0);
+
+## getBtnActiveState {#getbtnactivestate .样式4}
+
+**功能：**
+
+获取按钮当前的子状态
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***uiID***   组件唯一标识
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+数值类型, 子状态id
+
+**调用示例：**
+
+BlackHole3D.Graphics.getBtnActiveState(\"btn_001\");
+
+## getBtnStatePicPath {#getbtnstatepicpath .样式4}
+
+**功能：**
+
+获取图像UI控件所使用的图片资源的路径
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***uiID***      组件唯一标识
+
+   2   ***stateId***   按钮的状态id, stateParList 对象列表 index 下标
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+字符串类型
+
+**调用示例：**
+
+BlackHole3D.Graphics.getBtnStatePicPath(\"btn_001\", 0);
+
+## setBtnStatePicPath {#setbtnstatepicpath .样式4}
+
+**功能：**
+
+设置图像UI控件所使用的图片资源的路径
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***uiID***      组件唯一标识
+
+   2   ***stateId***   按钮的状态id, stateParList 对象列表 index 下标
+
+   3   ***picPath***   按钮的子状态纹理路径
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+var uiID = \"img_001\";
+
+var stateId = 0;
+
+var picPath = \"!(RealBIMAppFileCache)/webui/light/settings_nor.png\";
+
+BlackHole3D.Graphics.setBtnStatePicPath(uiID, stateId, picPath);
+
+## setSysPanelBtnClrStyle {#setsyspanelbtnclrstyle .样式4}
+
+**功能：**
+
+设置系统的UI面板按钮的主题颜色
+
+注：只支持系统浅色和深色、只支持只有两种按钮子状态类型
+
+系统面板设置调整主题在回调函数RESystemUIEvent中进行，
+
+"Setting_Effect_UIClr_Style_Light"和"Setting_Effect_UIClr_Style_Dark"对应浅色和深色主题
+
+**参数：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***uiID***       组件唯一标识
+
+   2   ***clrStyle***   颜色样式 0：浅色 1：深色
+  ---- ---------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+//鼠标点击图形界面系统按钮监听事件
+
+document.addEventListener(\"RESystemUIEvent\", RESystemUIEvent);
+
+function RESystemUIEvent(e) {
+
+console.log(\'\-- 鼠标点击图形界面系统按钮监听事件 \--\', e.detail);
+
+if (e.detail.btnname == \"btn_001\") {
+
+if (e.detail.btnstate == 0) {
+
+BlackHole3D.Graphics.setBtnActiveState(\"btn_001\", 1);
+
+} else {
+
+BlackHole3D.Graphics.setBtnActiveState(\"btn_001\", 0);
+
+}
+
+}
+
+if (e.detail.btnname == \"Setting_Effect_UIClr_Style_Dark\") {
+
+console.log(\'\-- 点击了系统设置（暗色主题） \--\');
+
+if (e.detail.btnstate == 1) {
+
+BlackHole3D.Graphics.setBtnStatePicPath(\"btn_001\", 0,
+\"!(RealBIMAppFileCache)/webui/dark/settings_nor.png\");
+
+BlackHole3D.Graphics.setSysPanelBtnClrStyle(\"btn_001\", 1);
+
+}
+
+}
+
+if (e.detail.btnname == \"Setting_Effect_UIClr_Style_Light\") {
+
+console.log(\'\-- 点击了系统设置（浅色主题） \--\');
+
+if (e.detail.btnstate == 1) {
+
+BlackHole3D.Graphics.setBtnStatePicPath(\"btn_001\", 0,
+\"!(RealBIMAppFileCache)/webui/light/settings_nor.png\");
+
+BlackHole3D.Graphics.setSysPanelBtnClrStyle(\"btn_001\", 0);
+
+}
+
+}
+
+}
+
+## 图片（Image）
+
+## createSysPanelImage {#createsyspanelimage .样式4}
+
+**功能：**
+
+创建一个系统UI面板上的通用样式的Image控件
+
+注：样式固定（宽高比10:48）无点击事件
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***uiID***         组件唯一标识
+
+  ***picPath***      图片地址
+
+  ***beforeUiID***   在这个组件之前插入（默认在最后面）
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+var uiID = \"img_001\";
+
+var picPath = \"!(RealBIMAppFileCache)/webui/light/settings_nor.png\";
+
+BlackHole3D.Graphics.createSysPanelImage(uiID, picPath);
+
+## getImagePicPath {#getimagepicpath .样式4}
+
+**功能：**
+
+获取图像UI控件所使用的图片资源的路径
+
+**参数：**
+
+  ---- ------------ ------------------------------------------------------
+   1   ***uiID***   组件唯一标识
+
+  ---- ------------ ------------------------------------------------------
+
+**返回值：**
+
+字符串类型
+
+**调用示例：**
+
+BlackHole3D.Graphics.getImagePicPath(\"img_001\");
+
+## setImagePicPath {#setimagepicpath .样式4}
+
+**功能：**
+
+设置图像UI控件所使用的图片资源的路径
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***uiID***      组件唯一标识
+
+   2   ***picPath***   图片地址
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+var uiID = \"img_001\";
+
+var picPath = \"!(RealBIMAppFileCache)/webui/light/settings_nor.png\";
+
+BlackHole3D.Graphics.setImagePicPath(uiID, picPath);
+
+## 通用
+
+## getSysPanelAllChildIds {#getsyspanelallchildids .样式4}
+
+**功能：**
+
+获取系统UI面板所有子组件的ID
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，系统UI 面板所有子组件id
+
+**调用示例：**
+
+BlackHole3D.Graphics.getSysPanelAllChildIds();
+
+## addSysPanelChildWidget {#addsyspanelchildwidget .样式4}
+
+**功能：**
+
+将已经创建好的组件到系统UI面板
+
+**参数：**
+
+  ------------------ ----------------------------------------------------------
+  ***uiID***         组件唯一标识
+
+  ***beforeUiID***   在这个组件之前插入（默认在最后面）
+  ------------------ ----------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Graphics.addSysPanelChildWidget(\"btn_001\");
+
+## removeSysPanelWidget {#removesyspanelwidget .样式4}
+
+**功能：**
+
+移除组件的某个子组件 （不删除子组件只从父组件列表中移除）
+
+**参数：**
+
++:-:+------------+-------------------------------------------------------+
+| 1 | ***uiID*** | 组件唯一标识                                          |
+|   |            |                                                       |
+|   |            | 系统的UI组件名称（RESysWndMateEm 类型）               |
+|   |            |                                                       |
+|   |            | PanelBtn_TerrainAlpha//底部主工具栏-地形透明度        |
+|   |            |                                                       |
+|   |            | PanelBtn_Reset//底部主工具栏-重置操作                 |
+|   |            |                                                       |
+|   |            | PanelBtn_IsolateBuild//底部主工具栏-隔离构件          |
+|   |            |                                                       |
+|   |            | PanelBtn_HideBuild//底部主工具栏-隐藏构件             |
+|   |            |                                                       |
+|   |            | PanelBtn_RecoverDisplay//底部主工具栏-恢复显示        |
+|   |            |                                                       |
+|   |            | PanelBtn_Measure//底部主工具栏-测量                   |
+|   |            |                                                       |
+|   |            | PanelBtn_Cutting,//底部主工具栏-剖切                  |
+|   |            |                                                       |
+|   |            | PanelBtn_Setting//底部主工具栏-设置                   |
++---+------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+//移除自定义的按钮
+
+BlackHole3D.Graphics.removeSysPanelWidget(\"btn_001\");
+
+//移除系统的按钮
+
+BlackHole3D.Graphics.removeSysPanelWidget(BlackHole3D.RESysWndMateEm.PanelBtn_Setting);
+
+## delWidget {#delwidget .样式4}
+
+**功能：**
+
+删除一个控件
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***uiID***   组件唯一标识
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+//删除自定义的按钮
+
+BlackHole3D.Graphics.delWidget(\"btn_001\");
+
+# 标签（Tag）
+
+## addTags {#addtags .样式4}
+
+**功能：**
+
+添加标签
+
+**参数：**
+
+  ------------------- ----------------------------------------------------------
+  ***tagInfoList***   标签信息集合（RETagInfo类型）
+
+  ------------------- ----------------------------------------------------------
+
+**RETagInfo模型解析：**
+
+  ---------------- ----------------------------------------------------------
+  ***tagName***    标签的名称(唯一标识)
+
+  ***pos***        标签的位置
+
+  ***infoList***   标签的内容（RETagContent 类型）
+  ---------------- ----------------------------------------------------------
+
+**RETagContent模型解析：**
+
+  ----------------- ----------------------------------------------------------
+  ***picPath***     标签每一行的纹理路径(要求32\*32像素，png格式)
+
+  ***text***        标签每一行的文字信息
+
+  ***textClr***     文字颜色（REColor 类型）
+
+  ***borderClr***   文字边框颜色（REColor 类型）
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+var tagInfo1 = new BlackHole3D.RETagInfo();
+
+tagInfo1.tagName = \"tag01\";
+
+tagInfo1.pos = \[-151, -95, 67\];
+
+var tagCont1 = new BlackHole3D.RETagContent();
+
+tagCont1.picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/shandian.png\";
+
+tagCont1.text = \"测试文字\";
+
+var tagCont2 = new BlackHole3D.RETagContent();
+
+tagCont2.picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/greenpot.png\";
+
+tagCont2.text = \"tag002测试文字\";
+
+tagInfo1.infoList = \[tagCont1, tagCont2\];
+
+var tagInfo2 = new BlackHole3D.RETagInfo();
+
+tagInfo2.tagName = \"tag012\";
+
+tagInfo2.pos = \[-246, 18, 16\];
+
+var tagCont01 = new BlackHole3D.RETagContent();
+
+tagCont01.picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/greenpot.png\";
+
+tagCont01.text = \"测试文字\";
+
+tagInfo2.infoList = \[tagCont01\];
+
+var tagInfoList = \[tagInfo1, tagInfo2\];
+
+BlackHole3D.Tag.addTags(tagInfoList);
+
+## addLineTags {#addlinetags .样式4}
+
+**功能：**
+
+添加元素全部自定义的行标签
+
+**参数：**
+
+  --- ------------------- -------------------------------------------------------
+   1  ***lineTagInfo***   行标签信息（RELineTagInfo 类型）
+
+  --- ------------------- -------------------------------------------------------
+
+**RELineTagInfo模型解析：**
+
+  ---- -------------------- -------------------------------------------------------
+   1   ***tagName***        表示要添加的标签名称，全局唯一
+
+   2   ***pos***            表示要添加的标签位置
+
+   3   ***tagMinWidth***    表示要添加的标签最小宽度
+
+   4   ***tagMinHeight***   表示要添加的标签最小高度
+
+   5   ***contents***       表示要添加标签的内容（包含 RELineTagCont 类型）
+
+   6   ***fontName***       表示要添加的标签内容字体样式
+
+   7   ***backClr***        表示要添加的标签背景颜色（REColor 类型）
+
+   8   ***frameClr***       表示要添加的标签边框颜色（REColor 类型）
+  ---- -------------------- -------------------------------------------------------
+
+**RELineTagCont模型解析：**
+
+  --- --------------- ---------------------------------------------------------------
+   1  ***type***      元素类型，\"text\":文字，\"tex\":图片
+
+   2  ***width***     元素宽度
+
+   3  ***height***    元素高度
+
+   4  ***border***    元素边框大小
+
+   5  ***elemClr***   元素颜色（REColor
+                      类型）type=\"text\"代表文字颜色，type=\"tex\"代表图片纹理颜色
+
+   6  ***text***      文字内容，只有在 type=\"text\"时才生效
+
+   7  ***picPath***   图片路径，只有在 type=\"tex\"时才生效
+  --- --------------- ---------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+var contents = \[
+
+{ type: \"text\", width: 30, height: 16, border: 10, text: \"01#\" },
+
+{ type: \"tex\", width: 20, height: 20, border: 0, picPath:
+\"https://demo.bjblackhole.com/demopage/examplesImgs/greenpot.png\" },
+
+{ type: \"text\", width: 16, height: 16, border: 0, elemClr: new
+BlackHole3D.REColor(0,0,0,0), text: \"\" },
+
+{ type: \"tex\", width: 20, height: 20, border: 2, picPath:
+\"https://demo.bjblackhole.com/demopage/examplesImgs/shandian.png\" },
+
+{ type: \"text\", width: 50, height: 16, border: 0, elemClr: new
+BlackHole3D.REColor(255,255,0,255), text: \"50000\" },
+
+{ type: \"text\", width: 30, height: 16, border: 0, text: \"kWh\" },
+
+{ type: \"tex\", width: 16, height: 16, border: 0, elemClr: new
+BlackHole3D.REColor(0,0,0,0), picPath: \"\" },
+
+{ type: \"tex\", width: 20, height: 20, border: 2, picPath:
+\"https://demo.bjblackhole.com/demopage/examplesImgs/feng.png\" },
+
+{ type: \"text\", width: 50, height: 16, border: 0, elemClr: new
+BlackHole3D.REColor(255,255,0,255), text: \"9.56\" },
+
+{ type: \"text\", width: 30, height: 16, border: 0, text: \"m/s\" },
+
+{ type: \"tex\", width: 20, height: 16, border: 0, elemClr: new
+BlackHole3D.REColor(0,0,0,0), picPath: \"\" },
+
+{ type: \"tex\", width: 20, height: 20, border: 2, picPath:
+\"https://demo.bjblackhole.com/demopage/examplesImgs/dianbo.png\" },
+
+{ type: \"text\", width: 50, height: 16, border: 0, elemClr: new
+BlackHole3D.REColor(255,255,0,255), text: \"1086\" },
+
+{ type: \"text\", width: 30, height: 16, border: 0, text: \"kw\" },
+
+\];
+
+var lineInfo = new BlackHole3D.RELineTagInfo();
+
+lineInfo.tagName = \"lineTag01\";//标签的名称(唯一标识)
+
+lineInfo.pos = \[4.028, 44.462, 4.561\];//标签的位置
+
+lineInfo.contents = contents;//标签的内容（包含 RELineTagCont 类型）
+
+lineInfo.tagMinWidth = 16;//表示要添加的标签最小宽度
+
+lineInfo.tagMinHeight = 16;//表示要添加的标签最小高度
+
+lineInfo.fontName = \"\";//表示要添加的标签内容字体样式
+
+lineInfo.backClr = new
+BlackHole3D.REColor(70,130,180,180);//表示要添加的标签背景颜色（REColor
+类型）
+
+lineInfo.frameClr = new
+BlackHole3D.REColor(0,255,255,0);//表示要添加的标签边框颜色（REColor
+类型）
+
+BlackHole3D.Tag.addLineTags(lineInfo);
+
+## getTag {#gettag .样式4}
+
+获取某个标签的信息
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***tagName***   表示想要获取信息的标签的名称
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  ---- --------------- ---------------------------------------------------
+   1   ***tagName***   标签的名称(唯一标识)
+
+   2   ***pos***       标签的位置
+  ---- --------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Tag.getTag(\"tag01\");
+
+## getAllTag {#getalltag .样式4}
+
+**功能：**
+
+获取所有标签的信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，当前添加的所有标签的信息
+
+**调用示例：**
+
+BlackHole3D.Tag.getAllTag();
+
+## delTags {#deltags .样式4}
+
+**功能：**
+
+删除标签
+
+**参数：**
+
+  ---- ------------------- -------------------------------------------------------
+   1   ***tagNameList***   表示要删除的标签的名称数组集合
+
+  ---- ------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Tag.delTags(\[\"lineTag01\"\])
+
+## delAllTag {#delalltag .样式4}
+
+**功能：**
+
+删除全部标签
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Tag.delAllTag()
+
+## getTagNum {#gettagnum .样式4}
+
+**功能：**
+
+获取标签总数
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，当前添加的标签总数
+
+**调用示例：**
+
+BlackHole3D.Tag.getTagNum()
+
+## setTagCanOverlap {#settagcanoverlap .样式4}
+
+**功能：**
+
+设置系统中标签是否允许被场景遮挡
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   true:表示允许被遮挡；false：表示不允许被遮挡
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Tag.setTagCanOverlap(true)
+
+## getTagCanOverlap {#gettagcanoverlap .样式4}
+
+**功能：**
+
+获取系统中标签是否允许被场景遮挡
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, true:表示允许被遮挡, false：表示不允许被遮挡
+
+**调用示例：**
+
+BlackHole3D.Tag.getTagCanOverlap()
+
+## setTagAutoScaleDist {#settagautoscaledist .样式4}
+
+**功能：**
+
+设置系统中标签的自动缩放距离
+
+**参数：**
+
+  ---- ------------- ------------------------------------------------------------
+   1   ***dist***    自动缩放距离，相机距离标签的距离大于该值时，标签会自动缩放
+
+  ---- ------------- ------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Tag.setTagAutoScaleDist(1000)
+
+## getTagAutoScaleDist {#gettagautoscaledist .样式4}
+
+**功能：**
+
+获取系统中标签的自动缩放距离
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，系统标签的自动缩放距离
+
+**调用示例：**
+
+BlackHole3D.Tag.getTagAutoScaleDist()
+
+## setTagVisDist {#settagvisdist .样式4}
+
+**功能：**
+
+设置系统中标签的可视距离距离
+
+**参数：**
+
+  ---- ------------- ------------------------------------------------------
+   1   ***dist***    标签可视距离，相机距离标签的距离大于该值时，标签隐藏
+
+  ---- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Tag.setTagVisDist(1000)
+
+## getTagVisDist {#gettagvisdist .样式4}
+
+**功能：**
+
+获取系统中标签的可视距离
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，系统标签的可视距离
+
+**调用示例：**
+
+BlackHole3D.Tag.getTagVisDist()
+
+# 标注（Mark） {#标注mark .样式3}
+
+## startAdd {#startadd .样式4}
+
+**功能：**
+
+开始添加标注
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，进入标注状态返回true, 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Mark.startAdd(); //进入创建标注的状态
+
+## setText {#settext .样式4}
+
+**功能：**
+
+添加标注文字
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***markText***   表示要添加的标注文字信息
+
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var textData = \"标注测试\";
+
+BlackHole3D.Mark.setText(textData);
+
+## getCurData {#getcurdata .样式4}
+
+**功能：**
+
+获取当前标注信息，包括添加标注时的相机方位、标注框、标注文字等
+
+**参数：**
+
+无
+
+**返回值：**
+
+当前添加的标注信息，Uint8Array类型
+
+**调用示例：**
+
+var markData = BlackHole3D.Mark.getCurData();
+
+## endAdd {#endadd .样式4}
+
+**功能：**
+
+退出添加标注状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，退出标注状态返回true, 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Mark.endAdd(); //保存当前标注信息后可以退出创建标注的状态
+
+## showData {#showdata .样式4}
+
+**功能：**
+
+查看之前保存的标注信息数据
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***markData***   标注信息（Uint8Array 类型）
+
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var markData = BlackHole3D.Mark.getCurData();
+
+BlackHole3D.Mark.showData(markData); //查看之前保存的标注信息
+
+# 锚点（Anchor）
+
+## 加载
+
+## addAnc {#addanc .样式4}
+
+**功能：**
+
+添加锚点
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancList***   锚点信息集合（REAncInfo 类型）
+
+  ---- --------------- -------------------------------------------------------
+
+**REAncInfo模型解析：**
+
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***groupName***            | 锚点组的标识，默认值 \"DefaultGroup\"，**同一场景，组的个数最多20个，每个组最多添加一万个锚点**             |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***ancName***              | 锚点的名称(唯一标识)，必填                                                                                  |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***pos***                  | 锚点的位置，默认值 \[0,0,0\]                                                                                |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***picPath***              | 锚点的纹理路径，默认值 \"\"                                                                                 |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textInfo***             | 锚点的文字，默认值 \"\"                                                                                     |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***picWidth***             | 锚点图片的宽度, 如果用于闪烁锚点效果，该值为闪烁锚点图片像素/闪烁个数                                       |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***picHeight***            | 锚点图片的高度, 如果用于闪烁锚点效果，该值为闪烁锚点图片像素/闪烁个数                                       |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***linePos***              | 锚点指引线的终点坐标(2维像素裁剪空间下相对于定位点的坐标) (Y轴向上递增)，即起始点相对pos点为\[0,0\],        |
+|                            | 最终点为相对\[x,y\]                                                                                         |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***lineClr***              | 指引线的颜色，默认值 REColor(0,0,0,0)                                                                       |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***ancSize***              | 锚点的覆盖范围参考值，大于等于0，可设为锚点图片的最大尺寸，该值越大，则相机定位到锚点时后退距离越大，默认值 |
+|                            | 0                                                                                                           |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***selfAutoScaleDist***    | 锚点自身自动缩放距离(\<0.0f表示使用全局自动缩放距离)，默认值 -1                                             |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***selfVisDist***          | 锚点自身可视距离(\<0.0f表示使用全局可视距离)，默认值 -1                                                     |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***texBias***              | 锚点文字与图片的相对位置, 二元素数组\[x，y\],                                                               |
+|                            |                                                                                                             |
+|                            | x取值（-1、0、1）分别表示文字在图片的左侧、中间、右侧；                                                     |
+|                            |                                                                                                             |
+|                            | y取值（-1、0、1）分别表示文字在图片的下侧、中间、上侧；                                                     |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***texFocus***             | 牵引线的最终顶点相对于图片的像素位置，需要配合ancSize使用，二元素数组\[x，y\], \[0,0\]表示位于图片的左下角, |
+|                            | \[picWidth/2,0\]表示位于图片中下                                                                            |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***fontName***             | 锚点的字体样式，默认值 \"RealBIMFont001\"                                                                   |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textClr***              | 锚点的字体颜，默认值 REColor(255,255,255,255)                                                               |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBorderClr***        | 锚点的字体边框颜色，默认值 REColor(0,0,0,255)                                                               |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackClr***          | 锚点的字体背景颜色，默认值 REColor(0,0,0,0)                                                                 |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackMode***         | 表示文字背景的处理模式                                                                                      |
+|                            |                                                                                                             |
+|                            | 0：禁用文字背景                                                                                             |
+|                            |                                                                                                             |
+|                            | 1：文字背景对应文字排版后返回的最终矩形区域                                                                 |
+|                            |                                                                                                             |
+|                            | 2：文字背景对应整体文字实际覆盖的矩形区域                                                                   |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***useLod***               | 是否允许聚合（只有uselod设为true，并且设置了有效的聚合参数 setAncLODInfo                                    |
+|                            | 后，锚点会自动聚合，同时锚点自动缩放和可视距离参数无效），默认值 false                                      |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***animObjName***          | 锚点关联的动画对象名称(仅当 useLod==false时有效)，默认值 \"\"                                               |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***animBoneID***           | 锚点关联的骨骼在动画对象内的ID(仅当 useLod==false时有效)，默认值 0                                          |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackPadding***      | 锚点的文字背景内容边距，默认为0                                                                             |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackPaddingRect***  | 文字背景内容边距范围，\[left,bottom,right,top\]                                                             |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackRadius***       | 文字背景圆角半径的大小                                                                                      |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackClrFadeDir***   | 文字背景颜色渐变方向 0: 不渐变 1: 从上往下渐变 2: 从左往右渐变                                              |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+| ***textBackFadeFinalClr*** | 文字背景颜色最终的渐变色，起始渐变色为textBackClr, textBackClrFadeDir !=0 有效                              |
++----------------------------+-------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+var ancList = \[
+
+{
+
+\"groupName\": \"camera\",
+
+\"ancName\": \"anc01\",
+
+\"pos\": \[-20, -20, 10\],
+
+\"picPath\": \"\",
+
+\"textInfo\": \"未拆迁\",
+
+\"picWidth\": 32,
+
+\"picHeight\": 32,
+
+\"linePos\": \[0, 100\],
+
+\"lineClr\": new BlackHole3D.REColor(255, 0, 0, 255),//红色
+
+\"ancSize\": 60,
+
+\"selfAutoScaleDist\": -1,
+
+\"selfVisDist\": -1,
+
+\"texBias\": \[1, 0\],
+
+\"texFocus\": \[0, 0\]
+
+}, {
+
+\"ancName\": \"anc02\",
+
+\"pos\": \[70.8, 76.481, 0\],
+
+\"picPath\": \"\",
+
+\"textInfo\": \"已拆迁\",
+
+\"picWidth\": 32,
+
+\"picHeight\": 32,
+
+\"linePos\": \[0, 50\],
+
+\"lineClr\": { red: 255, green: 0, blue: 0, alpha: 255 },//红色
+
+\"ancSize\": 60,
+
+\"selfAutoScaledist\": -1,
+
+\"selfVisDist\": -1,
+
+\"texBias\": \[1, 0\],
+
+\"texFocus\": \[0, 0\]
+
+}
+
+\];
+
+BlackHole3D.Anchor.addAnc(ancList);
+
+## delAnc {#delanc .样式4}
+
+**功能：**
+
+删除锚点
+
+**参数：**
+
+  ---- ------------------- -------------------------------------------------------
+   1   ***ancNameList***   表示要删除的锚点的名称数组集合
+
+  ---- ------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+var ancNameList = \[\"anc01\",\"anc02\"\];
+
+BlackHole3D.Anchor.delAnc(ancNameList);
+
+## delGroupAnc {#delgroupanc .样式4}
+
+**功能：**
+
+删除一组锚点
+
+**参数：**
+
+  ---- -------------------- -----------------------------------------------------
+   1   ***ancGroupName***   表示要删除的锚点的组名称
+
+  ---- -------------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.Anchor.delGroupAnc(\"group01\");
+
+## delAllAnc {#delallanc .样式4}
+
+**功能：**
+
+删除全部锚点
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.Anchor.delAllAnc();
+
+## getAncNum {#getancnum .样式4}
+
+**功能：**
+
+获取锚点总数
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值, 当前添加的锚点总数
+
+**调用示例：**
+
+console.log(BlackHole3D.Anchor.getAncNum();
+
+## getAnc {#getanc .样式4}
+
+**功能：**
+
+获取某个锚点的信息
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancName***   表示想要获取信息的锚点的名称
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（REAncInfo 对象类型）
+
+  ---------------------------- ------------------------------------------------------------
+  ***groupName***              锚点组的标识，默认值 \"DefaultGroup\"
+
+  ***ancName***                锚点的名称(唯一标识)
+
+  ***pos***                    锚点的位置
+
+  ***picPath***                锚点的纹理路径
+
+  ***textInfo***               锚点的文字
+
+  ***linePos***                锚点指引线的终点坐标(2维像素裁剪空间下相对于定位点的坐标)
+                               (Y轴向上递增)
+
+  ***lineClr***                指引线的颜色
+
+  ***selfAutoScaleDist***      锚点自身自动缩放距离(\<0.0f表示使用全局自动缩放距离)
+
+  ***selfVisDist***            锚点自身可视距离(\<0.0f表示使用全局可视距离)
+
+  ***fontName***               锚点的字体样式
+
+  ***textClr***                锚点的字体颜
+
+  ***textBorderClr***          锚点的字体边框颜色
+
+  ***textBackClr***            锚点的字体背景颜色
+
+  ***useLod***                 是否允许聚合（只有uselod设为true，并且设置了有效的聚合参数
+                               setAncLODInfo
+                               后，锚点会自动聚合，同时锚点自动缩放和可视距离参数无效）
+
+  ***animObjName***            锚点关联的动画对象名称(仅当 useLod==false时有效)
+
+  ***animBoneID***             锚点关联的骨骼在动画对象内的ID(仅当 useLod==false时有效)
+
+  ***textBackPadding***        锚点的文字背景内容边距，默认为0
+
+  ***textBackPaddingRect***    文字背景内容边距范围，\[left,bottom,right,top\]
+
+  ***textBackRadius***         文字背景圆角半径的大小
+
+  ***textBackClrFadeDir***     文字背景颜色渐变方向 0: 不渐变 1: 从上往下渐变 2:
+                               从左往右渐变
+
+  ***textBackFadeFinalClr***   文字背景颜色最终的渐变色，起始渐变色为textBackClr,
+                               textBackClrFadeDir !=0 有效
+  ---------------------------- ------------------------------------------------------------
+
+**调用示例：**
+
+var ancName = \"anc01\";
+
+var ancData = BlackHole3D.Anchor.getAnc(ancName);
+
+console.log(ancData);
+
+## getGroupAnc {#getgroupanc .样式4}
+
+**功能：**
+
+获取某一组锚点的信息
+
+**参数：**
+
+  ---- -------------------- -----------------------------------------------------
+   1   ***ancGroupName***   表示想要获取信息的锚点的组名称
+
+  ---- -------------------- -----------------------------------------------------
+
+**返回值：**
+
+数组, 当前组的锚点信息集合（REAncInfo 对象类型）
+
+**调用示例：**
+
+var ancGroupName = \"\"camera\"\";
+
+var ancDataList = BlackHole3D.Anchor.getGroupAnc(ancGroupName);
+
+console.log(ancDataList );
+
+## getAllAnc {#getallanc .样式4}
+
+**功能：**
+
+获取所有锚点的信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 当前添加的所有锚点的信息集合
+
+**调用示例：**
+
+var ancDataList = BlackHole3D.Anchor.getAllAnc();
+
+console.log(ancDataList );
+
+## addAnimAnc {#addanimanc .样式4}
+
+**功能：**
+
+添加闪烁锚点
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancList***   锚点信息集合（REAncInfo 类型）
+
+  ---- --------------- -------------------------------------------------------
+
+**REAncInfo模型解析：**
+
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***groupName***         | 锚点组的标识，默认值 \"DefaultGroup\"                                                               |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***ancName***           | 锚点的名称(唯一标识)                                                                                |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***pos***               | 锚点的位置                                                                                          |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***picPath***           | 锚点的纹理路径                                                                                      |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***textInfo***          | 锚点的文字                                                                                          |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***picWidth***          | 锚点图片的宽度, 如果用于闪烁锚点效果，该值为闪烁锚点图片像素/闪烁个数                               |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***picHeight***         | 锚点图片的高度, 如果用于闪烁锚点效果，该值为闪烁锚点图片像素/闪烁个数                               |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***picNum***            | 闪烁时循环播放的图片个数                                                                            |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***playFrame***         | 闪烁的帧率，即1秒钟闪几下                                                                           |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***linePos***           | 锚点指引线的终点坐标(2维像素裁剪空间下相对于定位点的坐标)                                           |
+|                         | (Y轴向上递增)，即起始点相对pos点为\[0,0\], 最终点为相对\[x,y\]                                      |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***lineClr***           | 指引线的颜色                                                                                        |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***ancSize***           | 锚点的覆盖范围参考值，大于等于0，可设为锚点图片的最大尺寸，该值越大，则相机定位到锚点时后退距离越大 |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***selfAutoScaleDist*** | 锚点自身自动缩放距离(\<0.0f表示使用全局自动缩放距离)                                                |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***selfVisDist***       | 锚点自身可视距离(\<0.0f表示使用全局可视距离)                                                        |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***texBias***           | 锚点文字与图片的相对位置, 二元素数组\[x，y\],                                                       |
+|                         |                                                                                                     |
+|                         | x取值（-1、0、1）分别表示文字在图片的左侧、中间、右侧；                                             |
+|                         |                                                                                                     |
+|                         | y取值（-1、0、1）分别表示文字在图片的下侧、中间、上侧；                                             |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***texFocus***          | 牵引线的最终顶点相对于图片的像素位置，需要配合ancSize使用，二元素数组\[x，y\],                      |
+|                         | \[0,0\]表示位于图片的左下角, \[picWidth/2,0\]表示位于图片中下                                       |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***fontName***          | 锚点的字体样式                                                                                      |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***textClr***           | 锚点的字体颜                                                                                        |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***textBorderClr***     | 锚点的字体边框颜色                                                                                  |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***textBackClr***       | 锚点的字体背景颜色                                                                                  |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***useLod***            | 是否允许聚合（只有uselod设为true，并且设置了有效的聚合参数 setAncLODInfo                            |
+|                         | 后，锚点会自动聚合，同时锚点自动缩放和可视距离参数无效）                                            |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***animObjName***       | 锚点关联的动画对象名称(仅当 useLod==false时有效)                                                    |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***animBoneID***        | 锚点关联的骨骼在动画对象内的ID(仅当 useLod==false时有效)                                            |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+| ***textBackPadding***   | 锚点的字体背景内容边距，默认为0                                                                     |
++-------------------------+-----------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+var ancList = \[
+
+{
+
+\"ancName\": \"anc01\",
+
+\"pos\": \[-25, -26, 10\],
+
+\"picPath\": \"\",
+
+\"picWidth\": 32,
+
+\"picHeight\": 32,
+
+\"textInfo\": \"张三\",
+
+\"picNum\": 3,
+
+\"playFrame\": 2
+
+}
+
+\];
+
+BlackHole3D.Anchor.addAnimAnc(ancList);
+
+## getAllAncGroupNames {#getallancgroupnames .样式4}
+
+**功能：**
+
+获取所有锚点类型标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 所有的锚点类型标识
+
+**调用示例：**
+
+BlackHole3D.Anchor.getAllAncGroupNames();
+
+## setAncLODInfo {#setanclodinfo .样式4}
+
+**功能：**
+
+设置锚点聚合参数
+
+**注：设置聚合效果，一定要设置包围盒范围，最大范围为50km，小场景没有超过范围可以使用默认值**
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***ancLODInfo***   聚合锚点信息（REAncLODInfo类型）
+
+  ---- ------------------ -------------------------------------------------------
+
+**REAncLODInfo模型解析：**
+
++:-:+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***groupName***   | 表示要聚合的锚点组的标识名，为空则表示所有的锚点对象                                                                     |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 2 | ***lodLevel***    | 表示聚合层级，范围1\~10,默认为1，层级越高表示相同相机高度，当到达聚合阈值时，聚合能力越强，不被聚合的锚点范围越小        |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 3 | ***useCustomBV*** | 是否用锚点的预估总包围盒，默认为false                                                                                    |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 4 | ***customBV***    | 锚点的预估总包围盒，二维数组\[\[Xmin,Ymin,Zmin\],\[Xmax,Ymax,Zmax\]\]，当useCustomBV为false时，此参数无效，填空数组即可; |
+|   |                   |                                                                                                                          |
+|   |                   | 默认为当前场景的总包围盒，**最大包围盒范围为50km**                                                                       |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 5 | ***lodMergePxl*** | 表示锚点所在单元格进行LOD合并时的投影到屏幕的像素尺寸阈值（值越大聚合能力越强）                                          |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 6 | ***lodMergeCap*** | 表示锚点所在单元格进行LOD合并时的单元格容积阈值（值越小聚合能力越强， 最小值为2）                                        |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+| 7 | ***mergeStyle***  | 表示锚点聚合后的样式，REAncInfo对象                                                                                      |
++---+-------------------+--------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 添加100个两种类型的锚点
+
+var arrancinfo = \[\];
+
+for (var i = 0; i \< 10; ++i) {
+
+for (var j = 0; j \< 10; ++j) {
+
+var ancInfo = new BlackHole3D.REAncInfo();
+
+ancInfo.groupName = (j % 2 == 0) ? \"group01\" : \"group02\";
+
+ancInfo.ancName = (i \* 100 + j).toString();
+
+ancInfo.pos = (j % 2 == 0) ? \[400 + i \* 40, -100 + j \* 40, 0\] :
+\[400 + i \* 40, 200 + j \* 40, 0\];;
+
+ancInfo.picPath = (j % 2 == 0) ?
+\"https://demo.bjblackhole.com/demopage/examplesImgs/tag.png\" :
+\"https://demo.bjblackhole.com/demopage/examplesImgs/anc.png\";
+
+ancInfo.textInfo = \"标记\" + (i \* 100 + j).toString();
+
+ancInfo.picWidth = 32;
+
+ancInfo.picHeight = 32;
+
+ancInfo.useLod = true;
+
+ancInfo.linePos = \[0, 50\];
+
+ancInfo.lineClr = new BlackHole3D.REColor(0, 255, 0, 255);
+
+ancInfo.ancSize = 60;
+
+ancInfo.selfAutoScaleDist = -1;
+
+ancInfo.selfVisDist = -1;
+
+ancInfo.texBias = \[1, 0\];
+
+ancInfo.textFocus = \[5, 2\];
+
+ancInfo.fontName = \"RealBIMFont001\";
+
+ancInfo.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+ancInfo.textBorderClr = new BlackHole3D.REColor(0, 0, 0, 128);
+
+arrancinfo.push(ancInfo);
+
+}
+
+}
+
+BlackHole3D.Anchor.addAnc(arrancinfo);
+
+// 设置锚点聚合,锚点数量多的时候效果比较明显
+
+var mergestyle01 = new BlackHole3D.REAncInfo();
+
+mergestyle01.picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/bubbler.png\";
+
+mergestyle01.picWidth = 60;
+
+mergestyle01.picHeight = 60;
+
+mergestyle01.texBias = \[1, 0\];
+
+mergestyle01.fontName = \"RealBIMFont001\";
+
+mergestyle01.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+mergestyle01.textBorderColor = new BlackHole3D.REColor(0, 0, 0, 128);
+
+var mergestyle02 = new BlackHole3D.REAncInfo();
+
+mergestyle02.picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/bubbley.png\";
+
+mergestyle02.picWidth = 60;
+
+mergestyle02.picHeight = 60;
+
+mergestyle02.texBias = \[1, 0\];
+
+mergestyle02.fontName = \"RealBIMFont001\";
+
+mergestyle02.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+mergestyle02.textBorderColor = new BlackHole3D.REColor(0, 0, 0, 128);
+
+//聚合信息
+
+var bbBV = \[\[-2001.0, -2001.0, -500.0\], \[2001.0, 2001.0, -500.0\]\];
+
+var ancLODInfo1 = new BlackHole3D.REAncLODInfo();
+
+ancLODInfo1.groupName = \"group01\";
+
+ancLODInfo1.lodLevel = 10;
+
+ancLODInfo1.useCustomBV = true;
+
+ancLODInfo1.customBV = bbBV;
+
+ancLODInfo1.lodMergePxl = 300.0;
+
+ancLODInfo1.lodMergeCap = 3;
+
+ancLODInfo1.mergeStyle = mergestyle01;
+
+var ancLODInfo2 = new BlackHole3D.REAncLODInfo();
+
+ancLODInfo2.groupName = \"group02\";
+
+ancLODInfo2.lodLevel = 10;
+
+ancLODInfo2.useCustomBV = true;
+
+ancLODInfo2.customBV = bbBV;
+
+ancLODInfo2.lodMergePxl = 300.0;
+
+ancLODInfo2.lodMergeCap = 3;
+
+ancLODInfo2.mergeStyle = mergestyle02;
+
+BlackHole3D.Anchor.setAncLODInfo(ancLODInfo1);
+
+BlackHole3D.Anchor.setAncLODInfo(ancLODInfo2);
+
+## resetAncLODInfo {#resetanclodinfo .样式4}
+
+**功能：**
+
+取消锚点聚合
+
+**参数：**
+
+  ---- ----------------- ----------------------------------------------------------
+   1   ***groupName***   表示要取消聚合的锚点组的标识名，为空则表示所有的锚点类型
+
+  ---- ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Anchor.resetAncLODInfo();
+
+## setAncAnimStop {#setancanimstop .样式4}
+
+**功能：**
+
+锚点图标停止闪烁
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancName***   表示想要停止闪烁的锚点的名称
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功返回true, 失败返回false
+
+**调用示例：**
+
+var ancName = \"anc01\";
+
+BlackHole3D.Anchor.setAncAnimStop(ancName);
+
+## 相机
+
+## setCamToAnc {#setcamtoanc .样式4}
+
+**功能：**
+
+相机定位到锚点（包括普通锚点和聚合锚点）
+
+**参数：**
+
++:-:+-------------------+----------------------------------------------------------------------------------+
+| 1 | ***ancName***     | 锚点的名称                                                                       |
++---+-------------------+----------------------------------------------------------------------------------+
+| 2 | ***backwardAmp*** | 表示相机在锚点中心处向后退的强度                                                 |
+|   |                   |                                                                                  |
+|   |                   | \>=0.0                                                                           |
+|   |                   | 表示相机的后退距离相对于锚点覆盖范围的比例(若锚点覆盖范围无效则视为绝对后退距离) |
+|   |                   |                                                                                  |
+|   |                   | \<0.0 表示相机的后退距离的绝对值的负                                             |
++---+-------------------+----------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var ancName = \"anc01\";
+
+var backwardAmp= 1.0;
+
+BlackHole3D.Anchor.setCamToAnc(ancName,backwardAmp);
+
+## setCamToGroupAnc {#setcamtogroupanc .样式4}
+
+**功能：**
+
+相机定位到组锚点
+
+**参数：**
+
++:-:+-------------------+----------------------------------------------------------------------------------+
+| 1 | ***groupName***   | 锚点组的标识                                                                     |
++---+-------------------+----------------------------------------------------------------------------------+
+| 2 | ***backwardAmp*** | 表示相机在锚点中心处向后退的强度                                                 |
+|   |                   |                                                                                  |
+|   |                   | \>=0.0                                                                           |
+|   |                   | 表示相机的后退距离相对于锚点覆盖范围的比例(若锚点覆盖范围无效则视为绝对后退距离) |
+|   |                   |                                                                                  |
+|   |                   | \<0.0 表示相机的后退距离的绝对值的负                                             |
++---+-------------------+----------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var groupName = \"group01\";
+
+var backwardAmp= 1.0;
+
+BlackHole3D.Anchor.setCamToGroupAnc(groupName,backwardAmp);
+
+## 渲染设置
+
+## setAncCanOverlap {#setanccanoverlap .样式4}
+
+**功能：**
+
+设置系统中锚点是否允许被场景遮挡
+
+**参数：**
+
+  ---- ----------------- --------------------------------------------------------
+   1   ***groupName***   锚点的类型标识，字符串类型，为空字符串表示所有类型锚点
+
+   2   ***enable***      true:表示允许被遮挡；false：表示不允许被遮挡
+  ---- ----------------- --------------------------------------------------------
+
+**返回值：**
+
+空
+
+**调用示例：**
+
+BlackHole3D.Anchor.setAncCanOverlap(\"group01\",false);
+
+## getAncCanOverlap {#getanccanoverlap .样式4}
+
+**功能：**
+
+获取系统中锚点是否允许被场景遮挡
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   标识锚点的类型标识，为空表示所有的类型
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, true:表示允许被遮挡；false：表示不允许被遮挡
+
+**调用示例：**
+
+BlackHole3D.Anchor.getAncCanOverlap(\"group1\");
+
+## setAncAutoScaleDist {#setancautoscaledist .样式4}
+
+**功能：**
+
+设置系统中锚点的自动缩放距离
+
+注：只有当锚点不允许聚合时(即添加锚点时，***uselod***参数设为false)，该方法有效
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------------
+   1   ***groupName***   标识锚点的类型标识，为空表示所有的类型
+
+   2   ***dist***        自动缩放距离，相机距离锚点的距离大于该值时，锚点会自动缩放
+  ---- ----------------- ------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var groupName = \"group1\";
+
+var dist = 1000;
+
+BlackHole3D.Anchor.setAncAutoScaleDist(groupName, dist);
+
+## getAncAutoScaleDist {#getancautoscaledist .样式4}
+
+**功能：**
+
+获取系统中锚点的自动缩放距离
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   标识锚点的类型标识，为空表示所有的类型
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值, 系统锚点的自动缩放距离
+
+**调用示例：**
+
+BlackHole3D.Anchor.getAncAutoScaleDist(\"group1\");
+
+## setAncVisDist {#setancvisdist .样式4}
+
+**功能：**
+
+设置系统中锚点的可视距离
+
+注：只有当锚点不允许聚合时(即添加锚点时，***uselod***参数设为false)，该方法有效；可视距离的优先级低于锚点自身可视距离
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   标识锚点的类型标识，为空表示所有的类型
+
+   2   ***dist***        锚点可视距离，相机距离锚点的距离大于该值时，锚点隐藏
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var groupName= \"group1\";
+
+var dist = 1000;
+
+BlackHole3D.Anchor.setAncVisDist(groupName, dist);
+
+## getAncVisDist {#getancvisdist .样式4}
+
+**功能：**
+
+获取系统中锚点的可视距离
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   标识锚点的类型标识，为空表示所有的类型
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值, 系统锚点的可视距离
+
+**调用示例：**
+
+BlackHole3D.Anchor.getAncVisDist(\"group1\");
+
+## setCustomMaxTexSize {#setcustommaxtexsize .样式4}
+
+**功能：**
+
+设置系统中锚点的最大自定义单体纹理尺寸
+
+**注：设置的是同一个组的尺寸信息，且需要在添加锚点之前进行设置，如果当前组已经被创建则设置无效**
+
+**参数：**
+
+  ---- ----------------- ----------------------------------------------------
+   1   ***groupName***   锚点组的标识，若为空串则不处理
+
+   2   ***size***        最大自定义单体纹理尺寸，0表示系统自动决定
+  ---- ----------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 先设置纹理大小
+
+BlackHole3D.Anchor.setCustomMaxTexSize(\"camera\",1024);
+
+// 添加锚点
+
+var ancList = \[
+
+{
+
+groupName: \'camera\',
+
+ancName: \'anc01\',
+
+pos: \[15.66, 35.877, 4.52\],
+
+picPath: \'https://demo.bjblackhole.com/demopage/examplesImgs/anc.png\',
+
+textInfo: \'未拆迁\',
+
+picWidth: 32,
+
+picHeight: 32,
+
+linePos: \[0, 100\],
+
+lineClr: new BlackHole3D.REColor(255, 0, 0, 255), //红色
+
+ancSize: 60,
+
+selfAutoScaleDist: -1,
+
+selfVisDist: -1,
+
+texBias: \[1, 0\],
+
+texFocus: \[0, 0\],
+
+},
+
+\];
+
+BlackHole3D.Anchor.addAnc(ancList);
+
+## getCustomMaxTexSize {#getcustommaxtexsize .样式4}
+
+**功能：**
+
+获取系统中锚点的最大自定义单体纹理尺寸
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   锚点组的标识，若为空串则不处理
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，最大自定义单体纹理尺寸
+
+**调用示例：**
+
+BlackHole3D.Anchor.getCustomMaxTexSize(\"camera\");
+
+# 几何图形（Geometry）
+
+## 加载
+
+## addPotShp {#addpotshp .样式4}
+
+**功能：**
+
+创建一个自定义顶点矢量
+
+**注：点矢量构成的二维平面默认为映射屏幕空间，如果需要映射世界空间，需要单独设置二维平面的右轴/上轴对应的方向值，即以-1，0，1三个值的方式表达二维平面在世界空间下某个面的对应情况**
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***potShpInfo***   矢量点信息（REPotShpInfo 类型）
+
+  ---- ------------------ ------------------------------------------------------
+
+**REPotShpInfo 模型解析：**
+
+  ---- --------------------- ---------------------------------------------------------------------------------------------------
+   1   ***shpName***         矢量标识名，若已有同名的矢量则覆盖之
+
+   2   ***pos***             表示顶点位置
+
+   3   ***potSize***         表示顶点的像素大小
+
+   4   ***potClr***          顶点的颜色（REColor 类型）
+
+   5   ***textInfo***        表示顶点的文字标注信息（REShpTextInfo 类型）
+
+   6   ***scrASDist***       表示屏幕空间矢量的自动缩放起始距离
+
+   7   ***scrVisDist***      表示屏幕空间矢量的可视距离
+
+   8   ***contactSce***      表示矢量是否与场景发生深度遮挡
+
+   9   ***groupName***       矢量组名称
+
+   10  ***useWorldDir***     表示是否使用二维平面映射到世界空间的方式，默认false
+
+   11  ***worldRightDir***   表示二维平面的单位**右轴**在世界空间下的绝对投影向量，useWorldDir为true有效，默认值
+                             \[0,0,0\]，例如想将二维平面放置在世界空间的xy平面上，worldRightDir=\[1,0,0\],worldUpDir=\[0,1,0\]
+
+   12  ***worldUpDir***      表示二维平面的单位**上轴**在世界空间下的绝对投影向量，useWorldDir为true有效，默认值
+                             \[0,0,0\]，例如想将二维平面放置在世界空间的xy平面上，worldRightDir=\[1,0,0\],worldUpDir=\[0,1,0\]
+  ---- --------------------- ---------------------------------------------------------------------------------------------------
+
+**REShpTextInfo模型解析：**
+
++:-:+----------------------+----------------------------------------------------+
+| 1 | ***text***           | 表示文字的内容                                     |
++---+----------------------+----------------------------------------------------+
+| 2 | ***texBias***        | 表示锚点文字与图片的相对位置，二维数组：           |
+|   |                      | 第一维-1、0、1分别表示文字在点的左侧、中间、右侧； |
+|   |                      | 第二维-1、0、1分别表示文字在点的下侧、中间、上侧   |
++---+----------------------+----------------------------------------------------+
+| 3 | ***fontName***       | 表示锚点的字体样式                                 |
++---+----------------------+----------------------------------------------------+
+| 4 | ***textClr***        | 文字颜色（REColor 类型）                           |
++---+----------------------+----------------------------------------------------+
+| 5 | ***textBorderClr***  | 文字边框颜色（REColor 类型）                       |
++---+----------------------+----------------------------------------------------+
+| 6 | ***textBackMode***   | 表示文字背景的处理模式：                           |
+|   |                      |                                                    |
+|   |                      | 0：表示禁用文字背景                                |
+|   |                      |                                                    |
+|   |                      | 1：表示启用文字背景，文字背景是文字所占的矩形区域  |
+|   |                      |                                                    |
+|   |                      | 2：文字背景对应整体文字实际覆盖的矩形区域          |
++---+----------------------+----------------------------------------------------+
+| 7 | ***textBackBorder*** | 表示文字背景的边界带的像素宽度                     |
++---+----------------------+----------------------------------------------------+
+| 8 | ***textBackClr***    | 表示文本背景色（REColor 类型）                     |
++---+----------------------+----------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+//矢量文字信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \"未拆迁\";
+
+shpTextInfo.texBias = \[1, 0\];
+
+shpTextInfo.fontName = \"RealBIMFont001\";
+
+shpTextInfo.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+shpTextInfo.textBorderClr = new BlackHole3D.REColor(0, 0, 0, 204);
+
+shpTextInfo.textBackMode = 2;
+
+shpTextInfo.textBackBorder = 2;
+
+shpTextInfo.textBackClr = new BlackHole3D.REColor(0, 0, 0, 204);
+
+//矢量点信息
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \"potShp001\";
+
+potShpInfo.pos = \[5.394, 14.598, 0.0\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.scrASDist = -1.0;
+
+potShpInfo.scrVisDist = -1.0;
+
+potShpInfo.contactSce = false;
+
+potShpInfo.textInfo = shpTextInfo;
+
+var addPosShpBool = BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+console.log(addPosShpBool);
+
+## addPolylineShp {#addpolylineshp .样式4}
+
+**功能：**
+
+创建一个自定义多边形自定义折线矢量
+
+**注：贴地效果会占用资源，大量数据请使用地形矢量效果，纹理材质仅限贴地效果使用，贴底模式不能作用在含有混合透明属性的资源上**
+
+**参数：**
+
+  ------------------- -------------------------------------------------------
+  ***lineShpInfo***   矢量线信息（RELineShpInfo 类型）
+
+  ------------------- -------------------------------------------------------
+
+**RELineShpInfo模型解析：**
+
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***shpName***       | 矢量标识名，若已有同名的矢量则覆盖之                                                                                               |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***potList***       | 表示多边形折线序列                                                                                                                 |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***fillState***     | 表示折线的填充状态：                                                                                                               |
+|                     |                                                                                                                                    |
+|                     | 0.  \>多边形不填充；                                                                                                               |
+|                     |                                                                                                                                    |
+|                     |     1-\>多边形首尾相连构成封闭区域进行填充；                                                                                       |
+|                     |                                                                                                                                    |
+|                     |     2-\>多边形首尾相连构成封闭区域进行填充(顶点高度自动修改为同一高度，默认为第一个顶点的高度)                                     |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***lineClr***       | 表示多边形的颜色（REColor 类型）                                                                                                   |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***fillClr***       | 表示多边形的填充颜色（REColor 类型）                                                                                               |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***textPos***       | 表示多边形的文字标注的位置：                                                                                                       |
+|                     |                                                                                                                                    |
+|                     | \>=0时，整数部分i/小数部分j：表示文字定位点在线段\<i,i+1\>上的偏移了长度百分比j                                                    |
+|                     |                                                                                                                                    |
+|                     | \[-1,0)表示文字定位在折线上并从首端点偏移折线总长度的百分比                                                                        |
+|                     |                                                                                                                                    |
+|                     | -2表示文字定位在多边形所有顶点的中心位置处                                                                                         |
+|                     |                                                                                                                                    |
+|                     | -3表示文字定位在多边形包围盒的中心位置处                                                                                           |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***textInfo***      | 表示顶点的文字标注信息（REShpTextInfo 类型）                                                                                       |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***scrASDist***     | 表示屏幕空间矢量的自动缩放起始距离                                                                                                 |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***scrVisDist***    | 表示屏幕空间矢量的可视距离                                                                                                         |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***contactSce***    | 表示矢量是否与场景发生深度遮挡                                                                                                     |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***groupName***     | 矢量组名称                                                                                                                         |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***projSce***       | 表示是否投影到地形，默认false                                                                                                      |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***proLineTex***    | 表示投影到地形线条的材质纹理, 默认不使用（**仅投影有效可用**）, **使用材质颜色lineClr参数不传递或者传递白色**                      |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***lineUnit***      | 表示线宽/线长使用的单位，默认像素长度（**仅投影且使用材质纹理有效可用**）, 0：表示像素长度, 1：表示世界空间长度(米)                |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***lineWidth***     | 表示线宽（**仅投影且使用材质纹理有效可用**）                                                                                       |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| ***lineTexLength*** | 表示线条上所贴的纹理的单位长度（**仅投影且使用材质纹理有效可用，实际线长大于单位长度则平铺效果，实际线长小于单位长度则裁切效果**） |
++---------------------+------------------------------------------------------------------------------------------------------------------------------------+
+
+**REShpTextInfo模型解析：**
+
+  ---------------------- -----------------------------------------------------
+  ***text***             表示文字的内容
+
+  ***texBias***          表示锚点文字与图片的相对位置，二维数组：
+                         第一维-1、0、1分别表示文字在点的左侧、中间、右侧；
+                         第二维-1、0、1分别表示文字在点的下侧、中间、上侧
+
+  ***fontName***         表示锚点的字体样式
+
+  ***textClr***          文字颜色（REColor 类型）
+
+  ***textBorderClr***    文字边框颜色（REColor 类型）
+
+  ***textBackMode***     表示文字背景的处理模式： 0：表示禁用文字背景
+                         1：表示启用文字背景，文字背景是文字所占的矩形区域
+
+  ***textBackBorder***   表示文字背景的边界带的像素宽度
+
+  ***textBackClr***      表示文本背景色（REColor 类型）
+  ---------------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+//矢量文字信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \"测试画线\";
+
+shpTextInfo.texBias = \[1, 0\];
+
+shpTextInfo.fontName = \"RealBIMFont001\";
+
+shpTextInfo.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+shpTextInfo.textBorderClr = new BlackHole3D.REColor(0, 0, 0, 128);
+
+shpTextInfo.textBackMode = 2;
+
+shpTextInfo.textBackBorder = 2;
+
+shpTextInfo.textBackClr = new BlackHole3D.REColor(0, 0, 0, 128);
+
+//矢量线信息
+
+var lineShpInfo = new BlackHole3D.RELineShpInfo();
+
+lineShpInfo.shpName = \"lineShp001\";
+
+lineShpInfo.potList = \[\[15.821551318975999, 17.619940136002967,
+0.000018728150966040857\],
+
+\[15.821551745332034, 18.969940110334004, 0.00001945166156147593\],
+
+\[13.771586103520088, 17.619892309623157, -0.00000452473561729505\]\];
+
+lineShpInfo.fillState = 1;
+
+lineShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+lineShpInfo.fillClr = new BlackHole3D.REColor(255, 255, 255, 128);
+
+lineShpInfo.textPos = -2;
+
+lineShpInfo.scrASDist = -1.0;
+
+lineShpInfo.scrVisDist = 300.0;
+
+lineShpInfo.contactSce = false;
+
+lineShpInfo.textInfo = shpTextInfo;
+
+var addlineShpBool = BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+
+console.log(addlineShpBool);
+
+// 贴底使用纹理
+
+//加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_osgb\',
+
+resourcesAddress:
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a1d83c0c8aceca56bf3874e8f2f7d39\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+//矢量文字信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \"测试画线\";
+
+shpTextInfo.fontName = \"RealBIMFont001\";
+
+shpTextInfo.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+//矢量线信息
+
+var lineShpInfo = new BlackHole3D.RELineShpInfo();
+
+lineShpInfo.shpName = \"lineShp001\";
+
+lineShpInfo.potList = \[\[96.2433526521798, -337.21167800944414,
+-102.86051011621315\],
+
+\[282.46313770629683, -312.0087282096053, -92.61778798745857\],
+
+\[264.81829752850064, -370.4429756670413, -95.13496442301555\]\];
+
+lineShpInfo.fillState = 0;
+
+lineShpInfo.groupName= \"a\";
+
+lineShpInfo.textInfo= shpTextInfo;
+
+lineShpInfo.projSce= true;
+
+lineShpInfo.proLineTex=
+\"https://demo.bjblackhole.com/demopage/examplesImgs/anc.png\";
+
+lineShpInfo.lineUnit= 1;
+
+lineShpInfo.lineWidth= 10;
+
+lineShpInfo.lineTexLength= 20;
+
+BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+
+## addPolyFenceShp {#addpolyfenceshp .样式4}
+
+**功能：**
+
+创建一个自定义多边形围栏
+
+**参数：**
+
+  ---- -------------------- ------------------------------------------------------
+   1   ***fenceShpInfo***   矢量围栏信息（REFenceShpInfo 类型）
+
+  ---- -------------------- ------------------------------------------------------
+
+**REFenceShpInfo模型解析：**
+
+  ------------------ -------------------------------------------------------
+  ***shpName***      矢量标识名，若已有同名的矢量则覆盖之
+
+  ***potList***      表示多边形折线顶点序列，xyzw, w分量表示端点处的围栏高度
+
+  ***isClose***      表示是否闭合
+
+  ***fenceClr***     表示多边形围栏的颜色（REColor 类型）
+
+  ***scrASDist***    表示屏幕空间矢量的自动缩放起始距离
+
+  ***scrVisDist***   表示屏幕空间矢量的可视距离
+
+  ***contactSce***   表示矢量是否与场景发生深度遮挡
+
+  ***groupName***    矢量组名称
+
+  ***texPath***      表示纹理路径
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+//矢量围栏信息
+
+var fenceShpInfo = new BlackHole3D.REFenceShpInfo();
+
+fenceShpInfo.shpName = \"fenceShp001\";
+
+fenceShpInfo.potList = \[\[14.717769348031592, 57.95791001082713,
+-0.000030016697266432857, 3\],
+
+\[11.833832403710415, 57.88562541960681, -0.000031201471490049926, 4\],
+
+\[12.011666543451309, 54.24507412739243, -0.00003062040975443381, 2\],
+
+\[14.82709974581475, 54.341189629415496, -0.00003190398601304878, 2\]\];
+
+fenceShpInfo.isClose = true;
+
+fenceShpInfo.fenceClr = new BlackHole3D.REColor(255, 255, 255, 128);
+
+fenceShpInfo.scrASDist = -1.0;
+
+fenceShpInfo.scrVisDist = 300.0;
+
+fenceShpInfo.contactSce = true;
+
+var addFenceeShpBool =
+BlackHole3D.Geometry.addPolyFenceShp(fenceShpInfo);
+
+console.log(addFenceeShpBool);
+
+## addPolyVolumeShp {#addpolyvolumeshp .样式4}
+
+**功能：**
+
+创建自定义多边形体积矢量
+
+**参数：**
+
+  ---- --------------------- -----------------------------------------------------
+   1   ***volumeShpInfo***   体积矢量信息（REVolumeShpInfo 类型）
+
+  ---- --------------------- -----------------------------------------------------
+
+**REVolumeShpInfo模型解析：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***shpName***      矢量标识名，若已有同名的矢量则覆盖之
+
+   2   ***groupName***    矢量组名称
+
+   3   ***potList***      表示多边形折线顶点序列，xyzw,
+                          w分量表示端点处的绝对高度
+
+   4   ***fenceClr***     表示多边形围栏的颜色（REColor 类型）
+
+   5   ***scrASDist***    表示屏幕空间矢量的自动缩放起始距离
+
+   6   ***scrVisDist***   表示屏幕空间矢量的可视距离
+
+   7   ***contactSce***   表示矢量是否与场景发生深度遮挡
+
+   8   ***genLine***      表示是否生成线矢量
+
+   9   ***lineClr***      表示线矢量颜色
+
+   10  ***lineWidth***    表示线矢量宽度
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+//体积矢量信息
+
+var volumeShpInfo = new BlackHole3D.REVolumeShpInfo();
+
+volumeShpInfo.shpName = \"volumeShp001\";
+
+volumeShpInfo.potList = \[\[14.717769348031592, 57.95791001082713, 4,
+3\],
+
+\[11.833832403710415, 57.88562541960681, 5, 4\],
+
+\[12.011666543451309, 54.24507412739243, 4, 2\],
+
+\[14.82709974581475, 54.341189629415496, 4, 2\]\];
+
+volumeShpInfo.fenceClr = new BlackHole3D.REColor(255, 255, 255, 128);
+
+volumeShpInfo.scrASDist = -1.0;
+
+volumeShpInfo.scrVisDist = 300.0;
+
+volumeShpInfo.contactSce = true;
+
+volumeShpInfo.genLine = true;
+
+volumeShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 128);
+
+volumeShpInfo.lineWidth = 2;
+
+var addVolumeShpBool =
+BlackHole3D.Geometry.addPolyVolumeShp(volumeShpInfo);
+
+console.log(addVolumeShpBool);
+
+## addPolyVolumeShpHor {#addpolyvolumeshphor .样式4}
+
+**功能：**
+
+创建自定义多边形体积矢量（水平）
+
+**参数：**
+
+  ---- --------------------- -----------------------------------------------------
+   1   ***volumeShpInfo***   体积矢量信息（REVolumeShpHorInfo 类型）
+
+  ---- --------------------- -----------------------------------------------------
+
+**REVolumeShpHorInfo模型解析：**
+
+  ---- ------------------ ----------------------------------------------------------
+   1   ***shpName***      矢量标识名，若已有同名的矢量则覆盖之
+
+   2   ***groupName***    矢量组名称
+
+   3   ***potList***      表示多边形折线序列点（必须为多边形首尾端点构成闭合区域）
+
+   4   ***minHeight***    表示Z轴上多边形体积的最小高度
+
+   5   ***maxHeight***    表示Z轴上多边形体积的最大高度
+
+   6   ***fenceClr***     表示多边形围栏的颜色（REColor 类型）
+
+   7   ***scrASDist***    表示屏幕空间矢量的自动缩放起始距离
+
+   8   ***scrVisDist***   表示屏幕空间矢量的可视距离
+
+   9   ***contactSce***   表示矢量是否与场景发生深度遮挡
+
+   10  ***genLine***      表示是否生成线矢量
+
+   11  ***lineClr***      表示线矢量颜色
+
+   12  ***lineWidth***    表示线矢量宽度
+  ---- ------------------ ----------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+//体积矢量信息
+
+var volumeShpInfo = new BlackHole3D.REVolumeShpHorInfo();
+
+volumeShpInfo.shpName = \"volumeShp002\";
+
+volumeShpInfo.potList = \[\[5.383515246504353, 38.96061150365045, 0\],
+
+\[8.522834191496631, 38.4990381279356, 0\],
+
+\[8.380334587255167, 33.95165196047751, 0\],
+
+\[4.7155933164953066, 34.81662803783975, 0\]\];
+
+volumeShpInfo.minHeight = 4;
+
+volumeShpInfo.maxHeight = 6;
+
+volumeShpInfo.fenceClr = new BlackHole3D.REColor(255, 255, 255, 128);
+
+volumeShpInfo.scrASDist = -1.0;
+
+volumeShpInfo.scrVisDist = 300.0;
+
+volumeShpInfo.contactSce = true;
+
+volumeShpInfo.genLine = true;
+
+volumeShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 128);
+
+volumeShpInfo.lineWidth = 2;
+
+var addVolumeShpBool =
+BlackHole3D.Geometry.addPolyVolumeShpHor(volumeShpInfo);
+
+console.log(addVolumeShpBool);
+
+## delShp {#delshp .样式4}
+
+**功能：**
+
+删除一个自定义矢量对象
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***shpName***   表示自定义矢量名称
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+var shpName = \"potShp001\";
+
+BlackHole3D.Geometry.delShp(shpName);
+
+## delAllShps {#delallshps .样式4}
+
+**功能：**
+
+删除所有的自定义矢量对象
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.Geometry.delAllShps();
+
+## getPotsNotInElems {#getpotsnotinelems .样式4}
+
+**功能：**
+
+判断顶点集合是否在指定的构件集合内，并返还不在指定构件集合内的顶点集合
+
+**参数：**
+
+  ---- ------------------ --------------------------------------------------------
+   1   ***dataSetId***    表示要处理的数据集，为空串则表示处理所有数据集
+
+   2   ***elemIdList***   表示要处理的构件id数组，若为空串则表示处理所有的构件id
+
+   3   ***potList***      表示要判断的顶点集合
+  ---- ------------------ --------------------------------------------------------
+
+**返回值：**
+
+数组，不在指定构件集合内的顶点集合。
+
+**调用示例：**
+
+var dataSetId = \"dataSetId01\";
+
+var elemIdList = \[684, 685, 686, 687\];
+
+var potList = \[\[21001559.75060378, -20091037.177998625,
+-3.53481759008978\],
+
+\[21001559.804146506, -20091020.742508937, -3.534819487695543\],
+
+\[21001556.62521952, -20091015.434710402, -3.535072640479207\],
+
+\[21001539.664617974, -20091013.005593244, -3.53507184860268\],
+
+\[21001531.680727087, -20091035.878917348, -1.34154536465282\],
+
+\[21001548.01155875, -20091023.784406953, -3.534515200947073\],
+
+\[21001555.416419413, -20091041.657161415, -3.5348201403919006\]\];
+
+var potsNotInElems = BlackHole3D.Geometry.getPotsNotInElems(dataSetId,
+elemIdList, potList);
+
+console.log(potsNotInElems);
+
+## delGroupShp {#delgroupshp .样式4}
+
+**功能：**
+
+删除某个组的所有自定义矢量对象
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+var groupName = \"group01\";
+
+BlackHole3D.Geometry.delGroupShp(groupName);
+
+## getAllGroupName {#getallgroupname .样式4}
+
+**功能：**
+
+获取所有的组名
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，所有组名称
+
+**调用示例：**
+
+BlackHole3D.Geometry.getAllGroupName();
+
+## 相机
+
+## setCamToShp {#setcamtoshp .样式4}
+
+**功能：**
+
+聚焦相机到指定的矢量对象
+
+**参数：**
+
++:-:+-------------------+----------------------------------------------------------------------------------+
+| 1 | ***shpName***     | 表示自定义矢量名称                                                               |
++---+-------------------+----------------------------------------------------------------------------------+
+| 2 | ***backwardAmp*** | 表示相机在锚点中心处向后退的强度                                                 |
+|   |                   |                                                                                  |
+|   |                   | \>=0.0                                                                           |
+|   |                   | 表示相机的后退距离相对于锚点覆盖范围的比例(若锚点覆盖范围无效则视为绝对后退距离) |
+|   |                   |                                                                                  |
+|   |                   | \<0.0 表示相机的后退距离的绝对值的负                                             |
++---+-------------------+----------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var shpName = \"potShp001\";
+
+var backwardAmp = 20;
+
+BlackHole3D.Geometry.setCamToShp(shpName, backwardAmp);
+
+## setCamToShpList {#setcamtoshplist .样式4}
+
+**功能：**
+
+聚焦相机到指定的矢量对象集合
+
+**参数：**
+
++:-:+-------------------+----------------------------------------------------------------------------------+
+| 1 | ***shpNameList*** | 表示自定义矢量名称集合                                                           |
++---+-------------------+----------------------------------------------------------------------------------+
+| 2 | ***backwardAmp*** | 表示相机在锚点中心处向后退的强度                                                 |
+|   |                   |                                                                                  |
+|   |                   | \>=0.0                                                                           |
+|   |                   | 表示相机的后退距离相对于锚点覆盖范围的比例(若锚点覆盖范围无效则视为绝对后退距离) |
+|   |                   |                                                                                  |
+|   |                   | \<0.0 表示相机的后退距离的绝对值的负                                             |
++---+-------------------+----------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var shpNameList = \[\"potShp001\"\];
+
+var backwardAmp = 20;
+
+BlackHole3D.Geometry.setCamToShpList(shpNameList, backwardAmp);
+
+## setCamToGroupShp {#setcamtogroupshp .样式4}
+
+**功能：**
+
+聚焦相机到指定的矢量组
+
+**参数：**
+
++:-:+-------------------+----------------------------------------------------------------------------------+
+| 1 | ***groupName***   | 矢量组标识                                                                       |
++---+-------------------+----------------------------------------------------------------------------------+
+| 2 | ***backwardAmp*** | 表示相机在锚点中心处向后退的强度                                                 |
+|   |                   |                                                                                  |
+|   |                   | \>=0.0                                                                           |
+|   |                   | 表示相机的后退距离相对于锚点覆盖范围的比例(若锚点覆盖范围无效则视为绝对后退距离) |
+|   |                   |                                                                                  |
+|   |                   | \<0.0 表示相机的后退距离的绝对值的负                                             |
++---+-------------------+----------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var groupName = \"group01\";
+
+var backwardAmp = 1.0;
+
+BlackHole3D.Geometry.setCamToGroupShp(groupName, backwardAmp);
+
+## 渲染设置
+
+## setShpClr {#setshpclr .样式4}
+
+**功能：**
+
+设置自定义矢量对象的颜色
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***shpName***   表示自定义矢量名称
+
+   2   ***shpClr***    颜色（REColor 类型）
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var shpName = \"potShp001\";
+
+var shpClr = new BlackHole3D.REColor(255, 0, 0, 128);
+
+BlackHole3D.Geometry.setShpClr(shpName, shpClr );
+
+## setShpPotCapture {#setshppotcapture .样式4}
+
+**功能：**
+
+设置矢量是否允许顶点捕捉
+
+**参数：**
+
+  ---- --------------- ---------------------------------------------------
+   1   ***enable ***   是否允许
+
+  ---- --------------- ---------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Geometry.setShpPotCapture(true);
+
+## getShpPotCapture {#getshppotcapture .样式4}
+
+**功能：**
+
+获取矢量是否允许顶点捕捉
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，允许顶点捕捉返回true, 不允许返回false
+
+**调用示例：**
+
+BlackHole3D.Geometry.getShpPotCapture();
+
+## setShpVisible {#setshpvisible .样式4}
+
+**功能：**
+
+设置一批自定义矢量的可见性
+
+**参数：**
+
+  --- ------------------- -------------------------------------------------------
+   1  ***shpNameList***   矢量标识集合
+
+   2  ***enable***        是否允许
+  --- ------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Geometry.setShpVisible(\[\"potShp001\"\],true);
+
+## getShpVisible {#getshpvisible .样式4}
+
+**功能：**
+
+获取某个自定义矢量的可见性
+
+**参数：**
+
+  --- --------------- -------------------------------------------------------
+   1  ***shpName***   矢量标识
+
+  --- --------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 可见返回true，不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Geometry.getShpVisible(\"potShp001\");
+
+## setGroupShpVisible {#setgroupshpvisible .样式4}
+
+**功能：**
+
+设置某个组的自定义矢量的可见性
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***groupName***   矢量组标识
+
+   2  ***enable***      是否允许
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Geometry.setGroupShpVisible(\"group01\",true);
+
+## getGroupShpVisible {#getgroupshpvisible .样式4}
+
+**功能：**
+
+获取某个组的自定义矢量的可见性
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***groupName***   矢量组标识
+
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 可见返回true，不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Geometry.getGroupShpVisible(\"group01\");
+
+## setGroupShpCanOverlap {#setgroupshpcanoverlap .样式4}
+
+**功能：**
+
+设置某个组矢量元素是否与主场景产生深度遮挡
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+   2   ***enable***      true:表示允许被遮挡；false：表示不允许被遮挡
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+空
+
+**调用示例：**
+
+BlackHole3D.Geometry.setGroupShpCanOverlap(\"group01\",false);
+
+## getGroupShpCanOverlap {#getgroupshpcanoverlap .样式4}
+
+**功能：**
+
+获取某个组矢量元素是否与主场景产生深度遮挡
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, true:表示允许被遮挡；false：表示不允许被遮挡
+
+**调用示例：**
+
+BlackHole3D.Geometry.getGroupShpCanOverlap(\"group01\");
+
+## setGroupShpVisDist {#setgroupshpvisdist .样式4}
+
+**功能：**
+
+设置某个组矢量元素的全局最大可视距离，超过该距离矢量会消失
+
+**参数：**
+
+  ---- ----------------- ----------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+   2   ***dist***        距离
+  ---- ----------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var groupName = \"group01\";
+
+var dist = 1000;
+
+BlackHole3D.Geometry.setGroupShpVisDist(groupName, dist);
+
+## getGroupShpVisDist {#getgroupshpvisdist .样式4}
+
+**功能：**
+
+获取某个组矢量元素的全局最大可视距离
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值, 最大可视距离
+
+**调用示例：**
+
+BlackHole3D.Geometry.getGroupShpVisDist(\"group01\");
+
+## setGroupShpAutoScaleDist {#setgroupshpautoscaledist .样式4}
+
+**功能：**
+
+设置某个组矢量元素的全局最小自动缩放距离，超过该距离矢量会自动减少清晰度
+
+**参数：**
+
+  ---- ----------------- ----------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+   2   ***dist***        距离
+  ---- ----------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var groupName = \"group01\";
+
+var dist = 1000;
+
+BlackHole3D.Geometry.setGroupShpAutoScaleDist(groupName, dist);
+
+## getGroupShpAutoScaleDist {#getgroupshpautoscaledist .样式4}
+
+**功能：**
+
+获取某个组矢量元素的全局最小自动缩放距离
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   矢量组标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值, 最小自动缩放距离
+
+**调用示例：**
+
+BlackHole3D.Geometry.getGroupShpAutoScaleDist(\"group01\");
+
+## setGroupShpProjSce {#setgroupshpprojsce .样式4}
+
+**功能：**
+
+设置某个组矢量元素是否投影地形
+
+**注：仅线（面）矢量有效**
+
+**参数：**
+
+  ----------------- -------------------------------------------------------
+  ***groupName***   矢量组标识
+
+  ***projSce***     是否投影地形
+  ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Geometry.setGroupShpProjSce(\"group01\", true);
+
+## setCustomShpPresetVisDist {#setcustomshppresetvisdist .样式4}
+
+**功能：**
+
+设置自定义矢量预设的可视距离（统一设置）
+
+**注：小于0时，表示无效；大于等于0时则统一使用该预设距离，如果设置了预设距离，且数值大于等于0，则表示自定义矢量接口中的可是距离参数无效**
+
+**参数：**
+
+  ------------------- -------------------------------------------------------
+  ***ptVisDist***     点可视距离
+
+  ***textVisDist***   文字可视距离
+
+  ***lineVisDist***   线可视距离
+
+  ***faceVisDist***   面可视距离
+  ------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 表示其他无效，所有的自定义矢量的文字可视距离统一设置成100
+
+BlackHole3D.Geometry.setCustomShpPresetVisDist(-1, 100, -1, -1);
+
+# 填挖方（Earthwork）
+
+## startCreate {#startcreate .样式4}
+
+**功能：**
+
+进入土方测量区域绘制状态，调用此接口后，即可开始绘制测量区域（鼠标左键点击绘制）
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Earthwork.startCreate()
+
+## endCreate {#endcreate .样式4}
+
+**功能：**
+
+退出土方测量区域绘制状态
+
+注：调用此接口后，会触发REEarthworkRgnFinish事件，当前绘制区域将会被清除
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Earthwork.endCreate()
+
+## getCnrsOfEarthworkRgn {#getcnrsofearthworkrgn .样式4}
+
+**功能：**
+
+获取土方测量绘制区域的顶点数组
+
+注：监听到 REEarthworkRgnFinish
+时间后即可获取，获取一次后系统会将顶点信息清除
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 当前挖填方区域的顶点数组
+
+**调用示例：**
+
+BlackHole3D.Earthwork.getCnrsOfEarthworkRgn();
+
+## parseData {#parsedata .样式4}
+
+**功能：**
+
+进行指定区域的填挖方计算
+
+注：调用此接口后，计算需要一个过程，在此期间会不停触发REEarthworkCalcProgress事件
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***potList***     表示挖填方区域顶点信息
+
+   2   ***elevation***   表示挖填方高度
+
+   3   *dataSetId*       表示参与计算的数据集标识
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var potList = \[\[6165.166335318995, -8768.082053712957,
+4.126687666849449\],
+
+\[6255.436495141696, -8762.714001408287, 3.747224011695323\],
+
+\[6261.891849508165, -8863.754471981883, 3.5461634837550378\],
+
+\[6167.587024474837, -8841.63394212601, 3.709711148089383\],
+
+\[6115.85852873034, -8798.714044359534, 3.296186976671123\]\];
+
+var elevation = 3;
+
+var dataSetId = \"dataSetId01\";
+
+BlackHole3D.Earthwork.parseData(potList, elevation, dataSetId);
+
+# BIM（BIM）
+
+## 构件属性
+
+## setElemAttr {#setelemattr .样式4}
+
+**功能：**
+
+改变构件属性，设置完成后永久有效，直到关闭三维图形窗口
+
+**参数：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***elemAttr***   构件的属性（REElemAttr类型）
+
+  ---- ---------------- ------------------------------------------------------
+
+**REElemAttr模型解析：**
+
+  ------------------------- ----------------------------------------------------------------------------------------------------
+  ***dataSetId***           数据集标识，为空字符串代表设置所有数据集的所有构件
+
+  ***elemIdList***          构件id集合，为空数组代表设置指定数据集的所有构件
+
+  ***elemClr***             构件颜色（REColor 类型）
+
+  ***clrWeight***           颜色权重, 此权重要使用必须配合颜色值存在（选填）
+
+  ***alphaWeight***         透明度权重, 此权重要使用必须配合透明度值存在（选填）
+
+  ***elemEmis***            表示构件的自发光强度，取值范围0\~255
+
+  ***elemEmisPercent***     表示构件自发光强度所占的权重，取值范围0\~255
+
+  ***elemSmooth***          表示构件的光泽度，取值范围0\~255
+
+  ***elemMetal***           表示构件的金属质感，取值范围0\~255
+
+  ***elemSmmePercent***     表示光泽度和金属质感的权重，取值范围0\~255
+
+  ***useNewAlpha***         是否作用设置的透明度信息，默认使用（elemClr为空，则不使用），设置对应信息必填此项，否则无效
+
+  ***useNewClr***           是否作用设置的颜色信息，默认使用（elemClr为空，则不使用），设置对应信息必填此项，否则无效
+
+  ***useNewEmis***          是否作用设置的自发光信息，默认使用（对应信息为空，则不使用），设置对应信息必填此项，否则无效
+
+  ***useNewSmoothMetal***   是否作用设置的光泽度金属性信息，默认使用（对应信息为空，则不使用），设置对应信息必填此项，否则无效
+  ------------------------- ----------------------------------------------------------------------------------------------------
+
+**REColor模型解析：**
+
+  ---- ------------- ------------------------------------------------------
+   1   ***red***     红色（取值范围0\~255）
+
+   2   ***green***   绿色（取值范围0\~255）
+
+   3   ***blue***    蓝色（取值范围0\~255）
+
+   4   ***alpha***   透明度（取值范围0\~255）
+  ---- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+1、改变所有数据集的所有构件颜色
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,255,0,204);
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+2、改变指定数据集的所有构件颜色
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,255,0,204);
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+3、只改变构件透明度（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,255,0,80);
+
+elemAttr.useNewAlpha = true;
+
+elemAttr.useNewClr = false;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+4、只改变构件颜色（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,255,0,80);
+
+elemAttr.useNewAlpha = false;
+
+elemAttr.useNewClr = true;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+5、只改变自发光（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemEmis = 255;
+
+elemAttr.elemEmisPercent = 255;
+
+elemAttr.useNewEmis = true;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+6、只改变光泽金属性（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemSmooth = 255;
+
+elemAttr.elemMetal = 255;
+
+elemAttr.elemSmmePercent = 255;
+
+elemAttr.useNewSmoothMetal= true;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+7、只改变颜色/透明度（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,255,0,80);
+
+elemAttr.useNewAlpha = true;
+
+elemAttr.useNewClr = true;
+
+elemAttr.useNewEmis = false;
+
+elemAttr.useNewSmoothMetal= false;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+8、只恢复颜色（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor();
+
+elemAttr.clrWeight = 0;
+
+elemAttr.useNewAlpha = false;
+
+elemAttr.useNewClr = true;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+9、只恢复透明度（保留其他）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor();
+
+elemAttr.alphaWeight = 0;
+
+elemAttr.useNewAlpha = true;
+
+elemAttr.useNewClr = false;
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+## getElemAttr {#getelemattr .样式4}
+
+**功能：**
+
+获取构件设置的属性信息
+
+**参数：**
+
+  ------- ------------------ ----------------------------------------------------
+   **1**  ***dataSetId***    数据集标识（必填）
+
+     2    ***elemIdList***   构件id集合，为空数组代表设置指定数据集的所有构件
+  ------- ------------------ ----------------------------------------------------
+
+**返回值：**
+
+对象类型（REElemAttr对象类型）
+
+  ------- ----------------------- ---------------------------------------------------
+     1    ***elemId***            构件id
+
+   **2**  ***elemClr***           构件颜色（REColor 类型）
+
+   **3**  ***clrWeight***         颜色权重
+
+   **4**  ***alphaWeight***       透明度权重
+
+   **5**  ***elemEmis***          表示构件的自发光强度，取值范围0\~255
+
+   **6**  ***elemEmisPercent***   表示构件自发光强度所占的权重，取值范围0\~255
+
+     7    ***elemSmooth***        表示构件的光泽度，取值范围0\~255
+
+   **8**  ***elemMetal***         表示构件的金属质感，取值范围0\~255
+
+   **9**  ***elemSmmePercent***   表示光泽度和金属质感的权重，取值范围0\~255
+  ------- ----------------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.BIM.getElemAttr(\"dataSet01\", \[1062,1014\]);
+
+## setElemAlpha {#setelemalpha .样式4}
+
+**功能：**
+
+改变构件透明度，颜色不变，设置完成后永久有效，直到关闭三维图形窗口
+
+**参数：**
+
+  ------- ------------------- ----------------------------------------------------
+     1    ***dataSetId***     数据集标识，为空字符串代表设置所有数据集的所有构件
+
+   **2**  ***elemIdList***    构件id集合，为空数组代表设置指定数据集的所有构件
+
+   **3**  ***elemAlpha***     构件透明度，取值范围0\~255
+
+   **4**  ***alphaWeight***   透明度权重, 此权重要使用必须配合透明度值存在（选填）
+  ------- ------------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setElemAlpha(\"dataSet01\",\[1062,1014\],204);
+
+## resetElemAttr {#resetelemattr .样式4}
+
+**功能：**
+
+恢复构件默认属性，设置完成后永久有效
+
+**参数：**
+
+  ---- ------------------ ----------------------------------------------------
+   1   ***dataSetId***    数据集标识，为空字符串代表设置所有数据集的所有构件
+
+   2   ***elemIdList***   构件id集合，为空数组代表设置指定数据集的所有构件
+  ---- ------------------ ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 恢复所有数据集的所有构件颜色和透明度
+
+BlackHole3D.BIM.resetElemAttr(\"\", \[\]);
+
+// 恢复指定数据集的所有构件的颜色和透明度
+
+BlackHole3D.BIM.resetElemAttr(\"dataSet01\", \[\]);
+
+// 恢复指定数据集的指定构件的颜色和透明度
+
+BlackHole3D.BIM.resetElemAttr(\"dataSet01\", \[1062,1014\]);
+
+## getElemHideState {#getelemhidestate .样式4}
+
+**功能：**
+
+判断一个构件透明度是否被设为0
+
+注：此接口仅对通过setElemAttr隐藏的构件有效
+
+**参数：**
+
+  ---- ----------------- ----------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+   2   ***elemId***      构件id
+  ---- ----------------- ----------------------------------------------------
+
+**返回值：**
+
+布尔值：返回true，表示被隐藏；返回false，表示未被隐藏
+
+**调用示例：**
+
+BlackHole3D.BIM.getElemHideState(\"dataSet01\", 1062);
+
+## getElemTotalBV {#getelemtotalbv .样式4}
+
+**功能：**
+
+根据构件id获取总包围盒信息
+
+**参数：**
+
+  --- ------------------ -------------------------------------------------------
+   1  ***dataSetId***    数据集标识，为空字符串代表设置所有数据集的所有构件
+
+   2  ***elemIdList***   构件id集合，为空数组代表设置指定数据集的所有构件
+  --- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+数组, 包围盒信息, 数组形式：\[Xmin, Xmax, Ymin, Ymax,Zmin, Zmax\]
+
+**调用示例：**
+
+// 获取所有数据集的所有构件的总包围盒信息
+
+BlackHole3D.BIM.getElemTotalBV(\"\", \[\]);
+
+// 获取指定数据集的所有构件的总包围盒信息
+
+BlackHole3D.BIM.getElemTotalBV(\"dataSet01\", \[\]);
+
+// 获取指定数据集的指定构件的总包围盒信息
+
+BlackHole3D.BIM.getElemTotalBV(\"dataSet01\", \[1062,1014\]);
+
+## getTotalBV {#gettotalbv .样式4}
+
+**功能：**
+
+根据数据集获取总包围盒信息
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，为空字符串代表设置所有数据集的所有构件
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数组, 包围盒信息, 数组形式：\[Xmin, Xmax, Ymin, Ymax,Zmin, Zmax\]
+
+**调用示例：**
+
+var aabbList = BlackHole3D.BIM.getTotalBV(\"dataSet01\");
+
+console.log(aabbList);
+
+## 选择集
+
+## setSelMode {#setselmode .样式4}
+
+**功能：**
+
+设置当前的选择类型
+
+**参数：**
+
++:-:+------------+-------------------------------------------------------+
+| 1 | ***mode*** | 等级                                                  |
+|   |            |                                                       |
+|   |            | 0：数据集                                             |
+|   |            |                                                       |
+|   |            | 1：构件级                                             |
++---+------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setSelMode(1);
+
+## getSelMode {#getselmode .样式4}
+
+**功能：**
+
+获取当前的选择类型
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，当前设置选择类型
+
+**调用示例：**
+
+BlackHole3D.BIM.getSelMode();
+
+## setSelElemsAttr {#setselelemsattr .样式4}
+
+**功能：**
+
+设置选择集的属性信息，包括颜色、透明度、是否可以穿透选中
+
+注：颜色和透明度权重为255，即不考虑本身属性信息，如需要本身的属性信息则使用setSelElemsBlendAttr接口
+
+**参数：**
+
+  ------- ----------------- ------------------------------------------------------------------------------------------
+     1    ***elemClr***     构件颜色（REColor 类型）
+
+   **2**  ***probeMask***   探测掩码（是否可以穿透选中，1: 不能穿透，0: 允许穿透,
+                            穿透模式需要配合Ctrl键或多选模式操作），默认为1
+
+   **3**  ***attrValid***   布尔变量，表示属性信息是否有效，若无效则选择集合将不采用该全局属性信息；默认有效（true）
+  ------- ----------------- ------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功为true，失败为false。
+
+**调用示例：**
+
+**可以在场景初始化完成后的任意时机调用**
+
+BlackHole3D.BIM.setSelElemsAttr(new
+BlackHole3D.REColor(255,255,0,255),0,true);
+
+## setSelElemsClr {#setselelemsclr .样式4}
+
+**功能：**
+
+单独设置选择集的颜色信息
+
+注：默认使用当前选择集的权重属性
+
+**参数：**
+
+  ---- --------------- ----------------------------------------------------
+   1   ***elemClr***   构件颜色（REColor 类型）
+
+  ---- --------------- ----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功为true，失败为false。
+
+**调用示例：**
+
+BlackHole3D.BIM.setSelElemsClr(new BlackHole3D.REColor(255,255,0,255));
+
+## setSelElemsAlpha {#setselelemsalpha .样式4}
+
+**功能：**
+
+单独设置选择集的透明度信息
+
+**参数：**
+
+  ------- ----------------- ----------------------------------------------------
+   **1**  ***elemAlpha***   构件透明度，取值范围0-255
+
+  ------- ----------------- ----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功为true，失败为false。
+
+**调用示例：**
+
+BlackHole3D.BIM.setSelElemsAlpha(128);
+
+## getSelElemsAttr {#getselelemsattr .样式4}
+
+**功能：**
+
+获取当前选择集的属性信息，包括颜色、透明度、是否可以穿透选中
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  ------- ----------------- ------------------------------------------------------------------------------------------
+     1    ***elemClr***     构件颜色（REColor 类型）
+
+   **2**  ***probeMask***   探测掩码（是否可以穿透选中，1: 不能穿透，0: 允许穿透,
+                            穿透模式需要配合Ctrl键或多选模式操作）
+
+   **3**  ***attrValid***   布尔变量，表示属性信息是否有效，若无效则选择集合将不采用该全局属性信息；默认有效（true）
+  ------- ----------------- ------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.BIM.getSelElemsAttr();
+
+## setSelElemsBlendAttr {#setselelemsblendattr .样式4}
+
+**功能：**
+
+设置选择集的混合信息
+
+**参数：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***elemAttr***   混合信息（RESelElemsBlendAttr类型）
+
+  ---- ---------------- ------------------------------------------------------
+
+**RESelElemsBlendAttr模型解析：**
+
+  ------- ------------------- ------------------------------------------------------------------------------------------
+     1    ***elemClr***       构件颜色（REColor 类型）
+
+   **2**  ***clrWeight***     颜色权重, 此权重要使用必须配合颜色值存在
+
+   **3**  ***alphaWeight***   透明度权重, 此权重要使用必须配合透明度值存在
+
+   **4**  ***probeMask***     探测掩码（是否可以穿透选中，1: 不能穿透，0: 允许穿透,
+                              穿透模式需要配合Ctrl键或多选模式操作）
+
+   **5**  ***attrValid***     布尔变量，表示属性信息是否有效，若无效则选择集合将不采用该全局属性信息；默认有效（true）
+  ------- ------------------- ------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功为true，失败为false。
+
+**调用示例：**
+
+**可以在场景初始化完成后的任意时机调用**
+
+var blendAttr = new BlackHole3D.RESelElemsBlendAttr();
+
+blendAttr.elemClr = new BlackHole3D.REColor(255, 0, 0, 204);
+
+blendAttr.clrWeight = 200;
+
+blendAttr.alphaWeight = 255;
+
+blendAttr.probeMask = 0;
+
+blendAttr.attrValid = true;
+
+BlackHole3D.BIM.setSelElemsBlendAttr(blendAttr);
+
+## getSelElemsBlendAttr {#getselelemsblendattr .样式4}
+
+**功能：**
+
+获取当前选择集的混合信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RESelElemsBlendAttr对象类型）
+
+  ------- ------------------- ------------------------------------------------------------------------------------------
+     1    ***elemClr***       构件颜色（REColor 类型）
+
+   **2**  ***clrWeight***     颜色权重
+
+   **3**  ***alphaWeight***   透明度权重
+
+   **4**  ***probeMask***     探测掩码（是否可以穿透选中，1: 不能穿透，0: 允许穿透,
+                              穿透模式需要配合Ctrl键或多选模式操作）
+
+   **5**  ***attrValid***     布尔变量，表示属性信息是否有效，若无效则选择集合将不采用该全局属性信息；默认有效（true）
+  ------- ------------------- ------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.BIM.getSelElemsBlendAttr();
+
+## resetSelElemsAttr {#resetselelemsattr .样式4}
+
+**功能：**
+
+重置选择集的属性信息为默认值
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，设置成功返回true
+
+**调用示例：**
+
+BlackHole3D.BIM.resetSelElemsAttr();
+
+## getSelElemIDs {#getselelemids .样式4}
+
+**功能：**
+
+获取当前选择集的构件ID集合
+
+注：支持同时返回多个项目的构件id集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，包裹（Object对象类型）
+
+  ------- ------------------ ------------------------------------------------------
+   **1**  ***dataSetId***    数据集标识
+
+     2    ***elemIdList***   构件id集合
+  ------- ------------------ ------------------------------------------------------
+
+**调用示例：**
+
+console.log(BlackHole3D.BIM.getSelElemIDs());
+
+## addToSelElems {#addtoselelems .样式4}
+
+**功能：**
+
+向当前选择集添加构件
+
+**注：选择模式必须处于构件模式下才有效**
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***dataSetId***    数据集标识，不能为空
+
+   2   ***elemIdList***   构件id集合，不能为空
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.addToSelElems(\"dataSet01\", \[1062,1014\]);
+
+## delFromSelElems {#delfromselelems .样式4}
+
+**功能：**
+
+从当前选择集合删除构件
+
+**注：数据集标识为空或者构件标识集合为空都代表删除所有选择集元素**
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***dataSetId***    数据集标识，为空字符串清空所有选择集
+
+   2   ***elemIdList***   构件id集合，为空数组串清空所有选择集
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//清空选择集
+
+BlackHole3D.BIM.delFromSelElems(\"\",\[\]);
+
+//删除指定构件
+
+BlackHole3D.BIM.delFromSelElems(\"dataSet01\",\[1062,1014\]);
+
+## delAllSelElems {#delallselelems .样式4}
+
+**功能：**
+
+清空选择集中的所有构件
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//清空选择集
+
+BlackHole3D.BIM.delAllSelElems();
+
+## getSelDataSetIDs {#getseldatasetids .样式4}
+
+**功能：**
+
+获取当前选择集中所有的数据集id
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，数据集id集合
+
+**调用示例：**
+
+BlackHole3D.BIM.getSelDataSetIDs();
+
+## addToSelDataSet {#addtoseldataset .样式4}
+
+**功能：**
+
+往当前选择集合添加数据集
+
+**注：选择模式必须处于数据集模式下才有效，接口：setSelMode**
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集唯一标识
+
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.addToSelDataSet(\"dataSet01\");
+
+## delFromSelDateSets {#delfromseldatesets .样式4}
+
+**功能：**
+
+从当前选择集合删除数据集
+
+**注：选择模式必须处于数据集模式下才有效**
+
+**参数：**
+
+  --- --------------------- -------------------------------------------------------
+   1  ***dataSetIdList***   数据集唯一标识集合
+
+  --- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let dataSetIdList = \[\"dataSet01\"\];
+
+BlackHole3D.BIM.delFromSelDateSets(dataSetIdList);
+
+## delAllSelDateSets {#delallseldatesets .样式4}
+
+**功能：**
+
+清空当前选择集中的所有数据集
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.delAllSelDateSets();
+
+## getDataSetAllElemIDs {#getdatasetallelemids .样式4}
+
+**功能：**
+
+获取某一个数据集的可见的元素id集合
+
+**参数：**
+
++:-:+-------------------+-------------------------------------------------------+
+| 1 | ***dataSetId***   | 数据集标识                                            |
++---+-------------------+-------------------------------------------------------+
+| 2 | ***visibalOnly*** | 表示是否去除当前设置透明度为0的构件id，布尔类型：     |
+|   |                   |                                                       |
+|   |                   | true:表示去除透明构件及设置无效的构件；               |
+|   |                   |                                                       |
+|   |                   | false:表示包含透明构件及设置无效的构件                |
++---+-------------------+-------------------------------------------------------+
+
+**返回值：**
+
+数组，构件ID集合
+
+**调用示例：**
+
+BlackHole3D.BIM.getDataSetAllElemIDs(\"dataSet01\",true);
+
+## getDiffVerElemIDs {#getdiffverelemids .样式4}
+
+**功能：**
+
+获取指定数据集内的子元素双版本比对的差异ID列表
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***diffType***  | 新版本相对于老版本的子元素对比类型                    |
+|   |                 |                                                       |
+|   |                 | 1：新增                                               |
+|   |                 |                                                       |
+|   |                 | 2：删除                                               |
+|   |                 |                                                       |
+|   |                 | 3：修改                                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+数组，构件ID集合（对应对比类型）
+
+**调用示例：**
+
+BlackHole3D.BIM.getDiffVerElemIDs(\"dataSet01\",3);
+
+## getAxisGridRegElem {#getaxisgridregelem .样式4}
+
+**功能：**
+
+获取轴网范围内的构件
+
+注：调用完成回调监听函数名称REElemSelRegFinish
+
+**参数：**
+
+  --- --------------- ----------------------------------------------------
+   1  ***regInfo***   轴网裁剪信息（RESelAxisGridRegInfo类型）
+
+  --- --------------- ----------------------------------------------------
+
+**RESelAxisGridRegInfo模型解析：**
+
+  ---- --------------------- ------------------------------------------------------------
+   1   ***dataSetId***       数据集标识
+
+   2   ***gridGroupName***   表示轴网所属组的唯一标识
+
+   3   ***gridNameList***    表示轴网的集合，要求轴网等于四个，并能够形成闭合多边形
+
+   4   ***offset***          表示四个轴网的偏移量，默认向多边形内部为负，多边形外部为正
+
+   5   ***minHeight***       表示Z轴上多边形裁剪区域的最小高度
+
+   6   ***maxHeight***       表示Z轴上多边形裁剪区域的最大高度
+
+   7   ***onlyVisible***     表示是否仅包含可见元素
+
+   8   ***includeInter***    表示是否包含与多边形区域边界相交的元素
+  ---- --------------------- ------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//添加轴网
+
+var infoList = \[\];
+
+var info1 = new BlackHole3D.REAxisGridInfo();
+
+info1.guid = \"001\";
+
+info1.name = \"B-10\";
+
+info1.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+info1.pos = \[\[10.0, 50.0, 0.0\], \[53.0, 7.0, 0.0\]\];
+
+infoList.push(info1);
+
+var info2 = new BlackHole3D.REAxisGridInfo();
+
+info2.guid = \"002\";
+
+info2.name = \"B-1\";
+
+info2.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+info2.pos = \[\[-20.0, 20.0, 0.0\], \[23.0, -23.0, 0.0\]\];
+
+infoList.push(info2);
+
+var info3 = new BlackHole3D.REAxisGridInfo();
+
+info3.guid = \"003\";
+
+info3.name = \"A-1\";
+
+info3.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+info3.pos = \[\[53.0, 7.0, 0.0\], \[23.0, -23.0, 0.0\]\];
+
+infoList.push(info3);
+
+var info4 = new BlackHole3D.REAxisGridInfo();
+
+info4.guid = \"004\";
+
+info4.name = \"A-10\";
+
+info4.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+info4.pos = \[\[10.0, 50.0, 0.0\], \[-20.0, 20.0, 0.0\]\];
+
+infoList.push(info4);
+
+BlackHole3D.AxisGrid.setData(\"AxisGrid01\", infoList);
+
+//添加轴网范围信息
+
+var regInfo = new BlackHole3D.RESelAxisGridRegInfo();
+
+regInfo.dataSetId = \"dataSet01\";
+
+regInfo.gridGroupName = \"AxisGrid01\";
+
+regInfo.gridNameList = \[\"B-10\", \"B-1\", \"A-1\", \"A-10\",\];
+
+regInfo.offset = \[0, 0, 0, 0\];
+
+regInfo.minHeight = 0.0;
+
+regInfo.maxHeight = 50.0;
+
+regInfo.onlyVisible = true;
+
+regInfo.includeInter = true;
+
+BlackHole3D.BIM.getAxisGridRegElem(regInfo);
+
+//添加选择范围监听回调
+
+document.addEventListener(\"REElemSelRegFinish\", REElemSelRegFinish);
+
+function REElemSelRegFinish(e) {
+
+console.log(\"获取范围内的构件回调完成\");
+
+BlackHole3D.BIM.setElemsValidState(\"dataSet01\", \[\],
+false);//全部置为无效
+
+BlackHole3D.BIM.setElemsValidState(\"dataSet01\", e.detail.elemids,
+true);//选出的对象置为有效
+
+}
+
+## getPolyFenceRegElem {#getpolyfenceregelem .样式4}
+
+**功能：**
+
+获取多边形范围内的构件
+
+注：调用完成回调监听函数名称REElemSelRegFinish
+
+**参数：**
+
+  --- --------------- ----------------------------------------------------
+   1  ***regInfo***   轴网裁剪信息（RESelPolyFenceRegInfo类型）
+
+  --- --------------- ----------------------------------------------------
+
+**RESelPolyFenceRegInfo模型解析：**
+
+  ---- -------------------- ----------------------------------------------------
+   1   ***dataSetId***      数据集标识
+
+   2   ***pointList***      多边形点集合（必须为多边形首尾端点构成闭合区域）
+
+   3   ***minHeight***      表示Z轴上多边形裁剪区域的最小高度
+
+   4   ***maxHeight***      表示Z轴上多边形裁剪区域的最大高度
+
+   5   ***onlyVisible***    表示是否仅包含可见元素
+
+   6   ***includeInter***   表示是否包含与多边形区域边界相交的元素
+  ---- -------------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//添加多边形范围信息
+
+var regInfo = new BlackHole3D.RESelPolyFenceRegInfo();
+
+regInfo.dataSetId = \"dataSet01\";
+
+regInfo.pointList = \[
+
+\[-20, 20, 0\],
+
+\[23, -23, 0\],
+
+\[53, 7, 0\],
+
+\[10, 50, 0\],
+
+\];
+
+regInfo.minHeight = 0.0;
+
+regInfo.maxHeight = 50.0;
+
+regInfo.onlyVisible = true;
+
+regInfo.includeInter = true;
+
+BlackHole3D.BIM.getPolyFenceRegElem(regInfo);
+
+//添加选择范围监听回调
+
+document.addEventListener(\"REElemSelRegFinish\", REElemSelRegFinish);
+
+function REElemSelRegFinish(e) {
+
+console.log(\"获取范围内的构件回调完成\", e.detail);
+
+BlackHole3D.BIM.setElemsValidState(\"dataSet01\", \[\],
+false);//全部置为无效
+
+BlackHole3D.BIM.setElemsValidState(\"dataSet01\", e.detail.elemids,
+true);//选出的对象置为有效
+
+}
+
+## setSelMarkClr {#setselmarkclr .样式4}
+
+**功能：**
+
+设置选中标记的颜色和透明度
+
+**参数：**
+
+  ---- --------------- ----------------------------------------------------
+   1   ***markClr***   标记颜色（REColor 类型）
+
+  ---- --------------- ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setSelMarkClr(new BlackHole3D.REColor(255,0,0,255));
+
+## getSelMarkClr {#getselmarkclr .样式4}
+
+**功能：**
+
+获取选中标记的颜色和透明度
+
+**参数：**
+
+无
+
+**返回值：**
+
+颜色类型，选中标记的颜色和透明度
+
+**调用示例：**
+
+BlackHole3D.BIM.getSelMarkClr();
+
+## 渲染设置
+
+## setElemsValidState {#setelemsvalidstate .样式4}
+
+**功能：**
+
+设置构件的有效性
+
+注：该接口只针对构件有效，对地形数据无效
+
+**参数：**
+
+  ------- ------------------ ---------------------------------------------------------------------------------------------
+     1    ***dataSetId***    表示要处理的数据集标识，为空串则表示处理所有数据集
+
+   **2**  ***elemIdList***   表示该项目对应的构件id数组，为空则表示该数据集下的全部构件
+
+   **3**  ***enable***       为true表示构件有效，为false表示构件无效，此时构件不可见，同时所有的接口操作都对这些构件无效
+  ------- ------------------ ---------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setElemsValidState(\"dataSet01\",\[1062,1014\],false);
+
+## setAutoLoadDist {#setautoloaddist .样式4}
+
+**功能：**
+
+设置项目的自动加载/卸载距离阈值
+
+注：为避免模型频繁加载、卸载，需设置缓冲带，范围越大越好，即卸载距离的绝对值大于加载距离绝对值的1.1倍以上即可
+
+**参数：**
+
+  --- ------------------- ----------------------------------------------------------------------------------------------------
+   1  ***dataSetId***     表示要处理的数据集标识，为空串则表示处理所有数据集
+
+   2  ***minLoadDist***   项目模型的最小加载距离，\>0表示绝对距离，\<0表示距离阈值相对于项目包围盒尺寸的倍数，=0表示永不卸载
+
+   3  ***maxLoadDist***   项目模型的最大加载距离，\>0表示绝对距离，\<0表示距离阈值相对于项目包围盒尺寸的倍数，=0表示永不卸载
+  --- ------------------- ----------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+var minLoadDist = 1000;
+
+var maxLoadDist = 2000;
+
+BlackHole3D.BIM.setAutoLoadDist(dataSetId, minLoadDist, maxLoadDist);
+
+## getAutoLoadDist {#getautoloaddist .样式4}
+
+**功能：**
+
+获取单项目的自动加载/卸载距离阈值
+
+**参数：**
+
+  --- ----------------- ------------------------------------------------------
+   1  ***dataSetId***   表示要处理的数据集标识，不能为空
+
+  --- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+单项目的自动加载/卸载距离阈值
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+BlackHole3D.BIM.getAutoLoadDist(dataSetId);
+
+## setElemDepthBias {#setelemdepthbias .样式4}
+
+**功能：**
+
+设置模型的深度偏移值
+
+**参数：**
+
+  --- ------------------ --------------------------------------------------------------------------------------
+   1  ***dataSetId***    数据集标识，为空字符串代表设置所有数据集的所有构件
+
+   2  ***elemIdList***   构件id集合，为空数组代表设置指定数据集的所有构件
+
+   3  ***depthBias***    深度偏移值,范围(-0.00001\~0.00001,默认为0,小于0表示优先渲染，绝对值越大，偏移量越大)
+  --- ------------------ --------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId = \"dataSet01\";
+
+var elemIdList = \[1062,1014\];
+
+var depthBias = -0.000009;
+
+BlackHole3D.BIM.setElemDepthBias(dataSetId, elemIdList, depthBias);
+
+## setElemTransform {#setelemtransform .样式4}
+
+**功能：**
+
+设置模型的仿射变换信息
+
+**参数：**
+
+  --- ----------------- --------------------------------------------------------------------
+   1  ***dataSetId***   数据集标识，为空字符串代表设置所有数据集的所有构件
+
+   2  ***scale***       模型的缩放系数，三元数，默认为\[1,1,1\]，xyz轴的缩放系数需保持一致
+
+   3  ***rotate***      模型的旋转系数，四元数，默认为\[0,0,0,1\]
+
+   4  ***offset***      模型的平移系数，三元数，默认为\[0,0,0\]
+  --- ----------------- --------------------------------------------------------------------
+
+**返回值：**
+
+布尔值
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+var scaleList= \[1,1,1\];
+
+var rotateList= \[0,0,0,1\];
+
+var offsetList= \[0,0,100\];
+
+BlackHole3D.BIM.setElemTransform(dataSetId, scaleList, rotateList,
+offsetList);
+
+## getElemTransform {#getelemtransform .样式4}
+
+**功能：**
+
+获取模型场景节点的仿射变换信息
+
+**参数：**
+
+  --- ----------------- ------------------------------------------------------
+   1  ***dataSetId***   数据集标识，为空串则表示处理所有数据集
+
+  --- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+**Object模型解析：**
+
+  ---- -------------- ----------------------------------------------------
+   2   ***scale***    模型的缩放系数，三元数
+
+   3   ***rotate***   模型的旋转系数，四元数
+
+   4   ***offset***   模型的平移系数，三元数
+  ---- -------------- ----------------------------------------------------
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+BlackHole3D.BIM.getElemTransform(dataSetId);
+
+## refreshDataSet {#refreshdataset .样式4}
+
+**功能：**
+
+刷新数据集模型
+
+注：针对当前加载的部分BIM模型，用来释放引擎窗口占用的硬件资源，设为true，则模型正常加载，设为false，则模型会自动卸载，再次设为true时，无需再次初始化，模型可立即再次加载。
+
+调用时间：引擎初次初始化完成后的任意时间
+
+**参数：**
+
+  --- ------------------- ------------------------------------------------------
+   1  ***dataSetId***     数据集标识，为空字符串代表设置所有数据集的所有构件
+
+   2  ***loadNewData***   表示刷新后是否重新加载数据
+  --- ------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+var loadNewData= false;
+
+BlackHole3D.BIM.refreshDataSet(dataSetId, loadNewData);
+
+## setBorderEmis {#setborderemis .样式4}
+
+**功能：**
+
+设置模型边缘高光属性。
+
+**参数：**
+
+  --- ----------------- ----------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+   2  ***amp***         表示边缘发光强度，范围（0\~1），建议设为0.1\~0.3左右即可
+
+   3  ***range***       表示边缘区域范围，（0\~n），建议设为0.5\~1左右即可
+  --- ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功为true，失败为false
+
+**调用示例：**
+
+//以下为一个完整的模型特效展示案例
+
+BlackHole3D.SkyBox.setEnable(false); //关掉默认天空盒
+
+BlackHole3D.SkyBox.setBackClr(new BlackHole3D.REColor(0,10,20,255));
+//设置天空盒背景颜色
+
+//设置所有的数据集模型的颜色和透明度
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"\";
+
+elemAttr.elemIdList = \[\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(21,209,237,128);
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+BlackHole3D.Common.setBorderEmisEnable(true); //开启边缘高光效果
+
+var dataSetId = \"dataSet01\";
+
+var amp = 0.5;
+
+var range = 1;
+
+BlackHole3D.BIM.setBorderEmis(dataSetId, amp, range); //设置边缘高光属性
+
+## getBorderEmis {#getborderemis .样式4}
+
+**功能：**
+
+获取模型边缘高光属性。
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数组，当前场景节点模型设置的边缘高光参数
+
+**调用示例：**
+
+BlackHole3D.BIM.getBorderEmis(dataSetId);
+
+## setMaxSmooth {#setmaxsmooth .样式4}
+
+**功能：**
+
+设置模型的最大光泽度
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+   2  ***smooth***      最大光泽度 取值范围\[0,1\]
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功为true，失败为false
+
+**调用示例：**
+
+BlackHole3D.BIM.setMaxSmooth(\"dataSet01\", 0.5);
+
+## getMaxSmooth {#getmaxsmooth .样式4}
+
+**功能：**
+
+获取模型的最大光泽度
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型
+
+**调用示例：**
+
+BlackHole3D.BIM.getMaxSmooth(\"dataSet01\");
+
+## setBorderLineNorLight {#setborderlinenorlight .样式4}
+
+**功能：**
+
+设置模型边界线是否启用法线光照的明暗效果
+
+**注：作用于轮廓线，可以提前设置也可以滞后设置**
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+   2  ***enable***      是否允许，默认允许
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 成功为true，失败为false
+
+**调用示例：**
+
+// 关闭效果
+
+BlackHole3D.BIM.setBorderLineNorLight(\"dataSet01\", false);
+
+//添加轮廓线
+
+BlackHole3D.BIM.setContourLineClr(\"dataSet01\", new
+BlackHole3D.REColor(255,0,0,255));
+
+## getBorderLineNorLight {#getborderlinenorlight .样式4}
+
+**功能：**
+
+获取模型边界线是否启用法线光照的明暗效果
+
+**参数：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***dataSetId***   数据集标识
+
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 启用为true，不启用为false
+
+**调用示例：**
+
+BlackHole3D.BIM.getBorderLineNorLight(\"dataSet01\");
+
+## setElemUVAnimAttr {#setelemuvanimattr .样式4}
+
+**功能：**
+
+设置模型内构件的UV动画属性
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***elemUVAnim***   构件UV动画信息（REElemUVAnim类型）
+
+  ---- ------------------ ------------------------------------------------------
+
+**REElemUVAnim模型解析：**
+
+  ------- ------------------ ----------------------------------------------------
+     1    ***dataSetId***    数据集标识，为空串则表示处理所有数据集
+
+   **2**  ***elemIdList***   构件id集合,为空数组则表示处理所有构件
+
+   **3**  ***scale***        UV缩放比例
+
+   **4**  ***speed***        UV移动速度，正值正方向，负值反方向，0不动
+  ------- ------------------ ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var anim = new BlackHole3D.REElemUVAnim();
+
+anim.dataSetId = \"dataSet01\";
+
+anim.elemIdList = \[37, 133\];
+
+anim.scale = \[1.0, 1.0\];
+
+anim.speed = \[-1.0, 0.0\];
+
+BlackHole3D.BIM.setElemUVAnimAttr(anim);
+
+## setElemUVVisible {#setelemuvvisible .样式4}
+
+**功能：**
+
+设置构件UV的显示和隐藏
+
+**参数：**
+
+  ------- ------------------ ----------------------------------------------------
+     1    ***dataSetId***    数据集标识，为空串则表示处理所有数据集
+
+   **2**  ***elemIdList***   构件id集合,为空数组则表示处理所有构件
+
+   **3**  ***visible***      显示类型，true显示，false不显示
+  ------- ------------------ ----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setElemUVVisible(\"dataSet01\",\[37, 133\],true);
+
+## setDiffCoef {#setdiffcoef .样式4}
+
+**功能：**
+
+设置模型的漫反射调节系数
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------------------------------------
+  ***dataSetId***   数据集标识，为空串则表示处理所有数据集
+
+  ***diffCoef***    漫反射调节系数，【red通道，green通道，blue通道】，默认1.0，**值越大越亮，值越小越暗**
+  ----------------- ---------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setDiffCoef(\"dataSet01\",\[10.0, 10.0, 10.0\]);
+
+## 骨骼动画
+
+## setElemToBone {#setelemtobone .样式4}
+
+**功能：**
+
+绑定一批构件到一个骨骼上
+
+**参数：**
+
+  ------- ------------------ -------------------------------------------------------
+     1    ***dataSetId***    数据集标识，为空字符串代表设置所有数据集的所有构件
+
+     2    ***elemIdList***   构件id集合，为空数组代表设置指定数据集的所有构件
+
+   **3**  ***boneId***       骨骼的全局id，整型，范围：1\~16384；
+  ------- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+var elemIdList= \[1062,1014\];
+
+var boneId= 1;
+
+BlackHole3D.BIM.setElemToBone(dataSetId,elemIdList, boneId);
+
+## getGolElemBoneNum {#getgolelembonenum .样式4}
+
+**功能：**
+
+获取系统中全局的骨骼总数
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值，系统中全局的骨骼总数
+
+**调用示例：**
+
+BlackHole3D.BIM.getGolElemBoneNum();
+
+## setGolElemBoneDestLoc {#setgolelembonedestloc .样式4}
+
+**功能：**
+
+设置全局骨骼的目标方位
+
+**参数：**
+
+  ---- ------------------- ------------------------------------------------------
+   1   ***boneLocInfo***   骨骼方位信息（REGolBoneLocInfo 类型）
+
+  ---- ------------------- ------------------------------------------------------
+
+**REGolBoneLocInfo模型解析：**
+
++:-:+---------------------+--------------------------------------------------------------------------------------------------------------------+
+| 1 | ***boneId***        | 表示骨骼全局ID，范围：1\~16384                                                                                     |
++---+---------------------+--------------------------------------------------------------------------------------------------------------------+
+| 2 | ***interval***      | 表示骨骼从当前方位过渡到目标方位所需的时长，单位为秒                                                               |
++---+---------------------+--------------------------------------------------------------------------------------------------------------------+
+| 3 | ***procBatch***     | 表示骨骼的方位过渡批次                                                                                             |
++---+---------------------+--------------------------------------------------------------------------------------------------------------------+
+| 4 | ***sendPostEvent*** | 表示骨骼方位过渡完毕后是否发送事件消息：                                                                           |
+|   |                     |                                                                                                                    |
+|   |                     | true发送事件，当前骨骼运动结束后会触发***REGolElemBoneDestLoc***事件，可得到当前骨骼的id、目标方位参数、批次等信息 |
++---+---------------------+--------------------------------------------------------------------------------------------------------------------+
+| 5 | ***destLoc***       | 表示骨骼的目标方位 (REBoneLoc 类型)                                                                                |
++---+---------------------+--------------------------------------------------------------------------------------------------------------------+
+
+**REBoneLoc模型解析：**
+
+  ---- ----------------------- --------------------------------------------------------------------------------------------------------
+   1   ***autoScale***         表示元素的自动缩放系数
+
+   2   ***localScale***        表示元素在以自身中心点为原点的局部世界空间中的缩放分量
+
+   3   ***localRotate***       表示元素在以自身中心点为原点的局部世界空间中的旋转分量(欧拉角：绕X/Y/Z轴的旋转角度-360.0\*k\~360.0\*j)
+
+   4   ***centerVirOrig***     表示元素中心点的缩放/旋转/平移变换所在的虚拟坐标系坐标原点的世界空间位置
+
+   5   ***centerVirScale***    表示元素中心点在虚拟坐标系下的缩放分量
+
+   6   ***centerVirRotate***   示元素中心点在虚拟坐标系下的旋转分量(欧拉角：绕X/Y/Z轴的旋转角度-360.0\*k\~360.0\*j)
+
+   7   ***centerVirOffset***   表示元素中心点在虚拟坐标系下的平移分量
+  ---- ----------------------- --------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true，失败返回false
+
+**调用示例：**
+
+//完整的爆炸动画示例
+
+//骨骼爆炸动画
+
+function animBone() {
+
+var dataSetId = \"dataSet01\";
+
+var elemIdList = \[\];
+
+var boneId = 1;
+
+BlackHole3D.BIM.setElemToBone(dataSetId, elemIdList, boneId);
+
+var aabbarr = BlackHole3D.BIM.getElemTotalBV(dataSetId, elemIdList);
+//数组形式：\[Xmin, Xmax, Ymin, Ymax,Zmin, Zmax\]
+
+var centerx = (aabbarr\[0\] + aabbarr\[1\]) / 2;
+
+var centery = (aabbarr\[2\] + aabbarr\[3\]) / 2;
+
+var centerz = (aabbarr\[4\] + aabbarr\[5\]) / 2;
+
+//骨骼的目标方位
+
+var destLoc = new BlackHole3D.REBoneLoc();
+
+destLoc.autoScale = \[0, 0, 0\];
+
+destLoc.localScale = \[1.0, 1.0, 1.0\];
+
+destLoc.localRotate = \[0.0, 0.0, 0.0\];
+
+destLoc.centerVirOrig = \[centerx, centery, centerz\];
+
+destLoc.centerVirScale = \[3.0, 3.0, 3.0\];
+
+destLoc.centerVirRotate = \[0.0, 0.0, 0.0\];
+
+destLoc.centerVirOffset = \[0.0, 0.0, 0.0\];
+
+//骨骼方位信息
+
+var boneLocInfo = new BlackHole3D.REGolBoneLocInfo();
+
+boneLocInfo.boneId = boneId;
+
+boneLocInfo.interval = 1
+
+boneLocInfo.procBatch = 0
+
+boneLocInfo.sendPostEvent = false;
+
+boneLocInfo.destLoc = destLoc;
+
+BlackHole3D.BIM.setGolElemBoneDestLoc(boneLocInfo);
+
+}
+
+## resetAllGolElemBoneDestLoc {#resetallgolelembonedestloc .样式4}
+
+**功能：**
+
+重置所有全局元素骨骼为默认方位
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.resetAllGolElemBoneDestLoc();
+
+## 轮廓线
+
+## setContourLineClr {#setcontourlineclr .样式4}
+
+**功能：**
+
+设置模型轮廓线
+
+**参数：**
+
++:-----:+-----------------+-------------------------------------------------------+
+| 1     | ***dataSetId*** | 数据集标识，为空串则表示处理所有数据集                |
++-------+-----------------+-------------------------------------------------------+
+| **2** | ***lineClr***   | 模型边界线颜色（REColor 类型）                        |
+|       |                 |                                                       |
+|       |                 | alpha==-1表示禁用边界线；                             |
+|       |                 |                                                       |
+|       |                 | alpha为\[0,255\]表示边界线颜色的权重系数              |
++-------+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.BIM.setContourLineClr(\"dataSet01\", new
+BlackHole3D.REColor(255,0,0,255));
+
+## getContourLineClr {#getcontourlineclr .样式4}
+
+**功能：**
+
+获取当前设置的轮廓线信息
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，为空串则表示处理所有数据集
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（REColor对象类型）
+
++:-:+-------------+---------------------------------------------------+
+| 1 | ***red***   | 红色                                              |
++---+-------------+---------------------------------------------------+
+| 2 | ***green*** | 绿色                                              |
++---+-------------+---------------------------------------------------+
+| 3 | ***blue***  | 蓝色                                              |
++---+-------------+---------------------------------------------------+
+| 4 | ***alpha*** | 透明度                                            |
+|   |             |                                                   |
+|   |             | alpha==-1表示禁用边界线；                         |
+|   |             |                                                   |
+|   |             | alpha为\[0,255\]表示边界线颜色的权重系数          |
++---+-------------+---------------------------------------------------+
+
+**调用示例：**
+
+BlackHole3D.BIM.getContourLineClr(\"dataSet01\")
+
+## setClipPlanesContourLineClr {#setclipplanescontourlineclr .样式4}
+
+**功能：**
+
+设置剖切面与模型相交的轮廓线颜色
+
+**参数：**
+
+  --- --------------- -------------------------------------------------------
+   1  ***lineClr***   轮廓线颜色（REColor 类型）
+
+  --- --------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.BIM.setClipPlanesContourLineClr(new
+BlackHole3D.REColor(255,255,255,128))
+
+## getClipPlanesContourLineClr {#getclipplanescontourlineclr .样式4}
+
+**功能：**
+
+获取剖切面与模型相交的轮廓线颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REColor对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***red***      红色
+
+   2   ***green***    绿色
+
+   3   ***blue***     蓝色
+
+   4   ***alpha***    表示颜色权重
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.BIM.getClipPlanesContourLineClr()
+
+# CAD（CAD）
+
+## 加载
+
+## loadCAD {#loadcad .样式4}
+
+**功能：**
+
+加载一张二维图纸，目前仅支持\*.dwg格式
+
+注：加载成功，会触发RECADLoad事件；要在RESystemEngineCreated监听事件之后调用
+
+**参数：**
+
++:-:+----------------+-------------------------------------------------------+
+| 1 | ***filePath*** | 图纸的资源发布路径                                    |
++---+----------------+-------------------------------------------------------+
+| 2 | ***unit***     | 图纸的单位 (RECadUnitEm 类型)（默认为米）：           |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Inch//英寸                                   |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Foot//英尺                                   |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Mile//英里                                   |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Millimeter//毫米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Centimeter//厘米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Meter//米                                    |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Kilometer//千米                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Microinch//微英寸                            |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Mil//毫英寸                                  |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Yard//码                                     |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Angstrom//埃                                 |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Nanometer//纳米                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Micron//微米                                 |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Decimeter//分米                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Decameter //十米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Hectometer//百米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Gigameter//百万公里                          |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Astro//天文                                  |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Lightyear//光年                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Parsec//天体                                 |
++---+----------------+-------------------------------------------------------+
+| 3 | ***scale***    | 图纸的比例尺信息（默认为1:1）                         |
++---+----------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//加载一张dwg格式的图纸，单位为米，比例尺为1:100
+
+BlackHole3D.setViewMode(BlackHole3D.REVpTypeEm.None,
+BlackHole3D.REVpTypeEm.CAD, BlackHole3D.REVpRankEm.Single);
+
+BlackHole3D.CAD.loadCAD(\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=res_cad/103-Floor
+Plan - 三层建筑平面图.dwg\", BlackHole3D.RECadUnitEm.CAD_UNIT_Meter,
+1.0);
+
+## unloadCAD {#unloadcad .样式4}
+
+**功能：**
+
+卸载所有CAD文件
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.unloadCAD()
+
+## addFillElem {#addfillelem .样式4}
+
+**功能：**
+
+添加颜色填充元素
+
+**参数：**
+
+  ------- ------------------ -------------------------------------------------------
+     1    ***fillElemId***   填充元素标识
+
+   **2**  ***pointList***    多边形点集合（二元数组集合，至少三个点构成面）
+
+   **3**  ***fillClr***      填充颜色（REColor 类型）
+  ------- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var pointList = \[
+
+\[0,0\],
+
+\[5.0,-2.5\],
+
+\[10.0,0.0\],
+
+\[12.5,5.0\],
+
+\[10.0,10.0\],
+
+\[5.0,12.5\],
+
+\[0.0,10.0\],
+
+\[-2.5,5.0\]
+
+\];
+
+var fillClr = new BlackHole3D.REColor(255,0,0,255);
+
+BlackHole3D.CAD.addFillElem(\"test01\", pointList, fillClr)
+
+## delFillElem {#delfillelem .样式4}
+
+**功能：**
+
+删除颜色填充元素
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***fillElemId***   填充元素标识
+
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.delFillElem(\"test01\")
+
+## getElemAttrs {#getelemattrs .样式4}
+
+**功能：**
+
+获取cad属性
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***elemId***   元素标识
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型（RECADAttr对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***tag***      表示属性名称
+
+   2   ***value***    表示属性值
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getElemAttrs(\'e8\');
+
+## getAttrElemIds {#getattrelemids .样式4}
+
+**功能：**
+
+根据cad属性查询cad图元标识
+
+**参数：**
+
+  ---- ------------ -------------------------------------------------------
+   1   ***attr***   属性（RECADAttr类型）
+
+  ---- ------------ -------------------------------------------------------
+
+**RECADAttr模型解析：**
+
+  ---- ---------------- -------------------------------------------------
+   1   ***tag***        表示属性名称
+
+   2   ***value***      表示属性值
+  ---- ---------------- -------------------------------------------------
+
+**返回值：**
+
+数组类型, 元素id集合
+
+**调用示例：**
+
+let attr = new BlackHole3D.RECADAttr();
+
+attr.tag = \"属性1\";
+
+attr.value = \"属性值\";
+
+BlackHole3D.CAD.getAttrElemIds(attr);
+
+## getCurAllLayer {#getcuralllayer .样式4}
+
+**功能：**
+
+获取cad当前所有图层信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型（RECADLayer对象类型）
+
+  ---- ----------------- ---------------------------------------------------
+   1   ***layerName***   表示图层名称
+
+   2   ***color***       表示图层颜色（REColor类型）
+
+   3   ***layerId***     图层标识
+
+   4   ***layerHide***   表示图层是否隐藏
+  ---- ----------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getCurAllLayer();
+
+## setLayerVisible {#setlayervisible .样式4}
+
+**功能：**
+
+设置显示隐藏图层
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***layerId***   图层标识
+
+   2   ***visible***   显示隐藏 true：显示 false：隐藏
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setLayerVisible(\"标识\", false);
+
+## setBgClr {#setbgclr .样式4}
+
+**功能：**
+
+设置cad背景颜色
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***color***   颜色（REColor 类型）
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setBgClr(new BlackHole3D.REColor(255, 0, 0, 255))
+
+## getElemsSearchText {#getelemssearchtext .样式4}
+
+**功能：**
+
+通过文字进行构件检索
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***searchText***   搜索文字
+
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+对象类型（RECADTextInfo对象类型）
+
+  ---- ---------------- -------------------------------------------------
+   1   ***elemId***     二维图元的id
+
+   2   ***text***       文字信息
+  ---- ---------------- -------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getElemsSearchText(\"WD\");
+
+## getLayoutLodRange {#getlayoutlodrange .样式4}
+
+**功能：**
+
+获取cad资源指定布局的lod范围
+
+**注：可以从 CAD.getAllLayoutId 获取所有的布局标识**
+
+**参数：**
+
+  ---------------- ----------------------------------------------------------
+  ***layoutId***   布局标识
+
+  ---------------- ----------------------------------------------------------
+
+**返回值：**
+
+二元素数组，\[最小级别,最大级别\]
+
+**调用示例：**
+
+BlackHole3D.CAD.getLayoutLodRange(\'S-1-00-001\')
+
+## setCurShowLodRange {#setcurshowlodrange .样式4}
+
+**功能：**
+
+设置当前加载布局显示限制的lod范围
+
+**注：需要在 CAD.getLayoutLodRange 获取的范围内设置**
+
+**参数：**
+
+  ------------ ----------------------------------------------------------
+  range        级别范围，二元素数组 \[最小级别,最大级别\]
+
+  ------------ ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCurShowLodRange(\[0, 8\]);
+
+## getCurShowLodRange {#getcurshowlodrange .样式4}
+
+**功能：**
+
+获取当前加载布局显示限制的lod范围
+
+**参数：**
+
+无
+
+**返回值：**
+
+二元素数组，\[最小级别,最大级别\]
+
+**调用示例：**
+
+BlackHole3D.CAD.getCurShowLodRange()
+
+## 相机
+
+## setCamLocateToElem {#setcamlocatetoelem-1 .样式4}
+
+**功能：**
+
+调整相机定位到一个二维图元
+
+**参数：**
+
+  ------- -------------- ---------------------------------------------------------------------
+     1    ***elemId***   二维图元的id
+
+   **2**  ***scale***    表示相机聚焦后的视口缩放比例，默认为1.0，该值越大，相机距离图元越远
+  ------- -------------- ---------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCamLocateToElem(\"e9\",1.0);
+
+## setCamLocateToAllElem {#setcamlocatetoallelem .样式4}
+
+**功能：**
+
+相机定位所有元素到当前屏幕
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCamLocateToAllElem();
+
+## setGroupShpAncScale {#setgroupshpancscale .样式4}
+
+**功能：**
+
+设置CAD矢量锚点的相机缩放边界值
+
+**参数：**
+
+  ------- ---------------- -------------------------------------------------------
+     1    ***groupId***    锚点组ID
+
+   **2**  ***minScale***   缩放最小边界（像素）
+
+   **3**  ***maxScale***   缩放最大边界（像素）
+  ------- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setGroupShpAncScale(\"group01\",10,100);
+
+## getDefaultViewportRange {#getdefaultviewportrange .样式4}
+
+**功能：**
+
+获取图纸默认视口（最大值最小值）
+
+**注**：如果没有布局默认标识Model
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型
+
+  ---- -------------------- ---------------------------------------------------
+   1   ***minPot***         视口左下角坐标
+
+   2   ***maxPot***         视口右上角坐标
+
+   3   ***currLayoutId***   布局标识
+  ---- -------------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getDefaultViewportRange();
+
+## getCurViewportRange {#getcurviewportrange .样式4}
+
+**功能：**
+
+获取当前视口范围（最大值最小值）
+
+**注**：如果没有布局默认标识Model
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型
+
+  ---- -------------------- ---------------------------------------------------
+   1   ***minPot***         视口左下角坐标
+
+   2   ***maxPot***         视口右上角坐标
+
+   3   ***currLayoutId***   布局标识
+  ---- -------------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getCurViewportRange();
+
+## setCurViewportRange {#setcurviewportrange .样式4}
+
+**功能：**
+
+设置当前视口范围及相机定位
+
+**注**：如果没有布局默认标识Model
+
+**参数：**
+
+  ------- -------------------- -------------------------------------------------------
+     1    ***minPot***         视口左下角坐标
+
+   **2**  ***maxPot***         视口右上角坐标
+
+   **3**  ***currLayoutId***   布局标识
+  ------- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCurViewportRange(\[-10,-10\],\[10,10\]);
+
+## setCamLocateToAreaComment {#setcamlocatetoareacomment .样式4}
+
+**功能：**
+
+调整相机定位到一个区域标注
+
+**参数：**
+
+  ------- --------------------- ---------------------------------------------------------------------
+     1    ***areaCommentId***   区域标注标识(字符串，唯一标识)
+
+   **2**  ***scale***           表示相机聚焦后的视口缩放比例，默认为1.0，该值越大，相机距离图元越远
+  ------- --------------------- ---------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCamLocateToAreaComment(\"areaCommentId_01\",1.0);
+
+## 属性信息
+
+## getElemBV {#getelembv .样式4}
+
+**功能：**
+
+获取cad图元包围盒
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***elemId***   二维图元的id
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型，【最小值点，最大值点】
+
+**调用示例：**
+
+BlackHole3D.CAD.getElemBV(\"e9\");
+
+## setBimCadMapPoints {#setbimcadmappoints .样式4}
+
+**功能：**
+
+设置Bim-Cad对齐映射点
+
+**注：在cad加载完成后设置**
+
+**参数：**
+
+  -------------------- ----------------------------------------------------------
+  ***bimPointList***   Bim顶点集合（三元素数组集合），需要三个点坐标构面
+
+  ***cadPointList***   Cad顶点集合（二元素数组集合），需要三个点坐标构面
+  -------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 添加事件
+
+document.addEventListener(\'RECADLoadFinish\', RECADLoadFinish);
+
+function RECADLoadFinish() {
+
+// 设置分屏视口
+
+BlackHole3D.setViewMode(BlackHole3D.REVpTypeEm.CAD,
+BlackHole3D.REVpTypeEm.BIM, BlackHole3D.REVpRankEm.LR);
+
+// 设置映射关系
+
+const bimPointList = \[
+
+\[18.045, 9.97, 3.118\],
+
+\[18.045, 9.97, 0.746\],
+
+\[15.612, 9.97, 0.746\],
+
+\];
+
+const cadPointList = \[
+
+\[-17.99, 3.109\],
+
+\[-17.99, 0.765\],
+
+\[-15.588, 0.765\],
+
+\];
+
+BlackHole3D.CAD.setBimCadMapPoints(bimPointList, cadPointList);
+
+}
+
+// 加载 BIM 资源
+
+const dataSetList = \[
+
+{
+
+dataSetId: \'bim\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a1544432b09cf4f27c1e7721d623c9a\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 加载 CAD 资源
+
+BlackHole3D.CAD.loadCAD(
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a1544432b09cf4f27c1e7721d623c9a/1/1_3040722.realcad\',
+
+BlackHole3D.RECadUnitEm.CAD_UNIT_Millimeter,
+
+1.0
+
+);
+
+## getBimToCadCamDir {#getbimtocadcamdir .样式4}
+
+**功能：**
+
+获取Bim映射Cad的相机朝向
+
+**注：需要先调用接口 setBimCadMapPoints 设置映射关系**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，相机朝向
+
+**调用示例：**
+
+BlackHole3D.CAD.getBimToCadCamDir();
+
+## getBimToCadPoint {#getbimtocadpoint .样式4}
+
+**功能：**
+
+获取Bim顶点映射Cad点
+
+**注：需要先调用接口 setBimCadMapPoints 设置映射关系**
+
+**参数：**
+
+  ---------------- ----------------------------------------------------------
+  ***bimPoint***   Bim顶点（三元素数组）
+
+  ---------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型，cad点数据
+
+**调用示例：**
+
+BlackHole3D.CAD.getBimToCadPoint(\[x,y,z\]);
+
+## getCadToBimPoint {#getcadtobimpoint .样式4}
+
+**功能：**
+
+Cad顶点映射Bim点
+
+**注：需要先调用接口 setBimCadMapPoints 设置映射关系**
+
+**参数：**
+
+  ---------------- ----------------------------------------------------------
+  ***cadPoint***   Cad顶点（二元素数组）
+
+  ---------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型，BIM点数据
+
+**调用示例：**
+
+BlackHole3D.CAD.getCadToBimPoint(\[x,y\]);
+
+## getCadToBimBV {#getcadtobimbv .样式4}
+
+**功能：**
+
+Cad包围盒信息映射Bim包围盒
+
+**注：需要先调用接口 setBimCadMapPoints 设置映射关系**
+
+**参数：**
+
+  ------------- ----------------------------------------------------------
+  ***cadBV***   cad对应的包围盒信息 \[\[minx, miny\], \[maxx, maxy\]\]
+
+  ------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型，BIM包围盒信息\[\[minx, miny, minz\], \[maxx, maxy, maxz\]\]
+
+**调用示例：**
+
+const cadBV = BlackHole3D.CAD.getElemBV(elemId);
+
+const bimBV = BlackHole3D.CAD.getCadToBimBV(cadBV);
+
+## getBimToCadBV {#getbimtocadbv .样式4}
+
+**功能：**
+
+Bim包围盒信息映射Cad包围盒
+
+**注：需要先调用接口 setBimCadMapPoints 设置映射关系**
+
+**参数：**
+
+  ------------- ----------------------------------------------------------
+  ***bimBV***   bim对应的包围盒信息 \[\[minx, miny, minz\], \[maxx, maxy,
+                maxz\]\]
+
+  ------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型，cad包围盒信息 \[\[minx, miny\], \[maxx, maxy\]\]
+
+**调用示例：**
+
+const bimBVArr = BlackHole3D.BIM.getElemTotalBV(\"bim\", \[elemId\]);
+
+const bimBV = \[\[bimBVArr\[0\], bimBVArr\[2\], bimBVArr\[4\]\],
+\[bimBVArr\[1\], bimBVArr\[3\], bimBVArr\[5\]\]\];
+
+const cadBV = BlackHole3D.CAD.getBimToCadBV(bimBV);
+
+## 选择集
+
+## selElem {#selelem .样式4}
+
+**功能：**
+
+选中一个二维图元，选中后该图元高亮
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***elemId***   二维图元的id
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//选择CAD图元
+
+BlackHole3D.CAD.selElem(\"e9\");
+
+## 锚点
+
+## addAnc {#addanc-1 .样式4}
+
+**功能：**
+
+添加锚点
+
+**注：**当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancList***   锚点信息集合（RECADAnc类型）
+
+  ---- --------------- -------------------------------------------------------
+
+**RECADAnc模型解析：**
+
+  ---- ---------------- ------------------------------------------------------------------------------------------------------------------------
+   1   ***anchorId***   锚点的名称(字符串，唯一标识)
+
+   2   ***pos***        锚点的位置，默认值 \[0,0,0\]
+
+   3   ***style***      锚点的样式，目前CAD锚点仅支持4种默认样式，分别以数字0\~3表示
+
+   4   ***innerClr***   内部元素颜色
+
+   5   ***extClr***     外部部元素颜色
+
+   6   ***layoutId***   布局标识，默认为Model，当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+  ---- ---------------- ------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+var ancList = \[\];
+
+var anc = new BlackHole3D.RECADAnc();
+
+anc.anchorId = \"anchor\";
+
+anc.layoutId = \"Model\";
+
+anc.pos = \[15, 15\];
+
+anc.style = 2;
+
+anc.innerClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+anc.extClr = new BlackHole3D.REColor(0, 255, 0, 255);
+
+ancList.push(anc);
+
+BlackHole3D.CAD.addAnc(ancList);
+
+## getAnc {#getanc-1 .样式4}
+
+**功能：**
+
+根据锚点id获取当前锚点的信息
+
+**注：**当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***anchorId***   根据锚点id获取当前锚点的信息
+
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（RECADAnc对象类型）
+
+  ---- ---------------- ------------------------------------------------------------------------------------------------------------------------
+   1   ***anchorId***   锚点的名称(字符串，唯一标识)
+
+   2   ***pos***        锚点的位置，默认值 \[0,0,0\]
+
+   3   ***style***      锚点的样式，目前CAD锚点仅支持4种默认样式，分别以数字0\~3表示
+
+   4   ***innerClr***   内部元素颜色
+
+   5   ***extClr***     外部部元素颜色
+
+   6   ***layoutId***   布局标识，默认为Model，当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+  ---- ---------------- ------------------------------------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getAnc(\"anchor\")
+
+## getAncNum {#getancnum-1 .样式4}
+
+**功能：**
+
+获取当前添加的锚点总数
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值, 当前添加的锚点总数
+
+**调用示例：**
+
+BlackHole3D.CAD.getAncNum()
+
+## getAllAnc {#getallanc-1 .样式4}
+
+**功能：**
+
+获取当前添加的全部锚点信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 当前添加的所有锚点的信息集合（RECADAnc类型）
+
+**调用示例：**
+
+var ancList = BlackHole3D.CAD.getAllAnc();
+
+for (let i = 0; i \< ancList.length; i++) {
+
+let cadAnc = ancList\[i\];
+
+console.log(cadAnc);
+
+}
+
+## delAnc {#delanc-1 .样式4}
+
+**功能：**
+
+删除锚点
+
+**参数：**
+
+  ---- -------------------- -------------------------------------------------------
+   1   ***anchorIdList***   锚点id数组
+
+  ---- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+//删除锚点
+
+var ancList = BlackHole3D.CAD.getAllAnc();
+
+var anc = ancList\[0\];
+
+var anchorIdList = \[anc.anchorId\];
+
+BlackHole3D.CAD.delAnc(anchorIdList);
+
+## delAllAnc {#delallanc-1 .样式4}
+
+**功能：**
+
+删除系统所有的CAD锚点
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+//删除所有锚点
+
+BlackHole3D.CAD.delAllAnc();
+
+## addShpAnc {#addshpanc .样式4}
+
+**功能：**
+
+添加一系列CAD矢量锚点
+
+**注：**当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***shpAncList***   矢量锚点集合（RECADShpAnc类型）
+
+  ---- ------------------ -------------------------------------------------------
+
+**RECADShpAnc模型解析：**
+
+  ---- ----------------- ------------------------------------------------------------------------------------------------------------------------
+   1   ***anchorId***    锚点的名称(字符串，唯一标识)
+
+   2   ***pos***         锚点的位置，默认值 \[0,0,0\]
+
+   3   ***shpPath***     表示使用的矢量文件路径
+
+   4   ***groupId***     表示锚点所属的组名称ID
+
+   5   ***text***        表示锚点的文字内容
+
+   6   ***textClr***     表示锚点文字的颜色
+
+   7   ***textSize***    文字的高度
+
+   8   ***textAlign***   表示锚点文字相对矢量图标的对齐方式（九宫格：以图片为中心\[0,0\]）
+
+   9   ***layoutId***    布局标识，默认为Model，当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+  ---- ----------------- ------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+//添加矢量锚点
+
+var arrCadAnc = \[\];
+
+var model = new BlackHole3D.RECADShpAnc();
+
+model.pos = \[1, 0\];
+
+model.text = \"test\";
+
+model.textClr = new BlackHole3D.REColor(255, 0, 255, 255);
+
+model.textSize = 16;
+
+model.shpPath =
+\"https://demo.bjblackhole.com/BlackHole3.0/imgs/1.svg\";
+
+model.groupId = \"group01\";
+
+model.anchorId = \"anchor001\";
+
+model.layoutId= \"Model\";
+
+model.textAlign = \[0, 0\];
+
+arrCadAnc.push(model);
+
+BlackHole3D.CAD.addShpAnc(arrCadAnc);
+
+## getShpAnc {#getshpanc .样式4}
+
+**功能：**
+
+根据锚点id获取矢量锚点的信息
+
+**注：**当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***anchorId***   表示添加的CAD矢量锚点id
+
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（RECADShpAnc对象类型）
+
+  ---- ----------------- ------------------------------------------------------------------------------------------------------------------------
+   1   ***anchorId***    锚点的名称(字符串，唯一标识)
+
+   2   ***pos***         锚点的位置，默认值 \[0,0,0\]
+
+   3   ***shpPath***     表示使用的矢量文件路径
+
+   4   ***groupId***     表示锚点所属的组名称ID
+
+   5   ***text***        表示锚点的文字内容
+
+   6   ***textClr***     表示锚点文字的颜色
+
+   7   ***textSize***    文字的高度
+
+   8   ***textAlign***   表示锚点文字相对矢量图标的对齐方式（九宫格：以图片为中心\[0,0\]）
+
+   9   ***layoutId***    布局标识，默认为Model，当设置为Model布局时如果锚点位置在子布局范围内，则当切换为子布局时会将锚点带入子布局，反之不生效
+  ---- ----------------- ------------------------------------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getShpAnc(\"anchor001\")
+
+## getShpAncNum {#getshpancnum .样式4}
+
+**功能：**
+
+获取当前添加的矢量锚点总数
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值, 当前添加的锚点总数
+
+**调用示例：**
+
+BlackHole3D.CAD.getShpAncNum()
+
+## getAllShpAnc {#getallshpanc .样式4}
+
+**功能：**
+
+获取当前添加的全部矢量锚点信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 当前添加的所有锚点的信息集合（RECADShpAnc类型）
+
+**调用示例：**
+
+var ancShpList = BlackHole3D.CAD.getAllShpAnc();
+
+for (let i = 0; i \< ancShpList.length; i++) {
+
+let cadShpAnc = ancShpList\[i\];
+
+console.log(cadShpAnc);
+
+}
+
+## delShpAnc {#delshpanc .样式4}
+
+**功能：**
+
+删除矢量锚点
+
+**参数：**
+
+  ---- -------------------- -------------------------------------------------------
+   1   ***anchorIdList***   锚点id数组
+
+  ---- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+//删除锚点
+
+var ancList = BlackHole3D.CAD.getAllShpAnc();
+
+var anc = ancList\[0\];
+
+var anchorIdList = \[anc.anchorId\];
+
+BlackHole3D.CAD.delShpAnc(anchorIdList);
+
+## delAllShpAnc {#delallshpanc .样式4}
+
+**功能：**
+
+删除系统所有的CAD矢量锚点
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+//删除所有矢量锚点
+
+BlackHole3D.CAD.delAllShpAnc();
+
+## getAllShpAncGroupIDs {#getallshpancgroupids .样式4}
+
+**功能：**
+
+获取所有矢量锚点组名
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 所有的锚点类型标识
+
+**调用示例：**
+
+BlackHole3D.CAD.getAllShpAncGroupIDs();
+
+## delGroupShpAnc {#delgroupshpanc .样式4}
+
+**功能：**
+
+根据组名删除一系列矢量锚点
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***groupId***   锚点组ID
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.CAD.delGroupShpAnc(\"group01\");
+
+## 标注
+
+## startCommentDraw {#startcommentdraw .样式4}
+
+**功能：**
+
+开启标注绘制（初始默认-箭头）
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.startCommentDraw();
+
+## endCommentDraw {#endcommentdraw .样式4}
+
+**功能：**
+
+结束标注绘制
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.endCommentDraw();
+
+## saveCurCommentDraw {#savecurcommentdraw .样式4}
+
+**功能：**
+
+保存当前绘制标注
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.saveCurCommentDraw();
+
+## cancelCurCommentDraw {#cancelcurcommentdraw .样式4}
+
+**功能：**
+
+取消当前绘制标注
+
+注：取消上次没有保存的所有操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.cancelCurCommentDraw();
+
+## setDrawingCommentStyle {#setdrawingcommentstyle .样式4}
+
+**功能：**
+
+设置当前标注绘制样式
+
+注：下次操作生效，标注添加完成回调事件 RECADCommentDrawFinish
+
+**参数：**
+
++:-:+-------------+-------------------------------------------------------+
+| 1 | ***style*** | 样式类型                                              |
+|   |             |                                                       |
+|   |             | 0：箭头                                               |
+|   |             |                                                       |
+|   |             | 1：云线框                                             |
+|   |             |                                                       |
+|   |             | 2：矩形                                               |
+|   |             |                                                       |
+|   |             | 3：椭圆                                               |
+|   |             |                                                       |
+|   |             | 4：文字**（需要调用 setTextCommentText 设置文字）**   |
++---+-------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setDrawingCommentStyle(2);
+
+## setTextCommentText {#settextcommenttext .样式4}
+
+**功能：**
+
+设置文字标注内容
+
+注：下次操作生效，标注添加完成回调事件 RECADCommentDrawFinish
+
+**参数：**
+
+  ---- ------------ -------------------------------------------------------
+   1   ***text***   文字内容 (换行请用\\n表示)
+
+  ---- ------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setTextCommentText(\"文字\");
+
+## setCommentLineWidth {#setcommentlinewidth .样式4}
+
+**功能：**
+
+设置标注线宽
+
+注：下次操作生效
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***width***   线宽
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCommentLineWidth(2.0);
+
+## setCommentColor {#setcommentcolor .样式4}
+
+**功能：**
+
+设置标注颜色
+
+注：下次操作生效
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***color***   颜色（REColor 类型）
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCommentColor(new BlackHole3D.REColor(255, 255, 0,
+255));
+
+## setCommentTextSize {#setcommenttextsize .样式4}
+
+**功能：**
+
+设置标注文字尺寸
+
+注：下次操作生效
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***width***   线宽
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCommentTextSize(15.0);
+
+## addAreaComment {#addareacomment .样式4}
+
+**功能：**
+
+添加区域标注
+
+**参数：**
+
+  ---- ---------------------- -----------------------------------------------------
+   1   ***areaComentInfo***   区域标注对象，（RECADAreaComment 类型）
+
+  ---- ---------------------- -----------------------------------------------------
+
+**RECADAreaComment模型解析：**
+
+  ---- --------------------- -------------------------------------------------
+   1   ***areaCommentId***   区域标注标识(字符串，唯一标识)
+
+   2   ***pointList***       二维顶点列表, 最少三个点，自动闭合
+
+   3   ***lineWith***        线宽, 0 :默认线宽
+
+   4   ***lineClr***         线条颜色
+
+   5   ***needFill***        是否需要填充，默认不需要
+
+   6   ***fillClr***         填充颜色，needFill=true 有效
+  ---- --------------------- -------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var areaComentInfo = new BlackHole3D.RECADAreaComment();
+
+areaComentInfo.areaCommentId = \"areaCommentId_01\";
+
+areaComentInfo.pointList = \[\[-160, 277\], \[-65, 229\], \[-168,
+195\]\];
+
+areaComentInfo.lineWith = 5;
+
+areaComentInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+areaComentInfo.needFill = true;
+
+areaComentInfo.fillClr = new BlackHole3D.REColor(0, 255, 0, 255);
+
+BlackHole3D.CAD.addAreaComment(areaComentInfo);
+
+## delAreaComment {#delareacomment .样式4}
+
+**功能：**
+
+删除区域标注
+
+**参数：**
+
+  ---- --------------------- -----------------------------------------------------
+   1   ***areaCommentId***   区域标注标识(字符串，唯一标识)
+
+  ---- --------------------- -----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.delAreaComment(\"areaCommentId_01\");
+
+## 测量
+
+## startMeasurementDraw {#startmeasurementdraw .样式4}
+
+**功能：**
+
+开启测量绘制
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.startMeasurementDraw();
+
+## endMeasurementDraw {#endmeasurementdraw .样式4}
+
+**功能：**
+
+结束测量绘制
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.endMeasurementDraw();
+
+## saveCurMeasurementDraw {#savecurmeasurementdraw .样式4}
+
+**功能：**
+
+保存当前测量绘制
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.saveCurMeasurementDraw();
+
+## cancelCurMeasurementDraw {#cancelcurmeasurementdraw .样式4}
+
+**功能：**
+
+取消当前测量绘制
+
+注：取消上次没有保存的所有操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.cancelCurMeasurementDraw();
+
+## delAllMeasurementDraw {#delallmeasurementdraw .样式4}
+
+**功能：**
+
+删除所有测量
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.delAllMeasurementDraw();
+
+## setMeasurementStyle {#setmeasurementstyle .样式4}
+
+**功能：**
+
+设置测量样式
+
+注：下次操作生效
+
+**参数：**
+
++:-:+-------------+-------------------------------------------------------+
+| 1 | ***style*** | 类型                                                  |
+|   |             |                                                       |
+|   |             | 0：单次长度测量                                       |
+|   |             |                                                       |
+|   |             | 1：连续长度测量                                       |
++---+-------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setMeasurementStyle(1);
+
+## getLengthMeasurementInfo {#getlengthmeasurementinfo .样式4}
+
+**功能：**
+
+获取长度测量信息
+
+注：只能返回单次测量，连续测量不支持返回
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***measureId***   测量标识 通过RECADMeasurementDrawFinish事件获取
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型
+
+  ---- ------------------- ---------------------------------------------------
+   1   ***totalLength***   总长度
+
+   2   ***differX***       x轴差值
+
+   3   ***differY***       y轴差值
+  ---- ------------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.CAD.getLengthMeasurementInfo(\"测量标识\");
+
+## 布局
+
+## getAllLayoutId {#getalllayoutid .样式4}
+
+**功能：**
+
+获取所有布局标识
+
+**注**：如果没有布局默认标识Model
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，布局标识集合
+
+**调用示例：**
+
+BlackHole3D.CAD.getAllLayoutId();
+
+## getCurLayoutId {#getcurlayoutid .样式4}
+
+**功能：**
+
+获取当前显示布局标识
+
+**注**：如果没有布局默认标识Model
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，当前布局标识
+
+**调用示例：**
+
+BlackHole3D.CAD.getCurLayoutId();
+
+## getDefaultLayoutId {#getdefaultlayoutid .样式4}
+
+**功能：**
+
+获取默认布局标识
+
+**注**：如果没有布局默认标识Model
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，默认布局标识
+
+**调用示例：**
+
+BlackHole3D.CAD.getDefaultLayoutId();
+
+## setCurShowLayout {#setcurshowlayout .样式4}
+
+**功能：**
+
+切换当前显示布局
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***layoutId***   布局标识
+
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.CAD.setCurShowLayout(\"Model\");
+
+# 瓦片（Grid）
+
+## 渲染设置
+
+## setDataSetAlpha {#setdatasetalpha .样式4}
+
+**功能：**
+
+设置某一块或全部的瓦片模型的透明度
+
+**注：当前仅支持倾斜摄影和上传资源后缀为.zip或者通过Terrain.getDataSetTerrId接口返回参数不存在的数据**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，为空则表示处理全部数据集
+
+   2   ***alpha***       目标透明度，整型，范围0\~255，0表示全透
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置某块地形为透明
+
+var dataSetId = \"\";
+
+var alpha = 0;
+
+BlackHole3D.Grid.setDataSetAlpha(dataSetId, alpha);
+
+## getDataSetAlpha {#getdatasetalpha .样式4}
+
+**功能：**
+
+获取当前设置的某一块或全部的瓦片模型的透明度
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值，当前设置的透明度，范围0\~255，如果没有设置，则该返回值为0
+
+**调用示例：**
+
+//获取当前设置的某块地形的透明度
+
+var dataSetId = \"\";
+
+BlackHole3D.Grid.getDataSetAlpha(dataSetId);
+
+## setDataSetDepthBias {#setdatasetdepthbias .样式4}
+
+**功能：**
+
+设置地形场景的深度偏移
+
+**参数：**
+
+  --- ----------------- ----------------------------------------------------------------------------------------
+   1  ***dataSetId***   数据集标识，为空字符串则默认处理当前加载的第一个数据集
+
+   2  ***depthBias***   深度偏移值，范围(-0.00001\~0.00001,默认为0；小于0表示优先渲染；绝对值越大，偏移量越大)
+  --- ----------------- ----------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId = \"dataSet01\";
+
+var depthBias = -0.000009;
+
+BlackHole3D.Grid.setDataSetDepthBias(dataSetId, depthBias);
+
+## refreshDataSet {#refreshdataset-1 .样式4}
+
+**功能：**
+
+针对当前加载的地形场景，用来释放引擎窗口占用的硬件资源
+
+注：设为true，则模型正常加载，设为false，则模型会自动卸载，再次设为true时，无需再次初始化，模型可立即再次加载。
+
+调用时间：引擎初次初始化完成后的任意时间
+
+**参数：**
+
+  --- ------------------- ------------------------------------------------------
+   1  ***dataSetId***     数据集标识，为空字符串则表示处理全部数据集
+
+   2  ***loadNewData***   表示刷新后是否重新加载数据
+  --- ------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var loadNewData = false;
+
+var dataSetId = \"dataSet01\";
+
+BlackHole3D.Grid.refreshDataSet(dataSetId,loadNewData );
+
+## setDataSetClr {#setdatasetclr .样式4}
+
+**功能：**
+
+设置某一块或全部的非BIM模型的颜色
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，为空则表示处理全部数据集
+
+   2   ***clr***         表示新的颜色（REColor 类型）
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置某块地形为绿色
+
+var dataSetId = \"dataSet01\";
+
+var clr = new BlackHole3D.REColor(0, 255, 0);
+
+BlackHole3D.Grid.setDataSetClr(dataSetId, clr);
+
+## resetDataSetClr {#resetdatasetclr .样式4}
+
+**功能：**
+
+重置某一块或全部的非BIM模型的颜色
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，为空则表示处理全部数据集
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId = \"dataSet01\";
+
+BlackHole3D.Grid.resetDataSetClr(dataSetId);
+
+## setDataSetTrans {#setdatasettrans .样式4}
+
+**功能：**
+
+设置瓦片模型的仿射变换信息
+
+**参数：**
+
+  --- ----------------- ------------------------------------------------------------
+   1  ***dataSetId***   数据集标识，为空字符串则表示处理全部数据集
+
+   2  ***scale***       模型的缩放系数，默认为\[1,1,1\]，xyz轴的缩放系数需保持一致
+
+   3  ***rotate***      模型的旋转系数，四元数，默认为\[0,0,0,1\]
+
+   4  ***offset***      模型的平移系数，默认为\[0,0,0\]
+  --- ----------------- ------------------------------------------------------------
+
+**返回值：**
+
+布尔值
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+var scale= \[1,1,1\];
+
+var rotate= \[0,0,0,1\];
+
+var offset= \[0,0,100\];
+
+BlackHole3D.Grid.setDataSetTrans(dataSetId, scale, rotate, offset);
+
+## getDataSetTrans {#getdatasettrans .样式4}
+
+**功能：**
+
+获取瓦片模型的仿射变换信息
+
+**参数：**
+
+  --- ----------------- ------------------------------------------------------
+   1  ***dataSetId***   数据集标识，为空串则表示处理所有数据集
+
+  --- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+**Object模型解析：**
+
+  ---- -------------- ----------------------------------------------------
+   2   ***scale***    模型的缩放系数，三元数
+
+   3   ***rotate***   模型的旋转系数，四元数
+
+   4   ***offset***   模型的平移系数，三元数
+  ---- -------------- ----------------------------------------------------
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+BlackHole3D.Grid.getDataSetTrans(dataSetId);
+
+## getDataSetBV {#getdatasetbv .样式4}
+
+**功能：**
+
+根据数据集id获取总包围盒信息
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，为空字符串则表示处理全部数据集
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+包围盒信息，数组形式：\[Xmin, Xmax, Ymin, Ymax,Zmin, Zmax\]
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+BlackHole3D.Grid.getDataSetBV(dataSetId);
+
+## setDataSetToHeight {#setdatasettoheight .样式4}
+
+**功能：**
+
+将地形场景节点投影到指定高度
+
+**参数：**
+
++:-:+-----------------+---------------------------------------------------------------------------------+
+| 1 | ***dataSetId*** | 要处理的数据集标识，为空字符串则表示处理全部数据集                              |
++---+-----------------+---------------------------------------------------------------------------------+
+| 2 | ***type***      | 表示投影类型                                                                    |
++---+-----------------+---------------------------------------------------------------------------------+
+| 3 | ***height***    | type==0：表示地形组禁止投射到固定高度;                                          |
+|   |                 |                                                                                 |
+|   |                 | type==1：height表示世界空间绝对高度;                                            |
+|   |                 |                                                                                 |
+|   |                 | type==2：height表示当前地形节点自身包围盒的相对高度范围(0\~1);                  |
+|   |                 |                                                                                 |
+|   |                 | type==3：height表示整个场景的地形节点总包围盒的相对高度范围(0\~1)               |
++---+-----------------+---------------------------------------------------------------------------------+
+| 4 | ***amp***       | 表示将地形投射到指定高度的投射强度(0\~1)                                        |
+|   |                 |                                                                                 |
+|   |                 | 例：通过type、height两个参数计算出来地形的某一个点到设定的拍平平面距离为100米： |
+|   |                 |                                                                                 |
+|   |                 | amp=1，该范围全部拍平到设定的高度；                                             |
+|   |                 |                                                                                 |
+|   |                 | amp=0，该范围全部拍平强度为0，该范围的高程保持不变；                            |
+|   |                 |                                                                                 |
+|   |                 | amp=0.5，该范围内所有的点向拍平方向缩放100\*0.5=50米；                          |
++---+-----------------+---------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var dataSetId= \"dataSet01\";
+
+var type= 1;
+
+var height= 0;
+
+var amp= 1;
+
+BlackHole3D.Grid.setDataSetToHeight(dataSetId,type,height,amp);
+
+## setValidState {#setvalidstate .样式4}
+
+**功能：**
+
+设置瓦片的有效性
+
+**注：可以做显示隐藏的处理，相比Grid.setDataSetAlpha效率更高**
+
+**参数：**
+
+  ------- ----------------- -----------------------------------------------------------------------------
+     1    ***dataSetId***   表示要处理的数据集标识，为空串则表示处理所有数据集
+
+   **2**  ***enable***      为true表示有效，为false表示无效，不可见，同时所有的接口操作都对这些瓦片无效
+  ------- ----------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Grid.setValidState(\"dataSet01\",false);
+
+## getValidState {#getvalidstate .样式4}
+
+**功能：**
+
+获取栅格的有效性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   表示要处理的数据集标识，为空串则表示处理所有数据集
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，true：有效 法false：无效
+
+**调用示例：**
+
+BlackHole3D.Grid.getValidState(\"dataSet01\");
+
+## setTerrSkirtAmp {#setterrskirtamp .样式4}
+
+**功能：**
+
+设置瓦片的裙带强度
+
+**参数：**
+
+  ------- ----------------- ------------------------------------------------------
+     1    ***dataSetId***   表示要处理的数据集标识，为空串则表示处理所有数据集
+
+   **2**  ***amp***         表示将地形裙带强度(0\~1)
+  ------- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Grid.setTerrSkirtAmp(\"dataSet01\",0.5);
+
+## getTerrSkirtAmp {#getterrskirtamp .样式4}
+
+**功能：**
+
+获取瓦片的裙带强度
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   表示要处理的数据集标识，为空串则表示处理所有数据集
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值，当前裙带强度，范围0\~1
+
+**调用示例：**
+
+BlackHole3D.Grid.getTerrSkirtAmp(\"dataSet01\");
+
+## setDiffCoef {#setdiffcoef-1 .样式4}
+
+**功能：**
+
+设置模型的漫反射调节系数
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------------------------------------
+  ***dataSetId***   数据集标识，为空串则表示处理所有数据集
+
+  ***diffCoef***    漫反射调节系数，【red通道，green通道，blue通道】，默认1.0，**值越大越亮，值越小越暗**
+  ----------------- ---------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Grid.setDiffCoef(\"dataSet01\",\[2.0, 2.0, 2.0\]);
+
+## 剖切
+
+## setClipEnable {#setclipenable .样式4}
+
+**功能：**
+
+设置地形模型是否可剖切
+
+**参数：**
+
+  ---- -------------- ---------------------------------------------------------
+   1   ***enable***   是否允许剖切，true表示习性可剖切，false表示地形不可剖切
+
+  ---- -------------- ---------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Grid.setClipEnable(true)
+
+## getClipEnable {#getclipenable .样式4}
+
+**功能：**
+
+获取当前地形是否可剖切
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，地形可剖切返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Grid.getClipEnable(true)
+
+# 地形（Terrain）
+
+## 渲染设置
+
+## getUnitImgShpAlone {#getunitimgshpalone .样式4}
+
+**功能：**
+
+获取项目内地形数据层单元是否需要独立镂空显示(将禁用影像图片显示)
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集的唯一标识名
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitImgShpAlone(\"地形系统\")
+
+## setUnitLayerlev {#setunitlayerlev .样式4}
+
+**功能：**
+
+设置地形数据层单元的层级别
+
+**参数：**
+
++:-:+-----------------+--------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集标识                                                                                                               |
++---+-----------------+--------------------------------------------------------------------------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识                                                                                                               |
++---+-----------------+--------------------------------------------------------------------------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：                                                                                  |
+|   |                 |                                                                                                                          |
+|   |                 | HEIGHT//高程图                                                                                                           |
+|   |                 |                                                                                                                          |
+|   |                 | EXTRUDE//挤出矢量                                                                                                        |
+|   |                 |                                                                                                                          |
+|   |                 | IMG_PIC//影像图片                                                                                                        |
+|   |                 |                                                                                                                          |
+|   |                 | IMG_SHP//影像矢量                                                                                                        |
+|   |                 |                                                                                                                          |
+|   |                 | ALL//所有类型的资源数据                                                                                                  |
++---+-----------------+--------------------------------------------------------------------------------------------------------------------------+
+| 4 | ***layerLev***  | 层级别（默认为1，作用于遮挡关系，建议级别不要过多，级别越多消耗资源越大）数值大遮挡数值小的级别，**不能输入小于1的数值** |
++---+-----------------+--------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitLayerlev(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, 3);
+
+## getUnitLayerlev {#getunitlayerlev .样式4}
+
+**功能：**
+
+获取地形数据层单元的层级别
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+数值，层级别
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitLayerlev(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitAlpha {#setunitalpha .样式4}
+
+**功能：**
+
+设置地形数据层单元的透明度
+
+**注：转换平台资源后缀为.doezip或者Terrain.getDataSetTerrId接口返回参数存在的数据，需要通过接口loadDataSet中的terrSuffix参数作为区分，才能通过当前接口单独控制数据集的透明度**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+   4   ***alpha***       透明度
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitActive(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, false);
+
+## setUnitActive {#setunitactive .样式4}
+
+**功能：**
+
+设置地形数据层单元的激活状态
+
+**注：通过Terrain.getDataSetTerrId接口能够获取数据，则可以使用当前接口设置数据集的显示和隐藏**
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+| 4 | ***active***    | 是否激活                                              |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitActive(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, false);
+
+## getUnitActive {#getunitactive .样式4}
+
+**功能：**
+
+获取地形数据层单元的激活状态
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，激活返回true; 否则false
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitActive(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitShpStyleName {#setunitshpstylename .样式4}
+
+**功能：**
+
+设置地形数据层单元的矢量样式标识名
+
+**参数：**
+
++:-:+--------------------+------------------------------------------------------+
+| 1 | ***dataSetId***    | 数据集标识                                           |
++---+--------------------+------------------------------------------------------+
+| 2 | ***unitId***       | 层单元标识                                           |
++---+--------------------+------------------------------------------------------+
+| 3 | ***resType***      | 地形资源数据类型 （RETerrResEm 类型）：              |
+|   |                    |                                                      |
+|   |                    | HEIGHT//高程图                                       |
+|   |                    |                                                      |
+|   |                    | EXTRUDE//挤出矢量                                    |
+|   |                    |                                                      |
+|   |                    | IMG_PIC//影像图片                                    |
+|   |                    |                                                      |
+|   |                    | IMG_SHP//影像矢量                                    |
+|   |                    |                                                      |
+|   |                    | ALL//所有类型的资源数据                              |
++---+--------------------+------------------------------------------------------+
+| 4 | ***shpStyleName*** | 矢量样式标识名                                       |
++---+--------------------+------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitShpStyleName(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, \"shangxicitypt_style\");
+
+## getUnitShpStyleName {#getunitshpstylename .样式4}
+
+**功能：**
+
+获取地形数据层单元的矢量样式标识名
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+字符串，矢量样式别名
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitShpStyleName(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitOmitParent {#setunitomitparent .样式4}
+
+**功能：**
+
+设置地形数据层单元的父级资源是否**忽略**重用
+
+**参数：**
+
++:-:+------------------+-------------------------------------------------------+
+| 1 | ***dataSetId***  | 数据集标识                                            |
++---+------------------+-------------------------------------------------------+
+| 2 | ***unitId***     | 层单元标识                                            |
++---+------------------+-------------------------------------------------------+
+| 3 | ***resType***    | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                  |                                                       |
+|   |                  | HEIGHT//高程图                                        |
+|   |                  |                                                       |
+|   |                  | EXTRUDE//挤出矢量                                     |
+|   |                  |                                                       |
+|   |                  | IMG_PIC//影像图片                                     |
+|   |                  |                                                       |
+|   |                  | IMG_SHP//影像矢量                                     |
+|   |                  |                                                       |
+|   |                  | ALL//所有类型的资源数据                               |
++---+------------------+-------------------------------------------------------+
+| 4 | ***omitParent*** | 忽略父级重用                                          |
++---+------------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitOmitParent(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, true);
+
+## getUnitOmitParent {#getunitomitparent .样式4}
+
+**功能：**
+
+获取地形数据层单元的父级资源是否忽略重用
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，不重用返回true; 否则false
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitOmitParent(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitShpHole {#setunitshphole .样式4}
+
+**功能：**
+
+设置地形数据层单元的矢量是否用于生成影像图片的孔洞
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+| 4 | ***enable***    | 是否作用                                              |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitShpHole(\"地形系统\", \"province\",
+BlackHole3D.RETerrResEm.ALL, true);
+
+## getUnitShpHole {#getunitshphole .样式4}
+
+**功能：**
+
+获取地形数据层单元的矢量是否用于生成影像图片的孔洞
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，作用返回true; 否则false
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitShpHole(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitLODLevRange {#setunitlodlevrange .样式4}
+
+**功能：**
+
+设置地形数据层单元的显示范围
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+| 4 | ***range***     | 级别范围，二维数组 \[最小级别,最大级别\]              |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitLODLevRange(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, \[8,13\]);
+
+## getUnitLODLevRange {#getunitlodlevrange .样式4}
+
+**功能：**
+
+获取地形数据层单元的显示范围
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+二维数组，\[最小级别,最大级别\]
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitLODLevRange(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitLayerClr {#setunitlayerclr .样式4}
+
+**功能：**
+
+设置地形数据层单元的混合颜色
+
+**参数：**
+
++-----------------+----------------------------------------------------------+
+| ***dataSetId*** | 数据集标识                                               |
++-----------------+----------------------------------------------------------+
+| ***unitId***    | 层单元标识                                               |
++-----------------+----------------------------------------------------------+
+| ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：                  |
+|                 |                                                          |
+|                 | HEIGHT//高程图                                           |
+|                 |                                                          |
+|                 | EXTRUDE//挤出矢量                                        |
+|                 |                                                          |
+|                 | IMG_PIC//影像图片                                        |
+|                 |                                                          |
+|                 | IMG_SHP//影像矢量                                        |
+|                 |                                                          |
+|                 | ALL//所有类型的资源数据                                  |
++-----------------+----------------------------------------------------------+
+| ***color***     | 目标颜色（REColor 类型）                                 |
++-----------------+----------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitLayerClr(\"地形系统\",
+BlackHole3D.Terrain.getAllUnitNames(\"地形系统\")\[0\],
+BlackHole3D.RETerrResEm.ALL, new BlackHole3D.REColor(255,0,0,128));
+
+## getUnitLayerClr {#getunitlayerclr .样式4}
+
+**功能：**
+
+获取地形数据层单元的混合颜色
+
+**参数：**
+
++-----------------+----------------------------------------------------------+
+| ***dataSetId*** | 数据集的唯一标识名（必填）                               |
++-----------------+----------------------------------------------------------+
+| ***unitId***    | 层单元标识（必填）                                       |
++-----------------+----------------------------------------------------------+
+| ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：                  |
+|                 |                                                          |
+|                 | HEIGHT//高程图                                           |
+|                 |                                                          |
+|                 | EXTRUDE//挤出矢量                                        |
+|                 |                                                          |
+|                 | IMG_PIC//影像图片                                        |
+|                 |                                                          |
+|                 | IMG_SHP//影像矢量                                        |
+|                 |                                                          |
+|                 | ALL//所有类型的资源数据                                  |
++-----------------+----------------------------------------------------------+
+
+**返回值：**
+
+REColor类型，目标混合颜色
+
+**调用示例：**
+
+let layerName = BlackHole3D.Terrain.getAllUnitNames(\"地形系统\")\[0\];
+
+BlackHole3D.Terrain.getUnitLayerClr(\"地形系统\", layerName,
+BlackHole3D.RETerrResEm.ALL);
+
+## setUnitLayerAlpha {#setunitlayeralpha .样式4}
+
+**功能：**
+
+设置地形数据层单元的透明度
+
+**注：如果通过接口Terrain.getTerrSubAllDataSetId获取一个地形实例含有多个数据集，那么最底层的数据集为基础层（Terrain.getUnitLayerlev接口可以获取层级信息，最小的层级为基础层），无法设置层单元透明度。如果只是为了操作数据集的显示和隐藏，建议不要事用此接口，不仅渲染效果负担大，使用会有限制，建议使用Terrain.setUnitActive操作**
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识                                            |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+| 4 | ***alpha***     | 目标透明度，整型，范围0\~255                          |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+let layerName = BlackHole3D.Terrain.getAllUnitNames(\"地形系统\")\[0\];\
+BlackHole3D.Terrain.setUnitLayerAlpha(\"地形系统\", layerName,
+BlackHole3D.RETerrResEm.ALL, 128);
+
+## getUnitLayerAlpha {#getunitlayeralpha .样式4}
+
+**功能：**
+
+获取地形数据层单元的透明度
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***dataSetId*** | 数据集的唯一标识名（必填）                            |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***unitId***    | 层单元标识（必填）                                    |
++---+-----------------+-------------------------------------------------------+
+| 3 | ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                 |                                                       |
+|   |                 | HEIGHT//高程图                                        |
+|   |                 |                                                       |
+|   |                 | EXTRUDE//挤出矢量                                     |
+|   |                 |                                                       |
+|   |                 | IMG_PIC//影像图片                                     |
+|   |                 |                                                       |
+|   |                 | IMG_SHP//影像矢量                                     |
+|   |                 |                                                       |
+|   |                 | ALL//所有类型的资源数据                               |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+数值类型，目标透明度
+
+**调用示例：**
+
+let layerName = BlackHole3D.Terrain.getAllUnitNames(\"地形系统\")\[0\];
+
+BlackHole3D.Terrain.getUnitLayerAlpha(\"地形系统\", layerName,
+BlackHole3D.RETerrResEm.ALL);
+
+## setTerrInstAlpha {#setterrinstalpha .样式4}
+
+**功能：**
+
+设置地形实例的透明度
+
+**注：如果通过接口Terrain.getTerrSubAllDataSetId获取一个地形实例含有多个数据集，此接口设置的透明度影响地形实例下的所有数据集**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+   2   ***alpha***       目标透明度，整型，范围0\~255
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setTerrInstAlpha(\"地形系统\", 128);
+
+## getTerrInstAlpha {#getterrinstalpha .样式4}
+
+**功能：**
+
+获取地形实例的透明度
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集的唯一标识名（必填）
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，目标透明度
+
+**调用示例：**
+
+BlackHole3D.Terrain.getTerrInstAlpha(\"地形系统\");
+
+## setUnitMinVirPxlH {#setunitminvirpxlh .样式4}
+
+**功能：**
+
+设置地形数据层单元的虚拟像素不自动变化的最小缩放高度
+
+**注：矢量线宽为资源内本身属性**
+
+**参数：**
+
++------------------+----------------------------------------------------------+
+| ***dataSetId***  | 数据集标识                                               |
++------------------+----------------------------------------------------------+
+| ***unitId***     | 层单元标识                                               |
++------------------+----------------------------------------------------------+
+| ***resType***    | 地形资源数据类型 （RETerrResEm 类型）：                  |
+|                  |                                                          |
+|                  | HEIGHT//高程图                                           |
+|                  |                                                          |
+|                  | EXTRUDE//挤出矢量                                        |
+|                  |                                                          |
+|                  | IMG_PIC//影像图片                                        |
+|                  |                                                          |
+|                  | IMG_SHP//影像矢量                                        |
+|                  |                                                          |
+|                  | ALL//所有类型的资源数据                                  |
++------------------+----------------------------------------------------------+
+| ***minVirPxlH*** | 最小缩放高度，-1为自动缩放                               |
++------------------+----------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setUnitMinVirPxlH(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, 10000);
+
+## getUnitMinVirPxlH {#getunitminvirpxlh .样式4}
+
+**功能：**
+
+获取地形数据层单元的虚拟像素不自动变化的最小缩放高度
+
+**参数：**
+
++-----------------+----------------------------------------------------------+
+| ***dataSetId*** | 数据集的唯一标识名（必填）                               |
++-----------------+----------------------------------------------------------+
+| ***unitId***    | 层单元标识（必填）                                       |
++-----------------+----------------------------------------------------------+
+| ***resType***   | 地形资源数据类型 （RETerrResEm 类型）：                  |
+|                 |                                                          |
+|                 | HEIGHT//高程图                                           |
+|                 |                                                          |
+|                 | EXTRUDE//挤出矢量                                        |
+|                 |                                                          |
+|                 | IMG_PIC//影像图片                                        |
+|                 |                                                          |
+|                 | IMG_SHP//影像矢量                                        |
+|                 |                                                          |
+|                 | ALL//所有类型的资源数据                                  |
++-----------------+----------------------------------------------------------+
+
+**返回值：**
+
+数值，最小缩放高度
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitMinVirPxlH(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL);
+
+## setTerrProjectMode {#setterrprojectmode .样式4}
+
+**功能：**
+
+设置地形是否允许投射到其他模型对象表面
+
+**注：同一场景中如果相同位置区域存在地形矢量数据和模型数据，则默认矢量数据投射到模型表面**
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***mode***        表示地形影像投射到其他模型对象表面的模式（默认2） 0:
+                    不投射 1: 仅投射影像图片层 2: 仅投射影像矢量层 3:
+                    同时投射影像图片和矢量层
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setTerrProjectMode(\"地形系统\", 0);
+
+## getTerrProjectMode {#getterrprojectmode .样式4}
+
+**功能：**
+
+获取地形是否允许投射到其他模型对象表面
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***dataSetId***   数据集的唯一标识名（必填）
+
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值类型，是否允许投射的类型
+
+**调用示例：**
+
+BlackHole3D.Terrain.getTerrProjectMode(\"地形系统\");
+
+## 加载属性
+
+## getAllUnitNames {#getallunitnames .样式4}
+
+**功能：**
+
+获取数据集所有的地形数据层单元名称
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集的唯一标识名，为空串则表示处理所有项目
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数组，单元名称集合
+
+**调用示例：**
+
+BlackHole3D.Terrain.getAllUnitNames(\"地形系统\");
+
+## getUnitBV {#getunitbv .样式4}
+
+**功能：**
+
+获取地形数据层单元的包围盒
+
+**参数：**
+
++:-:+------------------+-------------------------------------------------------+
+| 1 | ***dataSetId***  | 数据集标识                                            |
++---+------------------+-------------------------------------------------------+
+| 2 | ***unitId***     | 层单元标识                                            |
++---+------------------+-------------------------------------------------------+
+| 3 | ***resType***    | 地形资源数据类型 （RETerrResEm 类型）：               |
+|   |                  |                                                       |
+|   |                  | HEIGHT//高程图                                        |
+|   |                  |                                                       |
+|   |                  | EXTRUDE//挤出矢量                                     |
+|   |                  |                                                       |
+|   |                  | IMG_PIC//影像图片                                     |
+|   |                  |                                                       |
+|   |                  | IMG_SHP//影像矢量                                     |
+|   |                  |                                                       |
+|   |                  | ALL//所有类型的资源数据                               |
++---+------------------+-------------------------------------------------------+
+| 4 | ***activeOnly*** | 是否仅处理已激活的地形数据层单元                      |
++---+------------------+-------------------------------------------------------+
+
+**返回值：**
+
+数组, 包围盒信息, 数组形式：\[Xmin, Xmax, Ymin, Ymax,Zmin, Zmax\]
+
+**调用示例：**
+
+BlackHole3D.Terrain.getUnitBV(\"地形系统\", \"shangxicitypt\",
+BlackHole3D.RETerrResEm.ALL, false);
+
+## getAllShpStyleNames {#getallshpstylenames .样式4}
+
+**功能：**
+
+获取所有的地形矢量样式标识名
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集的唯一标识名
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数组，矢量样式标识名集合
+
+**调用示例：**
+
+BlackHole3D.Terrain.getAllShpStyleNames(\"地形系统\");
+
+## setShpStyle {#setshpstyle .样式4}
+
+**功能：**
+
+设置一个地形矢量样式
+
+**注：**样式相同则覆盖，样式不同则新增。
+
+使用前需要先调用getShpStyle获取样式在进行调整
+
+**参数：**
+
+  ---- -------------------- ------------------------------------------------------
+   1   ***dataSetId***      数据集的唯一标识名（必填）
+
+   2   ***shpStyleId***     矢量样式的标识名（必填）
+
+   3   ***shpStyleInfo***   矢量样式信息 （RETerrShpStyleInfo 类型）
+  ---- -------------------- ------------------------------------------------------
+
+**RETerrShpStyleInfo模型解析：**
+
+  ------- --------------------- --------------------------------------------
+   **1**  ***quadStyleList***   广告板样式集合 （RETerrShpQuadStyle 类型）
+
+   **2**  ***textStyleList***   文本样式集合 （RETerrShpTextStyle 类型）
+
+   **3**  ***lineStyleList***   线条样式集合 （RETerrShpLineStyle 类型）
+
+   **4**  ***faceStyleList***   三角面样式集合 （RETerrShpFaceStyle 类型）
+  ------- --------------------- --------------------------------------------
+
+**RETerrShpQuadStyle模型解析：**
+
+  ---- --------------------- --------------------------------------------------------------------------------------------------
+   1   ***matchAttrName***   表示样式要匹配的矢量原数据的属性字段名
+
+   2   ***matchAttrVal***    表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）
+
+   3   ***texPath***         表示纹理资源的路径，若为空则为全白纹理
+
+   4   ***dispRect***        表示广告板在定位点(0,0)处的显示区域\[左下x，左下y，右上x，右上y\](单位为一个虚拟像素)
+
+   5   ***texRect***         表示广告板关联的纹理关联的纹理子区域上的相对UV\[左下x，左下y，右上x，右上y\](单位为一个虚拟像素)
+
+   6   ***quadClr***         表示广告板颜色 （REColor 类型）不建议设置，此为混合颜色，不易掌控，建议获取值再返回
+  ---- --------------------- --------------------------------------------------------------------------------------------------
+
+**RETerrShpTextStyle模型解析：**
+
++:--:+---------------------+-------------------------------------------------------------------------------------+
+| 1  | ***matchAttrName*** | 表示样式要匹配的矢量原数据的属性字段名                                              |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 2  | ***matchAttrVal***  | 表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）                            |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 3  | ***weight***        | 表示文字是否采用粗体显示                                                            |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 4  | ***italic***        | 表示文字是否采用斜体显示                                                            |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 5  | ***textClr***       | 表示文本颜色 （REColor 类型）                                                       |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 6  | ***textBorderClr*** | 表示文本的轮廓颜色 （REColor 类型）                                                 |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 7  | ***dispRect***      | 表示文字在定位点(0,0)处的显示区域\[左下x，左下y，右上x，右上y\](单位为一个虚拟像素) |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 8  | ***fmtFlag***       | 文字在显示区域内的对齐方式 （RETextFmtEm 类型）：                                   |
+|    |                     |                                                                                     |
+|    |                     | LT//左上区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | MT//中上区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | RT//右上区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | LM//左中区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | MM//中中区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | RM//右中区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | LB//左下区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | MB//中下区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | RB//右下区域                                                                        |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 9  | ***charW***         | 表示单个字符的宽(单位为一个虚拟像素)                                                |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 10 | ***charH***         | 表示单个字符的高(单位为一个虚拟像素)                                                |
++----+---------------------+-------------------------------------------------------------------------------------+
+
+**RETerrShpLineStyle模型解析：**
+
+  ---- --------------------- ----------------------------------------------------------
+   1   ***matchAttrName***   表示样式要匹配的矢量原数据的属性字段名
+
+   2   ***matchAttrVal***    表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）
+
+   3   ***texPath***         表示纹理资源的路径，若为空则为全白纹理
+
+   4   ***segLen***          表示纹理的区间分段（进行纹理拼接限制长度）
+
+   5   ***width***           表示线条的宽度
+
+   6   ***lineClr***         表示线条的统一颜色 （REColor
+                             类型），alpha取值范围【0，15】
+  ---- --------------------- ----------------------------------------------------------
+
+**RETerrShpFaceStyle模型解析：**
+
+  ---- --------------------- ----------------------------------------------------------
+   1   ***matchAttrName***   表示样式要匹配的矢量原数据的属性字段名
+
+   2   ***matchAttrVal***    表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）
+
+   3   ***faceClr***         表示面的颜色 （REColor 类型），alpha取值范围【0，15】
+  ---- --------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//修改所有广告牌图片
+
+let \_cShpStyleInfo = BlackHole3D.Terrain.getShpStyle(\"地形系统\",
+\"shangxicitypt_Style\");
+
+let quadStyle = \_cShpStyleInfo.quadStyleList\[0\] \|\| \[\];
+
+quadStyle.texPath = \"纹理路径\";
+
+BlackHole3D.Terrain.setShpStyle(\"地形系统\", \"shangxicitypt_Style\",
+\_cShpStyleInfo);
+
+//修改所有文字颜色
+
+let \_cShpStyleInfo = BlackHole3D.Terrain.getShpStyle(\"地形系统\",
+\"shangxicitypt_Style\");
+
+let textStyle = \_cShpStyleInfo.textStyleList\[0\] \|\| \[\];
+
+textStyle.textClr = new BlackHole3D.REColor(0, 255, 0);
+
+BlackHole3D.Terrain.setShpStyle(\"地形系统\", \"shangxicitypt_Style\",
+\_cShpStyleInfo);
+
+//修改数据属性名称为river的线颜色
+
+let \_cShpStyleInfo = BlackHole3D.Terrain.getShpStyle(\"地形系统\",
+\"shangxiriver_Style\");
+
+let lineStyle = \_cShpStyleInfo.lineStyleList\[0\] \|\| \[\];
+
+lineStyle.matchAttrVal = \"river\";
+
+lineStyle.lineClr = new BlackHole3D.REColor(255, 0, 0);
+
+BlackHole3D.Terrain.setShpStyle(\"地形系统\", \"shangxiriver_Style\",
+\_cShpStyleInfo);
+
+//修改数据属性名称为112140100000000的面颜色
+
+let \_cShpStyleInfo = BlackHole3D.Terrain.getShpStyle(\"地形系统\",
+\"shangxicity_Style\");
+
+let faceStyle = \_cShpStyleInfo.faceStyleList\[0\] \|\| \[\];
+
+faceStyle.matchAttrVal = \"112140100000000\";
+
+faceStyle.faceClr = new BlackHole3D.REColor(255, 0, 0);
+
+BlackHole3D.Terrain.setShpStyle(\"地形系统\", \"shangxicity_Style\",
+\_cShpStyleInfo);
+
+## getShpStyle {#getshpstyle .样式4}
+
+**功能：**
+
+获取一个地形矢量样式
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***dataSetId***    数据集的唯一标识名（必填）
+
+   2   ***shpStyleId***   矢量样式的标识名（必填）
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+对象类型（RETerrShpStyleInfo对象类型）
+
+**RETerrShpStyleInfo模型解析：**
+
+  ------- --------------------- --------------------------------------------
+   **1**  ***quadStyleList***   广告板样式集合 （RETerrShpQuadStyle 类型）
+
+   **2**  ***textStyleList***   文本样式集合 （RETerrShpTextStyle 类型）
+
+   **3**  ***lineStyleList***   线条样式集合 （RETerrShpLineStyle 类型）
+
+   **4**  ***faceStyleList***   三角面样式集合 （RETerrShpFaceStyle 类型）
+  ------- --------------------- --------------------------------------------
+
+**RETerrShpQuadStyle模型解析：**
+
+  ---- --------------------- --------------------------------------------------------------------------------------------------
+   1   ***matchAttrName***   表示样式要匹配的矢量原数据的属性字段名
+
+   2   ***matchAttrVal***    表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）
+
+   3   ***texPath***         表示纹理资源的路径，若为空则为全白纹理
+
+   4   ***dispRect***        表示广告板在定位点(0,0)处的显示区域\[左下x，左下y，右上x，右上y\](单位为一个虚拟像素)
+
+   5   ***texRect***         表示广告板关联的纹理关联的纹理子区域上的相对UV\[左下x，左下y，右上x，右上y\](单位为一个虚拟像素)
+
+   6   ***quadClr***         表示广告板颜色 （REColor 类型）不建议设置，此为混合颜色，不易掌控，建议获取值再返回
+  ---- --------------------- --------------------------------------------------------------------------------------------------
+
+**RETerrShpTextStyle模型解析：**
+
++:--:+---------------------+-------------------------------------------------------------------------------------+
+| 1  | ***matchAttrName*** | 表示样式要匹配的矢量原数据的属性字段名                                              |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 2  | ***matchAttrVal***  | 表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）                            |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 3  | ***weight***        | 表示文字是否采用粗体显示                                                            |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 4  | ***italic***        | 表示文字是否采用斜体显示                                                            |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 5  | ***textClr***       | 表示文本颜色 （REColor 类型）                                                       |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 6  | ***textBorderClr*** | 表示文本的轮廓颜色 （REColor 类型）                                                 |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 7  | ***dispRect***      | 表示文字在定位点(0,0)处的显示区域\[左下x，左下y，右上x，右上y\](单位为一个虚拟像素) |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 8  | ***fmtFlag***       | 文字在显示区域内的对齐方式 （RETextFmtEm 类型）：                                   |
+|    |                     |                                                                                     |
+|    |                     | LT//左上区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | MT//中上区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | RT//右上区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | LM//左中区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | MM//中中区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | RM//右中区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | LB//左下区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | MB//中下区域                                                                        |
+|    |                     |                                                                                     |
+|    |                     | RB//右下区域                                                                        |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 9  | ***charW***         | 表示单个字符的宽(单位为一个虚拟像素)                                                |
++----+---------------------+-------------------------------------------------------------------------------------+
+| 10 | ***charH***         | 表示单个字符的高(单位为一个虚拟像素)                                                |
++----+---------------------+-------------------------------------------------------------------------------------+
+
+**RETerrShpLineStyle模型解析：**
+
+  ---- --------------------- ----------------------------------------------------------
+   1   ***matchAttrName***   表示样式要匹配的矢量原数据的属性字段名
+
+   2   ***matchAttrVal***    表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）
+
+   3   ***texPath***         表示纹理资源的路径，若为空则为全白纹理
+
+   4   ***segLen***          表示纹理的区间分段（进行纹理拼接限制长度）
+
+   5   ***width***           表示线条的宽度
+
+   6   ***lineClr***         表示线条的统一颜色 （REColor 类型）
+  ---- --------------------- ----------------------------------------------------------
+
+**RETerrShpFaceStyle模型解析：**
+
+  ---- --------------------- ----------------------------------------------------------
+   1   ***matchAttrName***   表示样式要匹配的矢量原数据的属性字段名
+
+   2   ***matchAttrVal***    表示样式要匹配的矢量原数据的属性值名（通配符\*搜索全部）
+
+   3   ***faceClr***         表示面的颜色 （REColor 类型）
+  ---- --------------------- ----------------------------------------------------------
+
+**调用示例：**
+
+let \_cShpStyleInfo = BlackHole3D.Terrain.getShpStyle(\"地形系统\",
+\"shangxicitypt_Style\");
+
+## delShpStyle {#delshpstyle .样式4}
+
+**功能：**
+
+删除一个地形矢量样式
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***dataSetId***    数据集的唯一标识名（必填）
+
+   2   ***shpStyleId***   矢量样式的标识名（必填）
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.delShpStyle(\"地形系统\", \"shangxicitypt\");
+
+## delAllShpStyle {#delallshpstyle .样式4}
+
+**功能：**
+
+删除所有的地形矢量样式
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.delAllShpStyle(\"地形系统\");
+
+## getDataSetTerrId {#getdatasetterrid .样式4}
+
+**功能：**
+
+获取数据集所属的全局地形实例标识
+
+**注：loadDataSet加载的dataSetCRS、groundDisplay、terrSuffix三个参数全部相同，则归属于同一个全局地形实例，**
+
+**可以用于判断是否为新版本转换工具处理的数据**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识，**必填**
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+字符串，全局地形实例标识
+
+**调用示例：**
+
+BlackHole3D.Terrain.getDataSetTerrId(\"地形系统\");
+
+## getTerrSubAllDataSetId {#getterrsuballdatasetid .样式4}
+
+**功能：**
+
+获取全局地形实例下包含数据集集合
+
+注：标识通过 getDataSetTerrId 接口获取
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***terrId***   全局地形实例标识
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+数据类型，数据集集合
+
+**调用示例：**
+
+BlackHole3D.Terrain.getTerrSubAllDataSetId(\"全局地形实例标识\");
+
+## 数据处理
+
+## registerPathFunc {#registerpathfunc .样式4}
+
+**功能：**
+
+注册一个地形自定义路径函数
+
+**注：加载wms数据时，可以动态的调整wms资源请求模板，瓦片数据更新引擎会主动调用注册的函数获取最新的资源请求模板信息**
+
+**参数：**
+
+  ---------------- ----------------------------------------------------------
+  ***funId***      函数标识
+
+  ***callback***   函数体，**参数必须为空，返回值必须为字符串**
+  ---------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载 WMS 资源（WebMercatorTilingScheme（3857切片方案））
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'WMS1_new\',
+
+useWMS: true,
+
+wmsInfo: {
+
+layerId: 5,
+
+selfCrs: \'EPSG:3857\',
+
+layerName: \'天地图矢量底图注记-Web墨卡托211\',
+
+reqFmt:
+\'http://36.138.229.240:7125/ls/mapserver/image/1906902073705275394/{z}/{x}/{y}.png\',
+
+layerType: 1,
+
+revertResX: 0,
+
+revertResY: 1,
+
+revertU: 0,
+
+revertV: 0,
+
+lodRange: \[15, 18\],
+
+resLonLatBound: \[109.0261450407931, 33.793854312359635,
+109.03624087552515, 33.80205676471956\],
+
+tilingSchemeType: 1,
+
+},
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 创建可更新的回调（主动版）
+
+const createUpdatableCallback = (initialValue) =\> {
+
+let currentValue = initialValue;
+
+// 返回一个闭包函数
+
+const callback = () =\> {
+
+return currentValue;
+
+};
+
+// 添加更新方法
+
+callback.update = (newValue) =\> {
+
+currentValue = newValue;
+
+};
+
+return callback;
+
+};
+
+var updatableCallback = createUpdatableCallback(\'资源请求模板\');
+
+// 注册可以动态调整资源请求模板函数
+
+BlackHole3D.Terrain.registerPathFunc(\'func_1\', updatableCallback);
+
+// 在合适的时机更新模板（主动版）
+
+updatableCallback.update(\'资源请求模板调整\');
+
+// 创建可更新的回调（被动版）
+
+const createUpdatableCallback = () =\> {
+
+// \...数据处理\...
+
+let value = \'最新的资源请求模板\';
+
+return value;
+
+};
+
+// 注册可以动态调整资源请求模板函数
+
+BlackHole3D.Terrain.registerPathFunc(\'func_1\',
+createUpdatableCallback);
+
+## unRegisterPathFunc {#unregisterpathfunc .样式4}
+
+**功能：**
+
+注销一个地形自定义路径函数
+
+**参数：**
+
+  ------------- ----------------------------------------------------------
+  ***funId***   函数标识
+
+  ------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.unRegisterPathFunc(\'func_1\');
+
+## unRegisterAllPathFunc {#unregisterallpathfunc .样式4}
+
+**功能：**
+
+注销系统中所有的地形自定义路径函数
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.unRegisterAllPathFunc();
+
+## 地形矢量锚点
+
+## addTerrShpAnc {#addterrshpanc .样式4}
+
+**功能：**
+
+添加地形矢量锚点
+
+**注：地形矢量锚点必须添加在地形数据上，地形矢量锚点z值为0表示贴合地形数据，z值大于0表示相对地形表面的偏移值，不允许小于0，z值为海拔高度偏移值，与引擎空间下的实际坐标高度不同**
+
+**参数：**
+
+  ---------------------- ---------------------------------------------------------
+  ***dataSetId***        数据集标识（地形数据）
+
+  ***terrShpAcnList***   地形矢量锚点信息集合（RETerrainShpAncInfo 类型）
+  ---------------------- ---------------------------------------------------------
+
+**RETerrainShpAncInfo模型解析：**
+
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***groupName***     | 锚点组的标识                                                                                                                              |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***ancName***       | 锚点的名称(唯一标识)，必填                                                                                                                |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***pos***           | 锚点的位置，默认值                                                                                                                        |
+|                     | \[0,0,0\]，**z值为0表示贴合地形数据，z值大于0表示相对地形表面的偏移值，不允许小于0，z值为海拔高度偏移值，与引擎空间下的实际坐标高度不同** |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***picPath***       | 锚点的纹理路径，默认值 \"\"                                                                                                               |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***textInfo***      | 锚点的文字，默认值 \"\"                                                                                                                   |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***picWidth***      | 锚点图片的宽度                                                                                                                            |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***picHeight***     | 锚点图片的高度                                                                                                                            |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***texBias***       | 锚点文字与图片的相对位置, 二元素数组\[x，y\],                                                                                             |
+|                     |                                                                                                                                           |
+|                     | x取值（-1、0、1）分别表示文字在图片的左侧、中间、右侧；                                                                                   |
+|                     |                                                                                                                                           |
+|                     | y取值（-1、0、1）分别表示文字在图片的下侧、中间、上侧；                                                                                   |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***texFocus***      | 牵引线的最终顶点相对于图片的像素位置，需要配合ancSize使用，二元素数组\[x，y\], \[0,0\]表示位于图片的左下角,                               |
+|                     | \[picWidth/2,0\]表示位于图片中下                                                                                                          |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***fontName***      | 锚点的字体样式，默认值 \"RealBIMFont001\"                                                                                                 |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***textClr***       | 锚点的字体颜，默认值 REColor(255,255,255,255)                                                                                             |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+| ***textBorderClr*** | 锚点的字体边框颜色，默认值 REColor(0,0,0,255)                                                                                             |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'地形影像\',
+
+resourcesAddress:
+
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_skymap\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加地形矢量锚点
+
+let terrShpAnc_1 = new BlackHole3D.RETerrainShpAncInfo();
+
+terrShpAnc_1.groupName = \'terrShpAnc\';
+
+terrShpAnc_1.ancName = \'terrShpAnc_1\';
+
+terrShpAnc_1.pos = \[13564024.192906115, 4769341.498752505,0\];
+
+terrShpAnc_1.picPath =
+\'https://demo.bjblackhole.com/demopage/examplesImgs/anc.png\';
+
+terrShpAnc_1.textInfo = \'未拆迁\';
+
+terrShpAnc_1.picWidth = 32;
+
+terrShpAnc_1.picHeight = 32;
+
+terrShpAnc_1.texBias = \[1, 0\];
+
+terrShpAnc_1.texFocus = \[0, 0\];
+
+var terrShpAncList = \[terrShpAnc_1\];
+
+BlackHole3D.Terrain.addTerrShpAnc(\'地形影像\', terrShpAncList);
+
+## getAllTerrShpAnc {#getallterrshpanc .样式4}
+
+**功能：**
+
+获取所有地形矢量锚点的信息
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***dataSetId***   数据集标识（地形数据）
+
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型, 地形矢量锚点信息集合
+
+**调用示例：**
+
+BlackHole3D.Terrain.getAllTerrShpAnc(\'地形影像\');
+
+## delTerrShpAnc {#delterrshpanc .样式4}
+
+**功能：**
+
+删除地形数据上的地形矢量锚点
+
+**参数：**
+
+  ------------------- --------------------------------------------------------------------
+  ***dataSetId***     数据集标识（地形数据），空字符串代表所有地形数据的所有地形矢量锚点
+
+  ***ancNameList***   锚点名称集合
+  ------------------- --------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+// 删除某个地形矢量锚点
+
+BlackHole3D.Terrain.delTerrShpAnc(\"地形影像\", \[\"terrShpAnc_1\"\]);
+
+// 删除所有地形矢量锚点
+
+BlackHole3D.Terrain.delTerrShpAnc(\"\", \[\]);
+
+## setCamToTerrShpAnc {#setcamtoterrshpanc .样式4}
+
+**功能：**
+
+聚焦相机到指定的地形矢量锚点
+
+**注：相机定位默认垂直向下**
+
+**参数：**
+
+  ------------------- -------------------------------------------------------
+  ***dataSetId***     数据集标识（地形数据）
+
+  ***ancNameList***   锚点名称集合
+
+  ***backwardAmp***   表示相机在锚点中心处向后退的强度
+  ------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setCamToTerrShpAnc(\"地形影像\",
+\[\"terrShpAnc_1\"\], 20.0);
+
+## setTerrShpAncVisible  {#setterrshpancvisible .样式4}
+
+**功能：**
+
+设置地形矢量锚点是否允许显示
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***ancName***     锚点名称
+
+  ***visible***     是否显示
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setTerrShpAncVisible(\"地形影像\",
+\"terrShpAnc_1\",true);
+
+## getTerrShpAncVisible {#getterrshpancvisible .样式4}
+
+**功能：**
+
+获取地形矢量锚点是否允许显示
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***ancName***     锚点名称
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值, 可见返回true，不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.setTerrShpAncVisible(\"地形影像\",
+\"terrShpAnc_1\");
+
+## setGolTerrShpAncTextVisLodRange {#setgolterrshpanctextvislodrange .样式4}
+
+**功能：**
+
+设置全局地形矢量锚点文字和图片的可视层级范围
+
+**参数：**
+
+  -------------------- ----------------------------------------------------------
+  ***textLodRange***   表示文字资源层级范围（二元素数组类型）,
+                       当值为\[0,0\]时表示不使用该预设值
+
+  ***picLodRange***    表示图片资源层级范围（二元素数组类型）,
+                       当值为\[0,0\]时表示不使用该预设值
+  -------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setGolTerrShpAncTextVisLodRange(\[5,16\],\[10,17\]);
+
+## getGolTerrShpAncTextVisLodRange {#getgolterrshpanctextvislodrange .样式4}
+
+**功能：**
+
+获取全局地形矢量锚点文字和图片的可视层级范围
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  -------------------- ----------------------------------------------------
+  ***textLodRange***   表示文字资源层级范围（二元素数组类型）
+
+  ***picLodRange***    表示图片资源层级范围（二元素数组类型）
+  -------------------- ----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Terrain.getGolTerrShpAncTextVisLodRange();
+
+## 地形矢量线
+
+## addTerrShpLine {#addterrshpline .样式4}
+
+**功能：**
+
+创建地形矢量线
+
+**注：地形矢量锚点必须添加在地形数据上，地形矢量线坐标序列z值无效，默认贴合地形数据**
+
+**参数：**
+
+  ----------------------- ---------------------------------------------------------
+  ***dataSetId***         数据集标识（地形数据）
+
+  ***terrShpLineList***   矢量线信息集合（RETerrShpLineInfo 类型）
+  ----------------------- ---------------------------------------------------------
+
+**RETerrShpLineInfo模型解析：**
+
+  ----------------- ---------------------------------------------------------------------------------
+  ***groupName***   矢量组名称
+
+  ***shpName***     矢量标识名，若已有同名的矢量则覆盖之
+
+  ***potList***     表示多边形折线序列，**z值无效，默认贴合地形数据**
+
+  ***fillState***   表示折线的填充状态 0-\>多边形不填充； 1-\>多边形首尾相连构成封闭区域进行填充；
+
+  ***lineClr***     表示多边形的颜色（REColor 类型）
+
+  ***fillClr***     表示多边形的填充颜色（REColor 类型）
+
+  ***textPos***     表示多边形的文字标注的位置：
+                    \>=0时，整数部分i/小数部分j：表示文字定位点在线段\<i,i+1\>上的偏移了长度百分比j
+                    \[-1,0)表示文字定位在折线上并从首端点偏移折线总长度的百分比
+                    -2表示文字定位在多边形所有顶点的中心位置处
+
+  ***textInfo***    表示顶点的文字标注信息（REShpTextInfo 类型）
+
+  ***lineWidth***   表示多边形折线的线宽，线宽不要小于3，否则渲染消耗大，造成异常
+
+  ***visible***     表示是否显示，默认true
+  ----------------- ---------------------------------------------------------------------------------
+
+**REShpTextInfo模型解析：**
+
+  --------------------- -----------------------------------------------------
+  ***text***            表示文字的内容
+
+  ***fontName***        表示锚点的字体样式
+
+  ***textClr***         文字颜色（REColor 类型）
+
+  ***textBorderClr***   文字边框颜色（REColor 类型）
+  --------------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'地形影像\',
+
+resourcesAddress:
+
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_skymap\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加地形矢量线
+
+//矢量文字信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'测试画线\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+shpTextInfo.textClr = new BlackHole3D.REColor(255, 255, 255, 255);
+
+shpTextInfo.textBorderClr = new BlackHole3D.REColor(0, 0, 0, 128);
+
+shpTextInfo.textBackMode = 2;
+
+shpTextInfo.textBackBorder = 2;
+
+shpTextInfo.textBackClr = new BlackHole3D.REColor(0, 0, 0, 128);
+
+//地形矢量线信息
+
+var terrShpLine_1 = new BlackHole3D.RETerrShpLineInfo();
+
+terrShpLine_1.shpName = \'terrShpLine_1\';
+
+terrShpLine_1.potList = \[
+
+\[13563740.540851377, 4769211.209846852, -0.0784632723480172\],
+
+\[13563349.972252555, 4767325.586231201, -0.07863956120309012\],
+
+\[13565240.192362081, 4768533.236580701, -0.07858742746975622\],
+
+\];
+
+terrShpLine_1.fillState = 1;
+
+terrShpLine_1.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+terrShpLine_1.fillClr = new BlackHole3D.REColor(255, 255, 255, 128);
+
+terrShpLine_1.textPos = -2;
+
+terrShpLine_1.groupName = \'a\';
+
+terrShpLine_1.textInfo = shpTextInfo;
+
+var terrShpLineList = \[terrShpLine_1\];
+
+BlackHole3D.Terrain.addTerrShpLine(\'地形影像\', terrShpLineList);
+
+## delTerrShpLine {#delterrshpline .样式4}
+
+**功能：**
+
+删除地形数据上的地形矢量线
+
+**参数：**
+
+  ----------------------- --------------------------------------------------------------------
+  ***dataSetId***         数据集标识（地形数据），空字符串代表所有地形数据的所有地形矢量锚点
+
+  ***shpLineNameList***   矢量线标识集合
+  ----------------------- --------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+// 删除某个地形矢量锚点
+
+BlackHole3D.Terrain.delTerrShpLine(\"地形影像\", \[\"terrShpLine_1\"\]);
+
+// 删除所有地形矢量锚点
+
+BlackHole3D.Terrain.delTerrShpLine(\"\", \[\]);
+
+## setCamToTerrShpLine {#setcamtoterrshpline .样式4}
+
+**功能：**
+
+聚焦相机到指定的地形矢量线
+
+**注：相机定位默认垂直向下**
+
+**参数：**
+
+  ----------------------- -------------------------------------------------------
+  ***dataSetId***         数据集标识（地形数据）
+
+  ***shpLineNameList***   矢量线标识集合
+
+  ***backwardAmp***       表示相机在锚点中心处向后退的强度
+  ----------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setCamToTerrShpLine(\"地形影像\",
+\[\"terrShpLine_1\"\], 200.0);
+
+## setTerrShpLineVisible {#setterrshplinevisible .样式4}
+
+**功能：**
+
+设置地形矢量线是否允许显示
+
+**参数：**
+
+  ------------------- ----------------------------------------------------------
+  ***dataSetId***     数据集标识
+
+  ***shpLineName***   矢量线标识
+
+  ***visible***       是否显示
+  ------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setTerrShpLineVisible(\"地形影像\",
+\"terrShpLine_1\",true);
+
+## getTerrShpLineVisible {#getterrshplinevisible .样式4}
+
+**功能：**
+
+获取地形矢量线是否允许显示
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***ancName***     锚点名称
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值, 可见返回true，不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Terrain.getTerrShpLineVisible(\"地形影像\",
+\"terrShpLine_1\");
+
+## setGolTerrShpLineTextVisLodRange {#setgolterrshplinetextvislodrange .样式4}
+
+**功能：**
+
+设置全局地形矢量线文字的可视层级范围
+
+**参数：**
+
+  -------------------- ----------------------------------------------------------
+  ***textLodRange***   表示文字资源层级范围（二元素数组类型）,
+                       当值为\[0,0\]时表示不使用该预设值
+
+  -------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Terrain.setGolTerrShpLineTextVisLodRange(\[5,16\]);
+
+## getGolTerrShpLineTextVisLodRange {#getgolterrshplinetextvislodrange .样式4}
+
+**功能：**
+
+获取全局地形矢量线文字的可视层级范围
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，全局地形矢量线文字的可视层级范围
+
+**调用示例：**
+
+BlackHole3D.Terrain.getGolTerrShpLineTextVisLodRange();
+
+# 360全景（Panorama）
+
+## 加载
+
+## loadPan {#loadpan .样式4}
+
+**功能：**
+
+加载一个或多个360全景场景
+
+注：全部加载成功，会触发REDataSetLoadPanSce事件；要在RESystemEngineCreated监听事件之后调用
+
+**参数：**
+
+  ---- ------------------- -------------------------------------------------------
+   1   ***dataSetList***   全景数据集集合 （Object类型）
+
+  ---- ------------------- -------------------------------------------------------
+
+**Object模型解析：**
+
+  ---- ------------------------ ---------------------------------------------------
+   1   ***dataSetId***          数据集的唯一标识名
+
+   2   ***resourcesAddress***   数据集资源包地址
+  ---- ------------------------ ---------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//加载360全景
+
+var dataSetList = \[
+
+{
+
+\"dataSetId\": \"pan01\",
+
+\"resourcesAddress\":
+\"https://yingshi-bim-demo-api.bosch-smartlife.com:8088/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res02&path=3a078ce7d766a927f0f4147af5ebe82e\",
+
+}
+
+\];
+
+BlackHole3D.Panorama.loadPan(dataSetList);
+
+## getReadyState {#getreadystate .样式4}
+
+**功能：**
+
+判断全景场景是否全部加载完成
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Panorama.getReadyState();
+
+## getAllDataSetNames {#getalldatasetnames .样式4}
+
+**功能：**
+
+获取当前已加载的所有全景场景名称
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，当前加载的全景场景名称数组
+
+**调用示例：**
+
+BlackHole3D.Panorama.getAllDataSetNames();
+
+## unloadDataSet {#unloaddataset-1 .样式4}
+
+**功能：**
+
+卸载一个或多个全景场景，传空数组时，卸载所有的全景场景
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***dataSetIdList***   全景数据集id数组，为空数组时，卸载全部
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Panorama.unloadDataSet(\"pan01\");
+
+## getElemInfo {#geteleminfo .样式4}
+
+**功能：**
+
+当所有的全景资源加载完成时，获取某一全景图资源的点位信息
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集的唯一标识名
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***elemId***   每一帧全景图片的ID
+
+   2   ***rotate***   旋转
+
+   3   ***pos***      位置
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Panorama.getElemInfo(\"pan01\");
+
+## loadPanPic {#loadpanpic .样式4}
+
+**功能：**
+
+设置360全景窗口显示的某一帧图片信息
+
+注：设置成功会触发REPanLoadSingle事件
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***elemId***    | 某一帧全景图的唯一标识                                |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***panWindow*** | 全景窗口标识，为0或1：                                |
+|   |                 |                                                       |
+|   |                 | 仅有一个全景窗口的情况下填0即可；                     |
+|   |                 |                                                       |
+|   |                 | 有两个全景窗口时，0表示第一个，1表示第二个            |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Panorama.loadPanPic(\"3a078ce7d766a927f0f4147af5ebe82e_1667878766\",0);
+
+## 相机
+
+## setCamLocateTo {#setcamlocateto-1 .样式4}
+
+**功能：**
+
+设置360相机的朝向
+
+**参数：**
+
++:-:+-----------------+---------------------------------------------------------------------------------------------+
+| 1 | ***locType***   | 表示相机朝向（RECamDirEm 枚举类型）                                                         |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_FRONT//面-主视图（前视图）                                                          |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_BACK//面-后视图                                                                     |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_LEFT//面-左视图                                                                     |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_RIGHT//面-右视图                                                                    |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_TOP//面-俯视图（上视图）                                                            |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_BOTTOM//面-仰视图（下视图）                                                         |
+|   |                 |                                                                                             |
+|   |                 | CAM_DIR_DEFAULT//默认视角                                                                   |
++---+-----------------+---------------------------------------------------------------------------------------------+
+|   | ***panWindow*** | 360相机的id，如果当前场景仅有一个360场景，则填0即可，如果有两个，则0表示第一个，1表示第二个 |
++---+-----------------+---------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Panorama.setCamLocateTo(BlackHole3D.RECamDirEm.CAM_DIR_LEFT,
+0);
+
+## setCamLocateToRotate {#setcamlocatetorotate .样式4}
+
+**功能：**
+
+设置360相机的朝向（四元素数组）
+
+**注：设置完成后会触发回调事件 REPanLocateCam**
+
+**参数：**
+
+  ---- ----------------- ---------------------------------------------------------------------------------------------
+   1   ***camRotate***   相机的朝向（四元素数组）
+
+       ***panWindow***   360相机的id，如果当前场景仅有一个360场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+  ---- ----------------- ---------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let camLoc = BlackHole3D.Panorama.getCamLocate(0);
+
+BlackHole3D.Panorama.setCamLocateToRotate(camLoc.camRotate, 0);
+
+## setCamLocateToDestPos {#setcamlocatetodestpos .样式4}
+
+**功能：**
+
+根据相机点位置和目标点位置，设置全景场景相机方位
+
+**参数：**
+
+  ------- ----------------- -----------------------------------------------------------------------------------------------
+   **1**  ***curPos***      当前相机的位置（当前帧图片扫描点位）
+
+   **2**  ***destPos***     目标点位，例\[1,1,1\]
+
+     3    ***panWindow***   全景相机标识，如果当前场景仅有一个全景场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+  ------- ----------------- -----------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var panInfoList = BlackHole3D.Panorama.getElemInfo(\"pan01\");
+
+var panElem1 = panInfoList\[1\];
+
+var panElem2 = panInfoList\[2\];
+
+BlackHole3D.Panorama.setCamLocateToDestPos(panElem1.pos, panElem2.pos,
+0);
+
+## getCamLocate {#getcamlocate-1 .样式4}
+
+**功能：**
+
+获取全景相机的方位信息
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***panWindow***   对应全景窗口标识，为0或1：
+                         仅有一个全景窗口的情况下填0即可；
+                         有两个全景窗口时，0表示第一个，1表示第二个
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（RECamLoc对象类型）
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***camPos***      相机位置（三元数）
+
+   2   ***camRotate***   相机的朝向（四元数）
+
+   3   ***camDir***      相机的朝向（欧拉角）
+  ---- ----------------- ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Panorama.getCamLocate(0);
+
+## setCamAutoForward {#setcamautoforward .样式4}
+
+**功能：**
+
+设置全景图的自动前进后退
+
+注：运动完成触发REPanCamAutoForwardFinish监听事件
+
+**参数：**
+
+  ------- ----------------- -----------------------------------------------------------------------------------------------
+   **1**  ***type***        类型 0：前进 1：后退
+
+   **2**  ***time***        时长
+
+     3    ***panWindow***   全景相机标识，如果当前场景仅有一个全景场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+  ------- ----------------- -----------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Panorama.setCamAutoForward(1, 1.0, 0);
+
+## 探测
+
+## getCurShpProbeRet {#getcurshpproberet-1 .样式4}
+
+**功能：**
+
+获取当前探测全景信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REProbeShpInfo对象类型）
+
+  ---- ------------------ -----------------------------------------------------
+   1   ***elemId***       构件标识
+
+   2   ***elemPos***      选择构件坐标
+
+   3   ***elemScrPos***   选择构件相对屏幕二维坐标（原点为屏幕左下角）
+  ---- ------------------ -----------------------------------------------------
+
+**调用示例：**
+
+//添加监听事件
+
+document.addEventListener(\"REPanSelShpElement\", REPanSelShpElement);
+
+//获取当前探测结果
+
+function REPanSelShpElement(){
+
+console.log(BlackHole3D.Panorama.getCurShpProbeRet());
+
+}
+
+## getTexPos {#gettexpos .样式4}
+
+**功能：**
+
+获取锚点在全景图上的像素坐标
+
+**参数：**
+
+  ---- ----------------- -----------------------------------------------------------------------------------------------
+   1   ***pos***         三维坐标点
+
+   2   ***panWindow***   全景相机标识，如果当前场景仅有一个全景场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+  ---- ----------------- -----------------------------------------------------------------------------------------------
+
+**返回值：**
+
+二元数组
+
+**调用示例：**
+
+BlackHole3D.Panorama.getTexPos(\[-217.0, 256.03, 12.1\], 0);
+
+## 锚点
+
+## addAnc {#addanc-2 .样式4}
+
+**功能：**
+
+添加锚点
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancList***   锚点信息集合（REPanAnc类型）
+
+  ---- --------------- -------------------------------------------------------
+
+**REPanAnc模型解析：**
+
+  ---- ----------------- --------------------------------------------------------------------------------------------------------
+   1   ***panWindow***   全景相机标识(默认值0)，如果当前场景仅有一个全景场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+
+   2   ***ancName***     锚点的名称(唯一标识)，必填
+
+   3   ***pos***         锚点的位置，默认值 \[0,0,0\]
+
+   4   ***texPos***      表示锚点在全景图上的像素位置
+
+   5   ***useTexPos***   表示是否使用像素位置添加锚点
+
+   6   ***picPath***     表示锚点的图片路径
+
+   7   ***picSize***     表示锚点的图片大小
+
+   8   ***text***        表示顶点的文字标注信息
+
+   9   ***textClr***     表示锚点的文字标注颜色
+
+   10  ***texBias***     表示锚点文字与图片的相对位置，二维坐标：以点为中心点，横轴为x，右侧为正方向，竖轴为y，向上为正方向,
+                         例如（-1，-1）为文字在点的左下方，（1,1）为右上方
+
+   11  ***texFocus***    表示指定纹理图片中的像素坐标，对应对锚点的位置坐标
+  ---- ----------------- --------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 添加成功返回true, 失败返回false
+
+**调用示例：**
+
+var panInfoList = BlackHole3D.Panorama.getElemInfo(\"pan01\");
+
+var panAncList = \[\];
+
+for (let j = 0; j \< panInfoList.length; j++) {
+
+var panElem = panInfoList\[j\];
+
+var model = new BlackHole3D.REPanAnc();
+
+//model.panWindow = 0;//选填
+
+model.ancName = \"锚点:\" + j;
+
+model.pos = panElem.pos;
+
+model.picPath = \"https://demo.bjblackhole.com/imgs/bubbley.png\";
+
+model.picSize = \[60, 60\];
+
+model.texFocus = \[-1, -1\];
+
+model.text = \"前进\";
+
+model.textClr = new BlackHole3D.REColor(0, 255, 255, 255);
+
+model.useTexPos = false;
+
+model.texBias = \[-1, -1\];
+
+model.texPos = \[30, 30\];
+
+panAncList.push(model);
+
+}
+
+BlackHole3D.Panorama.addAnc(panAncList);
+
+## delAnc {#delanc-2 .样式4}
+
+**功能：**
+
+删除锚点
+
+**参数：**
+
+  ---- ----------------- -----------------------------------------------------------------------------------------------
+   1   ***panWindow***   全景相机标识，如果当前场景仅有一个全景场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+
+   2   ***ancName***     点的名称,如果为\"\"删除所有全景图中的所有锚点
+  ---- ----------------- -----------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.Panorama.delAnc(\"锚点:1\",0);
+
+## getAllAncName {#getallancname .样式4}
+
+**功能：**
+
+获取当前已加载的全景图锚点的唯一标识集合
+
+**参数：**
+
+  ---- ----------------- -----------------------------------------------------------------------------------------------
+   1   ***panWindow***   全景相机标识，如果当前场景仅有一个全景场景，则填0即可，如果有两个，则0表示第一个，1表示第二个
+
+  ---- ----------------- -----------------------------------------------------------------------------------------------
+
+**返回值：**
+
+数组类型
+
+**调用示例：**
+
+BlackHole3D.Panorama.getAllAncName(0);
+
+# 模型编辑（Edit）
+
+## startEdit {#startedit .样式4}
+
+**功能：**
+
+进入位置编辑状态
+
+**注：重置、退出、保存、匹配，由RESystemUIEvent监听事件返回对应按钮操作id，分别为PosMatch_Reset_Btn、PosMatch_Exit_Btn、PosMatch_Save_Btn、ControlPosMatchBtn**
+
+**参数：**
+
+  ---- ------------ -------------------------------------------------------
+   1   ***type***   默认编辑操作类型 0:不在位置编辑匹配模式 1: 移动配准
+                    2：控制点配准
+
+  ---- ------------ -------------------------------------------------------
+
+**返回值：**
+
+数值类型，0：成功，1：失败（参数错误），2：失败（处于其他状态无法进入编辑状态），3：失败（引擎未初始化）
+
+**调用示例：**
+
+//移动配准
+
+BlackHole3D.Edit.startEdit(1);
+
+//控制点配准
+
+BlackHole3D.Edit.startEdit(2);
+
+//监听UI事件
+
+document.addEventListener(\"RESystemUIEvent\", RESystemUIEvent);
+
+function RESystemUIEvent(e) {
+
+console.log(e.detail);
+
+if (e.detail.btnname == \"PosMatch_Save_Btn\") {
+
+//保存按钮被点击
+
+}
+
+}
+
+## endEdit {#endedit .样式4}
+
+**功能：**
+
+退出位置编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//监听UI事件
+
+document.addEventListener(\"RESystemUIEvent\", RESystemUIEvent);
+
+function RESystemUIEvent(e) {
+
+console.log(e.detail);
+
+if (e.detail.btnname == \"PosMatch_Exit_Btn\") {
+
+BlackHole3D.Edit.endEdit();
+
+}
+
+}
+
+## getEditState {#geteditstate .样式4}
+
+**功能：**
+
+获取位置编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0：没有处于编辑状态 1：移动配准编辑状态 2：控制点配准编辑状态
+
+**调用示例：**
+
+BlackHole3D.Edit.getEditState();
+
+## setDataSetEditEnable {#setdataseteditenable .样式4}
+
+**功能：**
+
+设置数据集是否可编辑，所有数据集默认是可编辑的
+
+**参数：**
+
+  --- --------------------- -------------------------------------------------------
+   1  ***dataSetIdList***   数据集唯一标识集合
+
+   2  ***enable***          是否允许编辑，默认为true
+  --- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let dataSetIdList = \[\"dataSet01\"\];
+
+BlackHole3D.Edit.setDataSetEditEnable(dataSetIdList, false);
+
+## getDataSetEditEnable {#getdataseteditenable .样式4}
+
+**功能：**
+
+获取数据集是否可编辑
+
+**参数：**
+
+  --- ----------------- --------------------------------------------------------
+   1  ***dataSetId***   数据集的唯一标识名
+
+  --- ----------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值, 允许返回true，反之返回false
+
+**调用示例：**
+
+BlackHole3D.Edit.getDataSetEditEnable(\"dataSet01\");
+
+# 测量（Measure）
+
+## 加载
+
+## addGroupData {#addgroupdata .样式4}
+
+**功能：**
+
+添加一组测量数据
+
+**注：groupId设置需要大于1024，1024以内的id为系统工具栏创建的测量数据的保有数值**
+
+**参数：**
+
+  ---- ----------------------- -----------------------------------------------------
+   1   ***measureInfoList***   测量信息集合 （REMeasureInfo 类型）
+
+  ---- ----------------------- -----------------------------------------------------
+
+**REMeasureInfo模型解析：**
+
++--------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***measureType***  | 测量类型                                                                                                                                       |
+|                    |                                                                                                                                                |
+|                    | 1：单次长度测量                                                                                                                                |
+|                    |                                                                                                                                                |
+|                    | 2：连续长度测量                                                                                                                                |
+|                    |                                                                                                                                                |
+|                    | 3：单次角度测量                                                                                                                                |
+|                    |                                                                                                                                                |
+|                    | 4：连续角度测量                                                                                                                                |
+|                    |                                                                                                                                                |
+|                    | 5：面积测量                                                                                                                                    |
+|                    |                                                                                                                                                |
+|                    | 6：位置测量                                                                                                                                    |
+|                    |                                                                                                                                                |
+|                    | 7：面间距测量**（拾取面不平行无法获取面间距，只展示面夹角数值）**                                                                              |
+|                    |                                                                                                                                                |
+|                    | 8：面角度测量                                                                                                                                  |
++--------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***dataShowType*** | 数据显示类型                                                                                                                                   |
+|                    |                                                                                                                                                |
+|                    | 1: 沿线（面）本身方向                                                                                                                          |
+|                    |                                                                                                                                                |
+|                    | 2：测量线（面）投射XY平面                                                                                                                      |
+|                    |                                                                                                                                                |
+|                    | 3：测量线投射Z方向**（仅线可用）**                                                                                                             |
+|                    |                                                                                                                                                |
+|                    | 4：测量线（面）贴地测量                                                                                                                        |
++--------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***groupId***      | 组id（数值类型）**设置需要大于1024，1024以内的id为系统工具栏创建的测量数据的保有数值，如果传递1024以内的值则会对工具栏创建的测量数据进行覆盖** |
++--------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***pointList***    | 测量点集合                                                                                                                                     |
+|                    |                                                                                                                                                |
+|                    | 长度：至少两个点                                                                                                                               |
+|                    |                                                                                                                                                |
+|                    | 角度：至少三个点                                                                                                                               |
+|                    |                                                                                                                                                |
+|                    | 面积：至少三个点                                                                                                                               |
+|                    |                                                                                                                                                |
+|                    | 位置：至少一个点                                                                                                                               |
++--------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| ***norList***      | 测量点的法线集合（默认空数组，面间距，面夹角测量时有效，和测量点集合一一对应）                                                                 |
++--------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//进入测量模式
+
+BlackHole3D.Measure.startMeasureState();
+
+var list = \[\];
+
+//长度测量
+
+var measureInfo1 = new BlackHole3D.REMeasureInfo();
+
+measureInfo1.measureType = 1;
+
+measureInfo1.dataShowType = 1;
+
+measureInfo1.groupId = 2000;
+
+measureInfo1.pointList = \[
+
+\[5.2774847810884005, 20.279251129164138, 1.35592204225739\],
+
+\[9.208837486233602, 19.28688892897917, 1.6398539371733278\],
+
+\];
+
+list.push(measureInfo1);
+
+//角度测量
+
+var measureInfo2 = new BlackHole3D.REMeasureInfo();
+
+measureInfo2.measureType = 3;
+
+measureInfo2.dataShowType = 1;
+
+measureInfo2.groupId = 2001;
+
+measureInfo2.pointList = \[
+
+\[5.2774847810884005, 20.279251129164138, 1.35592204225739\],
+
+\[10.208837486233602, 19.28688892897917, 1.6398539371733278\],
+
+\[7.014212960555174, 16.284113142217954, 0.000028166025423104202\],
+
+\];
+
+list.push(measureInfo2);
+
+//面积测量
+
+var measureInfo3 = new BlackHole3D.REMeasureInfo();
+
+measureInfo3.measureType = 5;
+
+measureInfo3.dataShowType = 1;
+
+measureInfo3.groupId = 2002;
+
+measureInfo3.pointList = \[
+
+\[5.2774847810884005, 20.279251129164138, 1.35592204225739\],
+
+\[10.208837486233602, 19.28688892897917, 1.6398539371733278\],
+
+\[7.014212960555174, 16.284113142217954, 0.000028166025423104202\],
+
+\];
+
+list.push(measureInfo3);
+
+//位置测量
+
+var measureInfo4 = new BlackHole3D.REMeasureInfo();
+
+measureInfo4.measureType = 6;
+
+measureInfo4.dataShowType = 1;
+
+measureInfo4.groupId = 2003;
+
+measureInfo4.pointList = \[
+
+\[5.2774847810884005, 20.279251129164138, 1.35592204225739\],
+
+\[10.208837486233602, 19.28688892897917, 1.6398539371733278\],
+
+\[7.014212960555174, 16.284113142217954, 0.000028166025423104202\],
+
+\];
+
+list.push(measureInfo4);
+
+//添加一组测量
+
+BlackHole3D.Measure.addGroupData(list);
+
+## delGroupData {#delgroupdata .样式4}
+
+**功能：**
+
+删除一组测量数据
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***groupId***   组id（数值类型）
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.delGroupData(100);
+
+## delTypeData  {#deltypedata .样式4}
+
+**功能：**
+
+删除一类测量数据
+
+**参数：**
+
++:-:+------------+-------------------------------------------------------------------+
+| 1 | ***type*** | 操作的测量类型                                                    |
+|   |            |                                                                   |
+|   |            | 1：单次长度测量                                                   |
+|   |            |                                                                   |
+|   |            | 2：连续长度测量                                                   |
+|   |            |                                                                   |
+|   |            | 3：单次角度测量                                                   |
+|   |            |                                                                   |
+|   |            | 4：连续角度测量                                                   |
+|   |            |                                                                   |
+|   |            | 5：面积测量                                                       |
+|   |            |                                                                   |
+|   |            | 6：位置测量                                                       |
+|   |            |                                                                   |
+|   |            | 7：面间距测量**（拾取面不平行无法获取面间距，只展示面夹角数值）** |
+|   |            |                                                                   |
+|   |            | 8：面角度测量                                                     |
++---+------------+-------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.delTypeData(2);
+
+## getGroupDataByType {#getgroupdatabytype .样式4}
+
+**功能：**
+
+根据测量类型获取测量数据
+
+**参数：**
+
++:-:+-------------------+-------------------------------------------------------------------+
+| 1 | ***measureType*** | //测量类型                                                        |
+|   |                   |                                                                   |
+|   |                   | 1：单次长度测量                                                   |
+|   |                   |                                                                   |
+|   |                   | 2：连续长度测量                                                   |
+|   |                   |                                                                   |
+|   |                   | 3：单次角度测量                                                   |
+|   |                   |                                                                   |
+|   |                   | 4：连续角度测量                                                   |
+|   |                   |                                                                   |
+|   |                   | 5：面积测量                                                       |
+|   |                   |                                                                   |
+|   |                   | 6：位置测量                                                       |
+|   |                   |                                                                   |
+|   |                   | 7：面间距测量**（拾取面不平行无法获取面间距，只展示面夹角数值）** |
+|   |                   |                                                                   |
+|   |                   | 8：面角度测量                                                     |
++---+-------------------+-------------------------------------------------------------------+
+
+**返回值：**
+
+数组类型，（REMeasureInfo对象类型）
+
++:-:+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***measureType***  | 测量类型                                                                                                                     |
+|   |                    |                                                                                                                              |
+|   |                    | 1：单次长度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 2：连续长度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 3：单次角度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 4：连续角度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 5：面积测量                                                                                                                  |
+|   |                    |                                                                                                                              |
+|   |                    | 6：位置测量                                                                                                                  |
+|   |                    |                                                                                                                              |
+|   |                    | 7：面间距测量**（拾取面不平行无法获取面间距，只展示面夹角数值）**                                                            |
+|   |                    |                                                                                                                              |
+|   |                    | 8：面角度测量                                                                                                                |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 2 | ***dataShowType*** | 数据显示类型                                                                                                                 |
+|   |                    |                                                                                                                              |
+|   |                    | 1: 沿线（面）本身方向                                                                                                        |
+|   |                    |                                                                                                                              |
+|   |                    | 2：测量线（面）投射XY平面                                                                                                    |
+|   |                    |                                                                                                                              |
+|   |                    | 3：测量线投射Z方向**（仅线可用）**                                                                                           |
+|   |                    |                                                                                                                              |
+|   |                    | 4：测量线（面）贴地测量                                                                                                      |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 3 | ***groupId***      | 组id（数值类型）**1024以内的id为系统工具栏创建的测量数据的保有数值，如果传递1024以内的值则会对工具栏创建的测量数据进行覆盖** |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 4 | ***pointList***    | 测量点集合                                                                                                                   |
+|   |                    |                                                                                                                              |
+|   |                    | 长度：至少两个点                                                                                                             |
+|   |                    |                                                                                                                              |
+|   |                    | 角度：至少三个点                                                                                                             |
+|   |                    |                                                                                                                              |
+|   |                    | 面积：至少三个点                                                                                                             |
+|   |                    |                                                                                                                              |
+|   |                    | 位置：至少一个点                                                                                                             |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+
+**调用示例：**
+
+BlackHole3D.Measure.getGroupDataByType(1);
+
+## getGroupDataByID {#getgroupdatabyid .样式4}
+
+**功能：**
+
+根据测量类型获取测量数据
+
+**参数：**
+
+  ---- ------------------- -------------------------------------------------------
+   1   ***groupIdList***   测量标识集合
+
+  ---- ------------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型，（REMeasureInfo对象类型）
+
++:-:+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***measureType***  | 测量类型                                                                                                                     |
+|   |                    |                                                                                                                              |
+|   |                    | 1：单次长度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 2：连续长度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 3：单次角度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 4：连续角度测量                                                                                                              |
+|   |                    |                                                                                                                              |
+|   |                    | 5：面积测量                                                                                                                  |
+|   |                    |                                                                                                                              |
+|   |                    | 6：位置测量                                                                                                                  |
+|   |                    |                                                                                                                              |
+|   |                    | 7：面间距测量**（拾取面不平行无法获取面间距，只展示面夹角数值）**                                                            |
+|   |                    |                                                                                                                              |
+|   |                    | 8：面角度测量                                                                                                                |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 2 | ***dataShowType*** | 数据显示类型                                                                                                                 |
+|   |                    |                                                                                                                              |
+|   |                    | 1: 沿线（面）本身方向                                                                                                        |
+|   |                    |                                                                                                                              |
+|   |                    | 2：测量线（面）投射XY平面                                                                                                    |
+|   |                    |                                                                                                                              |
+|   |                    | 3：测量线投射Z方向**（仅线可用）**                                                                                           |
+|   |                    |                                                                                                                              |
+|   |                    | 4：测量线（面）贴地测量                                                                                                      |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 3 | ***groupId***      | 组id（数值类型）**1024以内的id为系统工具栏创建的测量数据的保有数值，如果传递1024以内的值则会对工具栏创建的测量数据进行覆盖** |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+| 4 | ***pointList***    | 测量点集合                                                                                                                   |
+|   |                    |                                                                                                                              |
+|   |                    | 长度：至少两个点                                                                                                             |
+|   |                    |                                                                                                                              |
+|   |                    | 角度：至少三个点                                                                                                             |
+|   |                    |                                                                                                                              |
+|   |                    | 面积：至少三个点                                                                                                             |
+|   |                    |                                                                                                                              |
+|   |                    | 位置：至少一个点                                                                                                             |
++---+--------------------+------------------------------------------------------------------------------------------------------------------------------+
+
+**调用示例：**
+
+BlackHole3D.Measure.getGroupDataByID(\[2000\]);
+
+## 渲染设置
+
+## setLineClr {#setlineclr .样式4}
+
+**功能：**
+
+设置测量线的颜色
+
+**参数：**
+
++:-:+---------------+-------------------------------------------------------+
+| 1 | ***clrType*** | 颜色类型，合法值和意义如下:                           |
+|   |               |                                                       |
+|   |               | \"BaseLine\":设置基本测量线的颜色                     |
+|   |               |                                                       |
+|   |               | \"Length_H\":设置长度测量时水平线的颜色               |
+|   |               |                                                       |
+|   |               | \"Length_V\":设置长度测量时垂直线的颜色               |
+|   |               |                                                       |
+|   |               | \"AreaEdge\":设置面积测量区轮廓线的颜色               |
+|   |               |                                                       |
+|   |               | \"AreaFace\":设置面积测量区面填充的颜色               |
++---+---------------+-------------------------------------------------------+
+| 2 | ***lineClr*** | 测量线颜色（REColor 类型）                            |
++---+---------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置测量基本（长度、角度、面积）线的颜色为白色
+
+BlackHole3D.Measure.setLineClr(\"BaseLine\",new
+BlackHole3D.REColor(255,255,255,255));
+
+## setTextStyle {#settextstyle .样式4}
+
+**功能：**
+
+设置测量显示文字的样式
+
+**参数：**
+
++:-:+----------------+-------------------------------------------------------------+
+| 1 | ***clrType***  | 颜色类型，合法值和意义如下:                                 |
+|   |                |                                                             |
+|   |                | \"Length\":设置每段长度文字的样式，包括字体样式和颜色透明度 |
+|   |                |                                                             |
+|   |                | \"Length_H\":设置长度测量时水平距离文字的样式               |
+|   |                |                                                             |
+|   |                | \"Length_V\":设置长度测量时垂直高度文字的样式               |
+|   |                |                                                             |
+|   |                | \"Total_Length\":设置总长度文字的样式                       |
+|   |                |                                                             |
+|   |                | \"Angle\":设置角度测量时文字的样式                          |
+|   |                |                                                             |
+|   |                | \"Area\":设置面积测量时文字的样式                           |
+|   |                |                                                             |
+|   |                | \"Slope\":设置坡度显示的文字的样式                          |
++---+----------------+-------------------------------------------------------------+
+| 2 | ***fontName*** | 字体样式名称，由REaddAGolFont接口创建的字体名称；           |
+|   |                |                                                             |
+|   |                | 填空字符串表示使用默认字体样式                              |
++---+----------------+-------------------------------------------------------------+
+| 3 | ***lineClr***  | 字体颜色（REColor 类型）                                    |
++---+----------------+-------------------------------------------------------------+
+| 4 | ***isBorder*** | 表示本次设置该字体本身还是边框：                            |
+|   |                |                                                             |
+|   |                | true：表示设置边框颜色                                      |
+|   |                |                                                             |
+|   |                | false：表示设置字体本身                                     |
++---+----------------+-------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置每段长度的字体样式
+
+BlackHole3D.Measure.setTextStyle(\"Length\",\"\",new
+BlackHole3D.REColor(255,255,255,255),false);
+
+## resetDefaultStyle {#resetdefaultstyle .样式4}
+
+**功能：**
+
+重置测量样式为系统默认样式
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.resetDefaultStyle();
+
+## getValueDispPrecision {#getvaluedispprecision-1 .样式4}
+
+**功能：**
+
+获取测量显示的精度
+
+**参数**：
+
+无
+
+**返回**值：
+
+数值类型，小数点后几位
+
+**调用示例：**
+
+BlackHole3D.Measure.getValueDispPrecision();
+
+## setValueDispPrecision {#setvaluedispprecision-1 .样式4}
+
+**功能：**
+
+设置测量显示的精度
+
+注：只有设置之后的才会被调整
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***precision***   精度（正整数）
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.setValueDispPrecision(3);
+
+## getSlopeVisible {#getslopevisible .样式4}
+
+**功能：**
+
+获取坡度显示状态
+
+**参数**：
+
+无
+
+**返回**值：
+
+布尔值，true开启 false关闭
+
+**调用示例：**
+
+BlackHole3D.Measure.getSlopeVisible();
+
+## setSlopeVisible {#setslopevisible .样式4}
+
+**功能：**
+
+设置长度测量时两点之间的坡度显示开关
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   显示状态
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.setSlopeVisible(true);
+
+## getLengthDataShowType {#getlengthdatashowtype .样式4}
+
+**功能：**
+
+获取当前长度测量的数据显示模式
+
+**参数**：
+
+无
+
+**返回**值：
+
+数值类型，1：沿线本身方向 2：测量线投射XY平面 3：测量线投射Z方向
+4：测量线贴地模式
+
+**调用示例：**
+
+BlackHole3D.Measure.getLengthDataShowType();
+
+## setLengthDataShowType {#setlengthdatashowtype .样式4}
+
+**功能：**
+
+设置当前长度测量的数据显示模式
+
+**注：只有startMeasureState接口进入的测量模式下有效，设置完成下次有效**
+
+**参数：**
+
++:-:+------------+-------------------------------------------------------+
+| 1 | ***type*** | 显示模式                                              |
+|   |            |                                                       |
+|   |            | 1：沿线本身方向                                       |
+|   |            |                                                       |
+|   |            | 2：测量线投射XY平面                                   |
+|   |            |                                                       |
+|   |            | 3：测量线投射Z方向                                    |
+|   |            |                                                       |
+|   |            | 4：测量线贴地模式                                     |
++---+------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.setLengthDataShowType(2);
+
+## getAreaDataShowType {#getareadatashowtype .样式4}
+
+**功能：**
+
+获取当前面积测量的数据显示模式
+
+**参数**：
+
+无
+
+**返回**值：
+
+数值类型， 1：平面上 2：平面投射XY平面 4：平面贴地模式
+
+**调用示例：**
+
+BlackHole3D.Measure.getAreaDataShowType();
+
+## setAreaDataShowType {#setareadatashowtype .样式4}
+
+**功能：**
+
+设置当前面积测量的数据显示模式
+
+**注：只有startMeasureState接口进入的测量模式下有效，设置完成下次有效**
+
+**参数：**
+
++:-:+------------+-------------------------------------------------------+
+| 1 | ***type*** | 显示模式                                              |
+|   |            |                                                       |
+|   |            | 1：平面上                                             |
+|   |            |                                                       |
+|   |            | 2：平面投射XY平面                                     |
+|   |            |                                                       |
+|   |            | 4：平面贴地模式                                       |
++---+------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.setAreaDataShowType(2);
+
+## getAssistLineVisible {#getassistlinevisible .样式4}
+
+**功能：**
+
+获取轴平行辅助线开启状态
+
+**参数**：
+
+无
+
+**返回**值：
+
+布尔值，true开启 false关闭
+
+**调用示例：**
+
+BlackHole3D.Measure.getAssistLineVisible();
+
+## setAssistLineVisible {#setassistlinevisible .样式4}
+
+**功能：**
+
+设置轴平行辅助线开启状态
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   显示状态
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.setAssistLineVisible(false);
+
+## 操作设置
+
+## startShowFenceMinDis {#startshowfencemindis .样式4}
+
+**功能：**
+
+显示鼠标选中点到场景中电子围栏的最短距离
+
+注：需要有电子围栏
+
+**调用示例：**
+
+//显示距离
+
+BlackHole3D.Measure.startShowFenceMinDis();
+
+## endShowFenceMinDis {#endshowfencemindis .样式4}
+
+**功能：**
+
+关闭显示鼠标选中点到场景中电子围栏的最短距离
+
+**调用示例：**
+
+//关闭显示距离
+
+BlackHole3D.Measure.endShowFenceMinDis();
+
+## drawHoriDisLine {#drawhoridisline .样式4}
+
+**功能：**
+
+在屏幕上显示两个点之间的水平距离
+
+**参数：**
+
+  ---- -------------- ------------------------------------------------------------------------------
+   1   ***point1***   表示第一个点的坐标，三元数组
+
+   2   ***point2***   表示第二个点的坐标，三元数组
+
+   3   ***text***     字符串格式，此参数为空时，表示显示两个点之间的距离；不为空时，显示相应的文字
+  ---- -------------- ------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//显示两个顶点之间的水平距离
+
+var point1 = \[15.73675912988119, 14.952203539523769,
+-0.000035778468316038925\];
+
+var point2 = \[5.7436397443920555, 15.233428105718719,
+0.00008613500627063786\];
+
+var text= \"666\";
+
+BlackHole3D.Measure.drawHoriDisLine(point1, point2 , text);
+
+## clearHoriDisLine {#clearhoridisline .样式4}
+
+**功能：**
+
+清除屏幕上的两点之间水平距离的信息
+
+**参数**：
+
+无
+
+**返回**值：
+
+无
+
+**调用示例：**
+
+//关闭显示距离
+
+BlackHole3D.Measure.clearHoriDisLine();
+
+## drawDisLine {#drawdisline .样式4}
+
+**功能：**
+
+在图形窗口显示两点之间的直线距离、水平距离、垂直距离
+
+**参数：**
+
++:-:+--------------+---------------------------------------------------------------+
+| 1 | ***point1*** | 表示第一个点的坐标，三元数组                                  |
++---+--------------+---------------------------------------------------------------+
+| 2 | ***point2*** | 表示第二个点的坐标，三元数组                                  |
++---+--------------+---------------------------------------------------------------+
+| 3 | ***mode***   | 显示模式，可显示线段、水平线、铅锤线，其组合有以下几种有效值: |
+|   |              |                                                               |
+|   |              | 1:显示线段本身并显示线段长度                                  |
+|   |              |                                                               |
+|   |              | 2:显示水平线并显示水平距离                                    |
+|   |              |                                                               |
+|   |              | 3:同时显示1和2模式下的内容                                    |
+|   |              |                                                               |
+|   |              | 4:显示铅锤线并显示垂直距离                                    |
+|   |              |                                                               |
+|   |              | 5:同时显示1和4模式下的内容                                    |
+|   |              |                                                               |
+|   |              | 6:同时显示2和4模式下的内容                                    |
+|   |              |                                                               |
+|   |              | 7:同时显示1和2和4模式下的内容                                 |
++---+--------------+---------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//显示两个顶点之间的距离
+
+var point1 = \[15.73675912988119, 14.952203539523769,
+-0.000035778468316038925\];
+
+var point2 = \[5.7436397443920555, 15.233428105718719,
+0.00008613500627063786\];
+
+var mode = 7;
+
+BlackHole3D.Measure.drawDisLine(point1, point2 , mode);
+
+## clearDisLine {#cleardisline .样式4}
+
+**功能：**
+
+关闭在图形窗口显示的两点之间的距离
+
+**参数**：
+
+无
+
+**返回**值：
+
+无
+
+**调用示例：**
+
+//关闭显示距离
+
+BlackHole3D.Measure.clearDisLine();
+
+## getMeasureType {#getmeasuretype .样式4}
+
+**功能：**
+
+获取当前操作的测量类型
+
+**参数**：
+
+无
+
+**返回**值：
+
+数值类型， 1：单次长度测量 2：连续长度测量 3：单次角度测量
+4：连续角度测量 5：面积测量 6：位置测量 7：面间距测量 8：面角度测量
+
+**调用示例：**
+
+BlackHole3D.Measure.getMeasureType();
+
+## setMeasureType {#setmeasuretype .样式4}
+
+**功能：**
+
+设置当前操作的测量类型
+
+**注：只有startMeasureState接口进入的测量模式下有效（拾取面不平行无法获取面间距，只展示面夹角数值）**
+
+**参数：**
+
++:-:+------------+-------------------------------------------------------------------+
+| 1 | ***type*** | 操作的测量类型                                                    |
+|   |            |                                                                   |
+|   |            | 1:单次长度测量                                                    |
+|   |            |                                                                   |
+|   |            | 2：连续长度测量                                                   |
+|   |            |                                                                   |
+|   |            | 3：单次角度测量                                                   |
+|   |            |                                                                   |
+|   |            | 4：连续角度测量                                                   |
+|   |            |                                                                   |
+|   |            | 5：面积测量                                                       |
+|   |            |                                                                   |
+|   |            | 6：位置测量                                                       |
+|   |            |                                                                   |
+|   |            | 7：面间距测量**（拾取面不平行无法获取面间距，只展示面夹角数值）** |
+|   |            |                                                                   |
+|   |            | 8：面角度测量                                                     |
++---+------------+-------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Measure.setMeasureType(2);
+
+## startMeasureState {#startmeasurestate .样式4}
+
+**功能：**
+
+进入测量交互模式
+
+**注：接口进入测量模式和系统UI面板中的测量模式不联动，需要关闭系统UI面板（包含内联弹窗）**
+
+**默认进入单次长度测量**
+
+**参数**：
+
+无
+
+**返回**值：
+
+布尔值，true成功 false失败
+
+**调用示例：**
+
+BlackHole3D.Measure.startMeasureState();
+
+## endMeasureState {#endmeasurestate .样式4}
+
+**功能：**
+
+结束测量交互模式
+
+**注：接口进入测量交互模式关闭的系统UI面板（包含内联弹窗）需要手动选择是否打开**
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***enable***   之前是否允许系统UI面板展示（默认为展示系统UI面板）
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，true成功 false失败
+
+**调用示例：**
+
+BlackHole3D.Measure.endMeasureState(false);
+
+## cancelCurPotOpt {#cancelcurpotopt .样式4}
+
+**功能：**
+
+取消当前点选操作
+
+注：并非结束了测量编辑状态，而是结束了当前组的编辑，当点击鼠标，会进入下一组测量路径的编辑状态
+
+**参数**：
+
+无
+
+**返回**值：
+
+布尔值，true成功 false失败
+
+**调用示例：**
+
+BlackHole3D.Measure.cancelCurPotOpt();
+
+## getCurState {#getcurstate .样式4}
+
+**功能：**
+
+获取当前是否处于测量交互模式
+
+**参数**：
+
+无
+
+**返回**值：
+
+布尔值，true处于 false不处于
+
+**调用示例：**
+
+BlackHole3D.Measure.getCurState();
+
+# 有限元（FEM）  {#有限元fem .样式3}
+
+## loadData {#loaddata .样式4}
+
+**功能：**
+
+加载FEM文件
+
+注：回调监听 RELoadFEMFinish用于接收加载文件是否成功
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***feId***       有限元数据唯一标识
+
+   2   ***filePath***   FEM文件路径
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//加载FEM文件
+
+BlackHole3D.FEM.loadData(\"FEMID\",\"https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=disk_out_ref_surface01.vtp\");
+
+//添加回调监听
+
+document.addEventListener(\"RELoadFEMFinish\", RELoadFEMFinishCallBack);
+
+function RELoadFEMFinishCallBack(e) {
+
+if (e.detail.succeed == 1) {
+
+console.log(\"有限元文件加载成功\");
+
+}
+
+}
+
+## removeData {#removedata .样式4}
+
+**功能：**
+
+移除指定标识的FEM数据
+
+**参数：**
+
+  ---- ------------ -------------------------------------------------------
+   1   ***feId***   有限元数据唯一标识
+
+  ---- ------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.FEM.removeData(\"FEMID\");
+
+## getAllScalarParamName {#getallscalarparamname .样式4}
+
+**功能：**
+
+获取所有的标量属性字段名称集合
+
+**参数：**
+
+  ---- ------------ -------------------------------------------------------
+   1   ***feId***   有限元数据唯一标识
+
+  ---- ------------ -------------------------------------------------------
+
+**返回值：**
+
+数组，包含所有名称的字符串数组
+
+**调用示例：**
+
+BlackHole3D.FEM.getAllScalarParamName(\"FEMID\");
+
+## setActiveScalar {#setactivescalar .样式4}
+
+**功能：**
+
+设置用于展示标量信息的属性字段
+
+**参数：**
+
+  ---- ------------------------ ---------------------------------------------------
+   1   ***feId***               有限元数据唯一标识
+
+   2   ***scarlarParamName***   标量属性字段名称
+  ---- ------------------------ ---------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.FEM.setActiveScalar(\"FEMID\", \"AsH3\");
+
+## setCLUT {#setclut .样式4}
+
+**功能：**
+
+设置颜色查找表信息（按照HSV格式参数）
+
+**参数：**
+
+  ---- ----------------------- -----------------------------------------------------
+   1   ***feId***              有限元数据唯一标识
+
+   2   ***hueRange***          色调取值范围 \[min,max\] 0-1的取值范围
+
+   3   ***saturationRange***   饱和度取值范围 \[min,max\] 0-1的取值范围
+
+   4   ***valueRange***        明度取值范围 \[min,max\] 0-1的取值范围
+  ---- ----------------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.FEM.setCLUT(\"FEMID\", \[0.4,0.9\], \[1.0,1.0\],
+\[0.0,1.0\]);
+
+# 轴网（AxisGrid）
+
+## setData {#setdata .样式4}
+
+**功能：**
+
+添加一组轴网数据
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***groupName***   组名称，该组轴网的唯一标识
+
+   2   ***infoList***    轴网数据集合（REAxisGridInfo 类型）
+  ---- ----------------- -------------------------------------------------------
+
+**REAxisGridInfo模型解析：**
+
+  ---- ---------------- -------------------------------------------------
+   1   ***guid***       轴线的唯一标识
+
+   2   ***name***       轴线的名称
+
+   3   ***lineClr***    轴线的颜色（REColor 类型）
+
+   4   ***pos***        轴线两个顶点坐标
+  ---- ---------------- -------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true, 否则返回false
+
+**调用示例：**
+
+var infoList = \[\];
+
+var info1 = new BlackHole3D.REAxisGridInfo();
+
+info1.guid = \"001\";
+
+info1.name = \"A\";
+
+info1.lineClr = new BlackHole3D.REColor(0, 0, 0, 255);
+
+info1.pos = \[\[4.288069845977211, 33.87103682291651, 1\],
+\[4.285024254261444, 15.658603008473774, 1\]\];
+
+infoList.push(info1);
+
+var info2 = new BlackHole3D.REAxisGridInfo();
+
+info2.guid = \"002\";
+
+info2.name = \"B\";
+
+info2.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+info2.pos = \[\[4.57677965923796, 14.677213563853854, 1\],
+\[15.71787952403888, 15.487131187284342, 1\]\];
+
+infoList.push(info2);
+
+BlackHole3D.AxisGrid.setData(\"AxisGrid01\", infoList);
+
+## getAllGroupNames {#getallgroupnames .样式4}
+
+**功能：**
+
+获取当前添加的轴网组名称集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前添加的轴网组名称
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.getAllGroupNames()
+
+## getGuid {#getguid .样式4}
+
+**功能：**
+
+根据轴网组名称获取对应的轴线guid集合
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   组名称，该组轴网的唯一标识
+
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，轴线guid集合
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.getGuid(\"AxisGrid01\");
+
+## delData {#deldata .样式4}
+
+**功能：**
+
+根据轴网组名称删除数据
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***groupNameList***   组名称集合
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.delData(\[\"AxisGrid01\"\]);
+
+## delAllData {#delalldata .样式4}
+
+**功能：**
+
+删除所有轴网数据
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.delAllData();
+
+## setClr {#setclr .样式4}
+
+**功能：**
+
+设置轴线的显示颜色
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   组名称，该组轴网的唯一标识
+
+   2   ***guidList***    guid集合，空数组代表所有guid集合
+
+   3   ***lineClr***     轴线颜色（REColor类型）
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，设置成功返回true，失败返回false
+
+**调用示例：**
+
+//所有guid集合的轴线颜色
+
+BlackHole3D.AxisGrid.setClr(\"AxisGrid01\",\[\],new
+BlackHole3D.REColor(0,255,0,255));
+
+//指定guid的轴线颜色
+
+BlackHole3D.AxisGrid.setClr(\"AxisGrid01\",\[\"001\"\],new
+BlackHole3D.REColor(0,255,0,255));
+
+## setProbeEnable {#setprobeenable .样式4}
+
+**功能：**
+
+设置轴网是否可以被探测
+
+注：默认为可以探测，允许探测会触发RESystemSelShpElement事件
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***groupNameList***   组名称集合，空数组代表素有组集合
+
+   2   ***enable***          是否允许探测
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，设置成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.setProbeEnable(\[\],false);
+
+## setVisible {#setvisible .样式4}
+
+**功能：**
+
+设置轴网是否显示
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***groupNameList***   组名称集合，空数组代表素有组集合
+
+   2   ***enable***          是否可见
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，设置成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.setVisible(\[\],false);
+
+## setOverlap {#setoverlap .样式4}
+
+**功能：**
+
+设置轴网是否允许被模型遮挡
+
+**参数：**
+
+  ---- -------------- ------------------------------------------------------
+   1   ***enable***   是否允许遮挡
+
+  ---- -------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.setOverlap(false);
+
+## getOverlap {#getoverlap .样式4}
+
+**功能：**
+
+获取当前设置的轴网是否允许被模型遮挡状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，允许遮挡返回true，不允许遮挡返回false
+
+**调用示例：**
+
+BlackHole3D.AxisGrid.getOverlap();
+
+# 标高（Elevation）
+
+## setData {#setdata-1 .样式4}
+
+**功能：**
+
+添加一组标高数据
+
+注：标高线条默认只有在正视图（前后左右四个方向）视角下显示
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   组名称，该组轴网的唯一标识
+
+   2   ***dataSetId***   数据集唯一标识
+
+   3   ***infoList***    标高数据集合（REElevationInfo 类型）
+  ---- ----------------- ------------------------------------------------------
+
+**REElevationInfo模型解析：**
+
+  ---- -------------------- -------------------------------------------------
+   1   ***guid***           标高的唯一标识
+
+   2   ***name***           标高的名称
+
+   3   ***lineClr***        标高线颜色（REColor 类型）
+
+   4   ***height***         高度
+
+   5   ***topHeight***      顶高
+
+   6   ***bottomHeight***   底高
+  ---- -------------------- -------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true, 否则返回false
+
+**调用示例：**
+
+var infoList = \[\];
+
+var info1 = new BlackHole3D.REElevationInfo();
+
+info1.guid = \"001\";
+
+info1.name = \"D\";
+
+info1.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+info1.height = 2.0;
+
+info1.topHeight = 0.0;
+
+info1.bottomHeight = 0.0;
+
+infoList.push(info1);
+
+var info2 = new BlackHole3D.REElevationInfo();
+
+info2.guid = \"002\";
+
+info2.name = \"G\";
+
+info2.lineClr = new BlackHole3D.REColor(0, 255, 0, 255);
+
+info2.height = 1.0;
+
+info2.topHeight = 1.0;
+
+info2.bottomHeight = 0.0;
+
+infoList.push(info2);
+
+BlackHole3D.Elevation.setData(\"Elevation01\", \"dataSet01\", infoList);
+
+## getAllGroupNames {#getallgroupnames-1 .样式4}
+
+**功能：**
+
+获取当前添加的标高组名称集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前添加的标高组名称
+
+**调用示例：**
+
+BlackHole3D.Elevation.getAllGroupNames()
+
+## getGuid {#getguid-1 .样式4}
+
+**功能：**
+
+根据组名称获取对应的标高guid集合
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   组名称，该组标高的唯一标识
+
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，标高guid集合
+
+**调用示例：**
+
+BlackHole3D.Elevation.getGuid(\"Elevation01\");
+
+## delData {#deldata-1 .样式4}
+
+**功能：**
+
+根据标高组名称删除数据
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***groupNameList***   组名称集合，为空数组表示删除全部
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Elevation.delData(\[\"Elevation01\"\]);
+
+## delAllData {#delalldata-1 .样式4}
+
+**功能：**
+
+删除所有标高数据
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Elevation.delAllData();
+
+## setClr {#setclr-1 .样式4}
+
+**功能：**
+
+设置标高的显示颜色
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   组名称，为空表示设置全部标高
+
+   2   ***guidList***    guid集合，空数组表示全部guid
+
+   3   ***lineClr***     标高颜色（REColor类型）
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，设置成功返回true，失败返回false
+
+**调用示例：**
+
+//所有guid集合的标高颜色
+
+BlackHole3D.Elevation.setClr(\"Elevation01\",\[\],new
+BlackHole3D.REColor(0,255,0,255));
+
+//指定guid的标高颜色
+
+BlackHole3D.Elevation.setClr(\"Elevation01\",\[\"001\"\],new
+BlackHole3D.REColor(0,255,0,255));
+
+## setProbeEnable {#setprobeenable-1 .样式4}
+
+**功能：**
+
+设置标高是否可以被探测
+
+注：默认为可以探测，允许探测会触发RESystemSelShpElement事件
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***groupNameList***   组名称集合，空数组代表所有组集合
+
+   2   ***enable***          是否允许探测
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，设置成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Elevation.setProbeEnable(\[\],false);
+
+## setVisible {#setvisible-1 .样式4}
+
+**功能：**
+
+设置标高是否显示
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***groupNameList***   组名称集合，空数组代表所有组集合
+
+   2   ***enable***          是否可见
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，设置成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Elevation.setVisible(\[\],false);
+
+## getData {#getdata .样式4}
+
+**功能：**
+
+根据标高的guid获取三个高度值
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***groupName***   组名称，该组标高的唯一标识
+
+   2   ***guid***        标高的唯一标识
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，当前GUID对应的三个标高值 \[height, topHeight, bottomHeight\]
+
+**调用示例：**
+
+BlackHole3D.Elevation.getData(\"Elevation01\",\"002\");
+
+## setOverlap {#setoverlap-1 .样式4}
+
+**功能：**
+
+设置标高是否允许被模型遮挡
+
+**参数：**
+
+  ---- -------------- ------------------------------------------------------
+   1   ***enable***   是否允许遮挡
+
+  ---- -------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Elevation.setOverlap(false);
+
+## getOverlap {#getoverlap-1 .样式4}
+
+**功能：**
+
+获取当前设置的标高是否允许被模型遮挡状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，允许遮挡返回true，不允许遮挡返回false
+
+**调用示例：**
+
+BlackHole3D.Elevation.getOverlap();
+
+# 电子围栏（Fence）
+
+## startFenceEdit {#startfenceedit .样式4}
+
+**功能：**
+
+进入编辑电子围栏状态
+
+注：进入电子围栏编辑状态后，可添加多个电子围栏
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Fence.startFenceEdit();
+
+## endFenceEdit {#endfenceedit .样式4}
+
+**功能：**
+
+退出编辑电子围栏状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Fence.endFenceEdit();
+
+## addFence {#addfence .样式4}
+
+**功能：**
+
+开始添加电子围栏
+
+**参数：**
+
+无
+
+**返回值：**
+
+进入添加电子围栏状态，返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Fence.addFence();
+
+## endAddFence {#endaddfence .样式4}
+
+**功能：**
+
+结束添加电子围栏
+
+**参数：**
+
+无
+
+**返回值：**
+
+退出当前电子围栏添加状态，返回true; 否则返回false
+
+**调用示例：**
+
+BlackHole3D.Fence.endAddFence();
+
+## setPicStyle {#setpicstyle .样式4}
+
+**功能：**
+
+设置电子围栏编辑状态的定位图标
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***picPath***   图片路径（32\*32像素、png格式）
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var picPath =
+\"https://demo.bjblackhole.com/demopage/examplesImgs/shandian.png\";
+
+BlackHole3D.Fence.setPicStyle(picPath);
+
+## getAllPotInfo {#getallpotinfo .样式4}
+
+**功能：**
+
+获取当前所有电子围栏的顶点信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，（REFencePot对象类型）
+
++:-:+------------------+-------------------------------------------------+
+| 1 | ***pos***        | 顶点位置                                        |
++---+------------------+-------------------------------------------------+
+| 2 | ***height***     | 顶点高度                                        |
++---+------------------+-------------------------------------------------+
+| 3 | ***potClr***     | 顶点颜色（REColor 类型）                        |
++---+------------------+-------------------------------------------------+
+| 4 | ***endPotType*** | 是否是当前围栏的最后一个顶点，                  |
+|   |                  |                                                 |
+|   |                  | 0：不是最后一个顶点；                           |
+|   |                  |                                                 |
+|   |                  | 1：最后一个顶点且围栏封闭；                     |
+|   |                  |                                                 |
+|   |                  | 2：最后一个顶点且围栏不封闭                     |
++---+------------------+-------------------------------------------------+
+
+**调用示例：**
+
+BlackHole3D.Fence.getAllPotInfo();
+
+## delAllFence {#delallfence .样式4}
+
+**功能：**
+
+删除全部电子围栏
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.Fence.delAllFence();
+
+## addFenceByPot {#addfencebypot .样式4}
+
+**功能：**
+
+根据顶点信息添加电子围栏，添加围栏之前会自动清除当前设置的所有围栏的信息
+
+**参数：**
+
+  ---- ------------------------ -----------------------------------------------------
+   1   ***fencePotInfoList***   围栏的顶点信息集合 （REFencePot类型）
+
+  ---- ------------------------ -----------------------------------------------------
+
+**REFencePot模型解析：**
+
++:-:+------------------+-------------------------------------------------+
+| 1 | ***pos***        | 顶点位置                                        |
++---+------------------+-------------------------------------------------+
+| 2 | ***height***     | 顶点高度                                        |
++---+------------------+-------------------------------------------------+
+| 3 | ***potClr***     | 顶点颜色（REColor 类型）                        |
++---+------------------+-------------------------------------------------+
+| 4 | ***endPotType*** | 是否是当前围栏的最后一个顶点，                  |
+|   |                  |                                                 |
+|   |                  | 0：不是最后一个顶点；                           |
+|   |                  |                                                 |
+|   |                  | 1：最后一个顶点且围栏封闭；                     |
+|   |                  |                                                 |
+|   |                  | 2：最后一个顶点且围栏不封闭                     |
++---+------------------+-------------------------------------------------+
+
+**返回值：**
+
+布尔值，添加成功返回true, 失败返回false
+
+**调用示例：**
+
+var fencePotList = \[\];
+
+var pot1 = new BlackHole3D.REFencePot();
+
+pot1.pos = \[6.271010875701904, 15.429169654846191,
+0.00003434607060626149\];
+
+pot1.height = 10;
+
+pot1.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+pot1.endPotType = 0;
+
+fencePotList.push(pot1);
+
+var pot2 = new BlackHole3D.REFencePot();
+
+pot2.pos = \[18.30353212782401, 28.97581500616011,
+-0.00002419808805242951\];
+
+pot2.height = 10;
+
+pot2.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+pot2.endPotType = 0;
+
+fencePotList.push(pot2);
+
+var pot3 = new BlackHole3D.REFencePot();
+
+pot3.pos = \[4.643471112809078, 29.62842330772714,
+-0.000019446589980987028\];
+
+pot3.height = 10;
+
+pot3.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+pot3.endPotType = 1;//最后一个点且闭合
+
+fencePotList.push(pot3);
+
+BlackHole3D.Fence.addFenceByPot(fencePotList);
+
+## getPotInAnyFence {#getpotinanyfence .样式4}
+
+**功能：**
+
+检测目标位置是否在任何一个围栏内
+
+**注：检测围栏范围区域内的点，高度不限制检测效果**
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***point***   目标点坐标（三元素数组）
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，存在返回true, 不存在返回false
+
+**调用示例：**
+
+//加载模型
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+//创建电子围栏
+
+var fencePotList = \[\];
+
+var pot1 = new BlackHole3D.REFencePot();
+
+pot1.pos = \[6.271010875701904, 15.429169654846191,
+0.00003434607060626149\];
+
+pot1.height = 10;
+
+pot1.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+pot1.endPotType = 0;
+
+fencePotList.push(pot1);
+
+var pot2 = new BlackHole3D.REFencePot();
+
+pot2.pos = \[18.30353212782401, 28.97581500616011,
+-0.00002419808805242951\];
+
+pot2.height = 10;
+
+pot2.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+pot2.endPotType = 0;
+
+fencePotList.push(pot2);
+
+var pot3 = new BlackHole3D.REFencePot();
+
+pot3.pos = \[4.643471112809078, 29.62842330772714,
+-0.000019446589980987028\];
+
+pot3.height = 10;
+
+pot3.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+pot3.endPotType = 1;//最后一个点且闭合
+
+fencePotList.push(pot3);
+
+BlackHole3D.Fence.addFenceByPot(fencePotList);
+
+// 检测点是否在围栏内
+
+BlackHole3D.Fence.getPotInAnyFence(\[10.432239958230547,
+25.052917279872826, 4.485455359079708\])
+
+# 剖切（Clip）
+
+## 通用
+
+## getSurplusID {#getsurplusid .样式4}
+
+**功能：**
+
+获取剖切完成后的可见元素ID集合
+
+**参数：**
+
++:-:+-----------------------+----------------------------------------------------------+
+| 1 | ***deleteCrossPart*** | 是否去除与包围体相交叉部分的构件，只保留包含在包围体内的 |
+|   |                       |                                                          |
+|   |                       | false：表示包含交叉                                      |
+|   |                       |                                                          |
+|   |                       | true：表示去除交叉                                       |
++---+-----------------------+----------------------------------------------------------+
+
+**返回值：**
+
+数组类型，剖切完成后的可见元素集合ID
+
+**调用示例：**
+
+//获取剖切剩余的ID，包含交叉
+
+var data = BlackHole3D.Clip.getSurplusID(false);
+
+console.log(data);
+
+//获取剖切剩余的ID，不包含交叉
+
+var data = BlackHole3D.Clip.getSurplusID(true);
+
+console.log(data);
+
+## getData {#getdata-1 .样式4}
+
+**功能：**
+
+获取当前的剖面信息
+
+注：旋转平移缩放针对体剖切，三顶点针对面剖切
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型，（REClipInfo对象类型）
+
+  ---- --------------------------- -------------------------------------------------
+   1   ***scale***                 缩放
+
+   2   ***rotate***                旋转
+
+   3   ***offset***                平移
+
+   4   ***isSingleSurfaceClip***   是否是单面剖切，true：单面剖切 false：体剖切
+
+   5   ***pot1***                  三角面剖切顶点1
+
+   6   ***pot2***                  三角面剖切顶点2
+
+   7   ***pot3***                  三角面剖切顶点3
+  ---- --------------------------- -------------------------------------------------
+
+**调用示例：**
+
+//获取剖面信息
+
+var tempClipData = BlackHole3D.Clip.getData();
+
+console.log(tempClipData);
+
+## setDataIntoClip {#setdataintoclip .样式4}
+
+**功能：**
+
+设置剖面信息，设置后进入剖切编辑状态
+
+注：旋转平移缩放针对体剖切，三顶点针对面剖切
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***clipInfo***   剖面信息（REClipInfo 类型）
+
+  ---- ---------------- -------------------------------------------------------
+
+**REClipInfo模型解析：**
+
+  ---- --------------------------- -------------------------------------------------
+   1   ***scale***                 缩放
+
+   2   ***rotate***                旋转
+
+   3   ***offset***                平移
+
+   4   ***isSingleSurfaceClip***   是否是单面剖切 true：单面剖切 false：体剖切
+
+   5   ***pot1***                  三角面剖切顶点1
+
+   6   ***pot2***                  三角面剖切顶点2
+
+   7   ***pot3***                  三角面剖切顶点3
+  ---- --------------------------- -------------------------------------------------
+
+**返回值：**
+
+设置成功，返回true，图形界面显示的的剖切结果，同时UI进入剖切编辑状态;
+否则返回false
+
+**调用示例：**
+
+//设置剖面信息
+
+var clipInfo = new BlackHole3D.REClipInfo();
+
+clipInfo.rotate = \[0.7084946217059984, 8.390326549300259e-16, -0,
+0.7057162113864709\];
+
+clipInfo.offset = \[15.504221856771613, 15.504221856771613,
+15.504221856771613\];
+
+clipInfo.scale = \[4.922421215950646, 38.9365141233854,
+-0.13028221393203876\];
+
+clipInfo.isSingleSurfaceClip = true;
+
+clipInfo.pot1 = \[3.922421215950676, 13.61446768408492,
+0.7702278847577326\];
+
+clipInfo.pot2 = \[5.922421215950676, 13.618396942057574,
+-0.2297643956783637\];
+
+clipInfo.pot3 = \[4.922421215950676, 13.622326200030225,
+-1.22975667611446\];
+
+BlackHole3D.Clip.setDataIntoClip(clipInfo);
+
+## setData {#setdata-2 .样式4}
+
+**功能：**
+
+设置剖面信息，设置后进入剖切完成状态
+
+注：旋转平移缩放针对体剖切，三顶点针对面剖切
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***clipInfo***   剖面信息（REClipInfo 类型）
+
+  ---- ---------------- -------------------------------------------------------
+
+**REClipInfo模型解析：**
+
+  ---- --------------------------- -------------------------------------------------
+   1   ***scale***                 缩放
+
+   2   ***rotate***                旋转
+
+   3   ***offset***                平移
+
+   4   ***isSingleSurfaceClip***   是否是单面剖切 true：单面剖切 false：体剖切
+
+   5   ***pot1***                  三角面剖切顶点1
+
+   6   ***pot2***                  三角面剖切顶点2
+
+   7   ***pot3***                  三角面剖切顶点3
+  ---- --------------------------- -------------------------------------------------
+
+**返回值：**
+
+设置成功，图形界面显示的的剖切结果，返回true; 否则返回false
+
+**调用示例：**
+
+//设置剖面信息
+
+var clipInfo = new BlackHole3D.REClipInfo();
+
+clipInfo.rotate = \[0.7084946217059984, 8.390326549300259e-16, -0,
+0.7057162113864709\];
+
+clipInfo.offset = \[15.504221856771613, 15.504221856771613,
+15.504221856771613\];
+
+clipInfo.scale = \[4.922421215950646, 38.9365141233854,
+-0.13028221393203876\];
+
+clipInfo.isSingleSurfaceClip = true;
+
+clipInfo.pot1 = \[3.922421215950676, 13.61446768408492,
+0.7702278847577326\];
+
+clipInfo.pot2 = \[5.922421215950676, 13.618396942057574,
+-0.2297643956783637\];
+
+clipInfo.pot3 = \[4.922421215950676, 13.622326200030225,
+-1.22975667611446\];
+
+BlackHole3D.Clip.setData(clipInfo);
+
+## endClip {#endclip .样式4}
+
+**功能：**
+
+退出剖切状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//退出剖切
+
+BlackHole3D.Clip.endClip();
+
+## getClipState {#getclipstate .样式4}
+
+**功能：**
+
+获取是否是在剖切模式下
+
+注：浏览状态和编辑状态都属于剖切模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值
+
+**调用示例：**
+
+//判断当前是否处于剖切状态
+
+var bool = BlackHole3D.Clip.getClipState();
+
+console.log(bool);
+
+## setReverseShowClipRgn {#setreverseshowcliprgn .样式4}
+
+**功能：**
+
+设置反向显示剖切区域
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setReverseShowClipRgn();
+
+## getClipBrowseState {#getclipbrowsestate .样式4}
+
+**功能：**
+
+判断是否处于剖切浏览状态
+
+注：浏览状态并没有退出剖切状态，只是无剖切操作状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值
+
+**调用示例：**
+
+//判断当前是否处于剖切浏览状态
+
+var bool = BlackHole3D.Clip.getClipBrowseState();
+
+console.log(bool);
+
+## setClipBrowseStyle {#setclipbrowsestyle .样式4}
+
+**功能：**
+
+设置当前剖切状态为浏览模式
+
+注：剖切模式下有效
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setClipBrowseStyle();
+
+## setClipEditStyle {#setclipeditstyle .样式4}
+
+**功能：**
+
+设置当前剖切状态为编辑模式
+
+注：剖切模式下有效
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setClipEditStyle();
+
+## resetClip {#resetclip .样式4}
+
+**功能：**
+
+重置剖切操作
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.resetClip();
+
+## getClipOptState {#getclipoptstate .样式4}
+
+**功能：**
+
+获取当前处于剖切模式的操作状态（单面剖切、体剖切）
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0：不在剖切状态 1：单面剖切 2：体剖切
+
+**调用示例：**
+
+BlackHole3D.Clip.getClipOptState();
+
+## 体剖切
+
+## getBoxClipTransType {#getboxcliptranstype .样式4}
+
+**功能：**
+
+获取体剖切变换模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0:位移 1:旋转 2:缩放
+
+**调用示例：**
+
+BlackHole3D.Clip.getBoxClipTransType();
+
+## setBoxClipTransType {#setboxcliptranstype .样式4}
+
+**功能：**
+
+设置体剖切变换模式
+
+注：只有体剖切状态有效
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***type***   剖切变换模式(默认缩放) 0:位移 1:旋转 2:缩放
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setBoxClipTransType(0);
+
+## setBoxClip {#setboxclip .样式4}
+
+**功能：**
+
+进入体剖切状态
+
+注：默认为缩放变换模式
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***dataList***   剖面信息（Object类型）
+
+  ---- ---------------- -------------------------------------------------------
+
+**Object模型解析：**
+
+  ---- ------------------ -------------------------------------------------
+   1   ***dataSetId***    数据集标识
+
+   2   ***elemIdList***   构件集合
+  ---- ------------------ -------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//使用选择集进行操作
+
+var list = BlackHole3D.BIM.getSelElemIDs();
+
+BlackHole3D.Clip.setBoxClip(list);
+
+//使用数据进行操作
+
+var dataList = \[
+
+{
+
+dataSetId: \"机房01\",
+
+elemIdList: \[787\]
+
+},
+
+{
+
+dataSetId: \"机房02\",
+
+elemIdList: \[785, 1065\]
+
+}
+
+\];
+
+BlackHole3D.Clip.setBoxClip(dataList);
+
+## setDataSetBoxClip {#setdatasetboxclip .样式4}
+
+**功能：**
+
+进入体剖切状态（数据集模式）
+
+注：默认为缩放变换模式
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***dataSetIdList***   数据集标识集合,为空数组代表所有数据集
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setDataSetBoxClip(\[\"机房01\"\])
+
+## setClipSpecifyHeight {#setclipspecifyheight .样式4}
+
+**功能：**
+
+根据指定高度进行单双面剖切
+
+**参数：**
+
+  ------- -------------------- ------------------------------------------------------
+     1    ***dataSetId***      数据集标识
+
+   **2**  ***topHeight***      顶高
+
+   **3**  ***bottomHeight***   底高
+
+   **4**  ***single***         是否单侧剖切
+  ------- -------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Clip.setClipSpecifyHeight(\"jifang01\",12.3,10,false);
+
+## setClipBoxClr {#setclipboxclr .样式4}
+
+**功能：**
+
+设置体剖切盒的面颜色和线颜色
+
+**注：需要在剖切辅助体显示之前设置**
+
+**参数：**
+
+  ------- --------------- ------------------------------------------------------
+     1    ***faceClr***   面颜色（REColor类型）
+
+   **2**  ***lineClr***   线颜色（REColor类型）
+  ------- --------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setClipBoxClr(new BlackHole3D.REColor(255,255,255,128),
+new BlackHole3D.REColor(255,0,0,255));
+
+## getClipBoxClr {#getclipboxclr .样式4}
+
+**功能：**
+
+获取体剖切盒的面颜色和线颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，第一个元素为面颜色，第二个元素为线颜色，数组为空代表获取失败
+
+**调用示例：**
+
+let clr_list = BlackHole3D.Clip.getClipBoxClr();
+
+if (clr_list.length \> 0) {
+
+let faceClr = clr_list\[0\];
+
+let lineClr = clr_list\[1\];
+
+}
+
+## setClipBoxHoverClrInfo {#setclipboxhoverclrinfo .样式4}
+
+**功能：**
+
+设置剖切盒鼠标悬停时的面颜色信息
+
+**注：需要在剖切辅助体显示之前设置**
+
+**参数：**
+
+  ------------------- ----------------------------------------------------------
+  ***faceClr***       面颜色（REColor类型）
+
+  ***clrWeight***     面颜色权重， \[0,255\]
+
+  ***alphaWeight***   面透明度权重， \[0,255\]
+  ------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setClipBoxHoverClrInfo(new BlackHole3D.REColor(255, 0,
+0, 128), 255, 255)
+
+## getClipBoxHoverClrInfo {#getclipboxhoverclrinfo .样式4}
+
+**功能：**
+
+获取剖切盒鼠标悬停时的面颜色信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  ------------------- -------------------------------------------------------
+  ***faceClr***       面颜色（REColor类型）
+
+  ***clrWeight***     面颜色权重， \[0,255\]
+
+  ***alphaWeight***   面透明度权重， \[0,255\]
+  ------------------- -------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Clip.getClipBoxHoverClrInfo()
+
+## 单面剖切
+
+## setSingleClip {#setsingleclip .样式4}
+
+**功能：**
+
+进入单面剖切状态
+
+注：默认为三点选取模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//进入单面剖切状态
+
+BlackHole3D.Clip.setSingleClip();
+
+## getSingleClipCreateType {#getsingleclipcreatetype .样式4}
+
+**功能：**
+
+获取单面剖切的创建方式
+
+**参数：**
+
+无
+
+**返回值：**
+
+数值类型，0:三点构面 1:鼠标拾取
+
+**调用示例：**
+
+BlackHole3D.Clip.getSingleClipCreateType();
+
+## setSingleClipCreateType {#setsingleclipcreatetype .样式4}
+
+**功能：**
+
+设置单面剖切的创建方式（三点构面、鼠标拾取）
+
+注：只有单面剖切状态有效
+
+**参数：**
+
+  --- ------------ -------------------------------------------------------
+   1  ***type***   创建模式(默认三点构面) 0:三点构面 1:鼠标拾取
+
+  --- ------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setSingleClipCreateType(0);
+
+## setClipPlaneClr {#setclipplaneclr .样式4}
+
+**功能：**
+
+设置单面剖切的面颜色和箭头颜色
+
+**注：需要在剖切辅助体显示之前设置**
+
+**参数：**
+
+  ------- ---------------- ------------------------------------------------------
+     1    ***faceClr***    面颜色（REColor类型）
+
+   **2**  ***arrowClr***   箭头颜色（REColor类型）
+  ------- ---------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setClipPlaneClr(new
+BlackHole3D.REColor(255,255,255,128), new
+BlackHole3D.REColor(255,0,0,255));
+
+## getClipPlaneClr {#getclipplaneclr .样式4}
+
+**功能：**
+
+获取单面剖切的面颜色和箭头颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，第一个元素为面颜色，第二个元素为箭头颜色，数组为空代表获取失败
+
+**调用示例：**
+
+let clr_list = BlackHole3D.Clip.getClipPlaneClr();
+
+if (clr_list.length \> 0) {
+
+let faceClr = clr_list\[0\];
+
+let arrowClr = clr_list\[1\];
+
+}
+
+## 相机
+
+## setLocateToClipElem {#setlocatetoclipelem .样式4}
+
+**功能：**
+
+根据指定方向定位到剖切面并进行缩放
+
+注：包围盒六面方向
+
+**参数：**
+
++:-:+---------------+-------------------------------------------------------+
+| 1 | ***locType*** | 定位方向信息（RECamDirEm 枚举类型）                   |
+|   |               |                                                       |
+|   |               | CAM_DIR_FRONT//面-主视图（前视图）                    |
+|   |               |                                                       |
+|   |               | CAM_DIR_BACK//面-后视图                               |
+|   |               |                                                       |
+|   |               | CAM_DIR_LEFT//面-左视图                               |
+|   |               |                                                       |
+|   |               | CAM_DIR_RIGHT//面-右视图                              |
+|   |               |                                                       |
+|   |               | CAM_DIR_TOP//面-俯视图（上视图）                      |
+|   |               |                                                       |
+|   |               | CAM_DIR_BOTTOM//面-仰视图（下视图）                   |
++---+---------------+-------------------------------------------------------+
+| 2 | ***scale***   | 表示包围盒高度缩放系数                                |
++---+---------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setLocateToClipElem(BlackHole3D.RECamDirEm.CAM_DIR_TOP,
+0.5);
+
+## setLocateToClipPlane {#setlocatetoclipplane .样式4}
+
+**功能：**
+
+定位相机到剖切面
+
+注：剩余未剖切元素能够构成包围盒情况下有效
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Clip.setLocateToClipPlane();
+
+# 动画（Animation）
+
+## addAnimWall {#addanimwall .样式4}
+
+**功能：**
+
+创建一个不规则动态墙。
+
+**参数：**
+
+  ---- -------------------- ------------------------------------------------------
+   1   ***animWallInfo***   动态墙信息（REAnimWallInfo类型）
+
+  ---- -------------------- ------------------------------------------------------
+
+**REAnimWallInfo模型解析：**
+
+  --- ----------------- -------------------------------------------------------------
+   1  ***groupName***   动态墙组名称
+
+   2  ***name***        动态墙名称
+
+   3  ***potList***     动态墙路径顶点坐标及高度，(x,y,z)表示顶点坐标，w表示高度
+
+   4  ***texPath***     动态墙纹理路径
+
+   5  ***normalDir***   纹理动画方向是否为法线方向，true为发现方向，false为切线方向
+
+   6  ***isClose***     动态墙是否强制闭合，默认闭合
+  --- ----------------- -------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animWallInfo = new BlackHole3D.REAnimWallInfo();
+
+animWallInfo.groupName = \"wall\";
+
+animWallInfo.name= \"wall01\";
+
+animWallInfo.potList = \[\[14.717769348031592, 57.95791001082713,
+-0.000030016697266432857, 3\],
+
+\[11.833832403710415, 57.88562541960681, -0.000031201471490049926, 3\],
+
+\[12.011666543451309, 54.24507412739243, -0.00003062040975443381, 3\],
+
+\[14.82709974581475, 54.341189629415496, -0.00003190398601304878, 3\]\];
+
+animWallInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+animWallInfo.normalDir = false;
+
+animWallInfo.isClose = true;
+
+BlackHole3D.Animation.addAnimWall(animWallInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"wall\";
+
+animStyle.nameList = \[\"wall01\"\];
+
+animStyle.animClr = new BlackHole3D.REColor(0,255,255);
+
+animStyle.clrWeight = 255;
+
+animStyle.scaleAndOffset = \[2.0, 1.0, -0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## addAnimPlane {#addanimplane .样式4}
+
+**功能：**
+
+创建一个不规则扫描平面。
+
+**参数：**
+
+  ---- --------------------- -----------------------------------------------------
+   1   ***animPlaneInfo***   扫描面信息（REAnimPlaneInfo类型）
+
+  ---- --------------------- -----------------------------------------------------
+
+**REAnimPlaneInfo模型解析：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***groupName***   不规则平面组名称
+
+   2  ***name***        不规则平面名称
+
+   3  ***potList***     不规则平面路径顶点坐标，(x,y,z)表示顶点坐标
+                        （至少三个数据）
+
+   4  ***texPath***     纹理路径
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animPlaneInfo = new BlackHole3D.REAnimPlaneInfo();
+
+animPlaneInfo.groupName = \"plane\";
+
+animPlaneInfo.name = \"plane01\";
+
+animPlaneInfo.potList = \[\[14.717769348031592, 57.95791001082713, 2\],
+
+\[11.833832403710415, 57.88562541960681, 2\],
+
+\[12.011666543451309, 54.24507412739243, 2\],
+
+\[14.82709974581475, 54.341189629415496, 2\]\];
+
+animPlaneInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+BlackHole3D.Animation.addAnimPlane(animPlaneInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"plane\";
+
+animStyle.nameList = \[\"plane01\"\];
+
+animStyle.animClr = new BlackHole3D.REColor(0,255,255);
+
+animStyle.clrWeight = 255;
+
+animStyle.scaleAndOffset = \[2.0, 1.0, -0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## addAnimSpheres {#addanimspheres .样式4}
+
+**功能：**
+
+创建一组球状扫描动画
+
+**参数：**
+
+  ---- ---------------------- -----------------------------------------------------
+   1   ***animSphereInfo***   球体信息（REAnimSphereInfo类型）
+
+  ---- ---------------------- -----------------------------------------------------
+
+**REAnimSphereInfo模型解析：**
+
+  --- --------------------- -------------------------------------------------------
+   1  ***groupName***       扫描球组名称
+
+   2  ***nameList***        扫描球名称数组
+
+   3  ***potCenterList***   扫描球中心点坐标数组
+
+   4  ***radius***          当前批次扫描球半径
+
+   5  ***sphere***          是否为圆球，true表示圆球，false表示半球
+
+   6  ***texPath***         纹理路径
+  --- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animSphereInfo = new BlackHole3D.REAnimSphereInfo();
+
+animSphereInfo.groupName = \"sphere\";
+
+animSphereInfo.nameList = \[\"sphere01\",\"sphere02\"\];
+
+animSphereInfo.potCenterList = \[\[14.717769348031592,
+57.95791001082713, 2\],
+
+\[12.98287890648843, 34.08362504945755, 1\]\];
+
+animSphereInfo.radius = 10;
+
+animSphereInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+BlackHole3D.Animation.addAnimSpheres(animSphereInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"sphere\";
+
+animStyle.nameList = \[\];
+
+animStyle.animClr = new BlackHole3D.REColor(0,255,255);
+
+animStyle.clrWeight = 255;
+
+animStyle.scaleAndOffset = \[1.0, 1.0, 0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## addAnimPolygons {#addanimpolygons .样式4}
+
+**功能：**
+
+创建一组规则平面多边形动画
+
+**参数：**
+
+  ---- ----------------------- ----------------------------------------------------
+   1   ***animPolygonInfo***   球体信息（REAnimPolygonInfo类型）
+
+  ---- ----------------------- ----------------------------------------------------
+
+**REAnimPolygonInfo模型解析：**
+
+  --- --------------------- -------------------------------------------------------------
+   1  ***groupName***       扫描平面组名称
+
+   2  ***nameList***        扫描平面名称数组
+
+   3  ***potCenterList***   扫描平面中心点坐标数组
+
+   4  ***radius***          当前批次扫描平面半径
+
+   5  ***radarScan***       扫描效果是否为雷达扫描，true为雷达扫描，false为扩散扫描
+
+   6  ***isRing***          是否为圆形，true表示圆形，此时边数为默认值，false表示多边形
+
+   7  ***edgeNum***         多边形的边数
+
+   8  ***texPath***         纹理路径
+  --- --------------------- -------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animPolygonInfo = new BlackHole3D.REAnimPolygonInfo();
+
+animPolygonInfo.groupName = \"polygon\";
+
+animPolygonInfo.nameList = \[\"polygon01\",\"polygon02\"\];
+
+animPolygonInfo.potCenterList = \[\[14.717769348031592,
+57.95791001082713, 2\],
+
+\[12.98287890648843, 34.08362504945755, 1\]\];
+
+animPolygonInfo.radius = 10;
+
+animPolygonInfo.radarScan = false;
+
+animPolygonInfo.isRing = false;
+
+animPolygonInfo.edgeNum = 6;
+
+animPolygonInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+BlackHole3D.Animation.addAnimPolygons(animPolygonInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"polygon\";
+
+animStyle.nameList = \[\];
+
+animStyle.animClr = new BlackHole3D.REColor(0,255,255);
+
+animStyle.clrWeight = 255;
+
+animStyle.scaleAndOffset = \[1.0, 1.0, 0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## addAnimPolygonWalls {#addanimpolygonwalls .样式4}
+
+**功能：**
+
+创建一组规则多边形动态墙
+
+**参数：**
+
+  ---- ------------------------ ---------------------------------------------------
+   1   ***animPolyWallInfo***   球体信息（REAnimPolyWallInfo类型）
+
+  ---- ------------------------ ---------------------------------------------------
+
+**REAnimPolyWallInfo模型解析：**
+
+  --- --------------------- -------------------------------------------------------------
+   1  ***groupName***       扫描平面组名称
+
+   2  ***nameList***        扫描平面名称数组
+
+   3  ***potCenterList***   扫描平面中心点坐标数组
+
+   4  ***radius***          当前批次扫描平面半径
+
+   5  ***height***          高度
+
+   6  ***isRing***          是否为圆形，true表示圆形，此时边数为默认值，false表示多边形
+
+   7  ***edgeNum***         多边形的边数
+
+   8  ***texPath***         纹理路径
+
+   9  ***normalDir***       贴图是否沿法线方向，true为法线方向，false为切线方向
+  --- --------------------- -------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animPolyWallInfo = new BlackHole3D.REAnimPolyWallInfo();
+
+animPolyWallInfo.groupName = \"polyWall\";
+
+animPolyWallInfo.nameList = \[\"polyWall01\",\"polyWall02\"\];
+
+animPolyWallInfo.potCenterList = \[\[14.717769348031592,
+57.95791001082713, 2\],
+
+\[12.98287890648843, 34.08362504945755, 1\]\];
+
+animPolyWallInfo.radius = 10;
+
+animPolyWallInfo.height = 5;
+
+animPolyWallInfo.isRing = false;
+
+animPolyWallInfo.edgeNum = 6;
+
+animPolyWallInfo.normalDir = true;
+
+animPolyWallInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+BlackHole3D.Animation.addAnimPolygonWalls(animPolyWallInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"polyWall\";
+
+animStyle.nameList = \[\];
+
+animStyle.animClr = new BlackHole3D.REColor(0,255,255);
+
+animStyle.clrWeight = 255;
+
+animStyle.scaleAndOffset = \[1.0, 1.0, 0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## addAnimCylinder {#addanimcylinder .样式4}
+
+**功能：**
+
+创建动态圆形管道
+
+**参数：**
+
+  ---- ------------------------ ---------------------------------------------------
+   1   ***animCylinderInfo***   信息（REAnimCylinderInfo类型）
+
+  ---- ------------------------ ---------------------------------------------------
+
+**REAnimCylinderInfo模型解析：**
+
+  --- ----------------- -------------------------------------------------------
+   1  ***groupName***   组名称
+
+   2  ***name***        名称
+
+   3  ***potList***     中心线路径顶点坐标
+
+   4  ***texPath***     纹理路径
+
+   5  ***radius***      半径
+  --- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animCylinderInfo = new BlackHole3D.REAnimCylinderInfo();
+
+animCylinderInfo.groupName = \"Cylinder\";
+
+animCylinderInfo.name = \"Cylinder01\";
+
+animCylinderInfo.potList = \[
+
+\[9.1430188185162677, 20.725476954872974, 4.2981972694396973\],
+
+\[9.1483041387047521, 35.597678617132431, 4.3007271089769965\],
+
+\[9.2690000534057617, 35.983598709106445, 4.2999999523162842\],
+
+\[9.654764235573321, 36.105368770864011, 4.295461189498031\],
+
+\[17.264230213985602, 36.107975503022303, 4.3012027364956316\],
+
+\];
+
+animCylinderInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+animCylinderInfo.radius = 0.5;
+
+BlackHole3D.Animation.addAnimCylinder(animCylinderInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"Cylinder\";
+
+animStyle.nameList = \[\];
+
+animStyle.animClr = new BlackHole3D.REColor(0, 255, 255);
+
+animStyle.clrWeight = 0;
+
+animStyle.scaleAndOffset = \[1.0, 1.0, -0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## addAnimAreaBuffer {#addanimareabuffer .样式4}
+
+**功能：**
+
+创建一个规则的路径平面
+
+**参数：**
+
+  ---- -------------------------- -----------------------------------------------
+   1   ***animAreaBufferInfo***   路径平面信息（REAnimAreaBufferInfo类型）
+
+  ---- -------------------------- -----------------------------------------------
+
+**REAnimAreaBufferInfo模型解析：**
+
+  ----------------- ----------------------------------------------------------
+  ***groupName***   路径平面组名称
+
+  ***name***        路径平面名称
+
+  ***potList***     中心线路径顶点坐标集合
+
+  ***texPath***     纹理路径
+
+  ***width***       平面宽度
+
+  ***policy***      拐点执行方案 0：贝塞尔曲线 1：线性折线
+
+  ***projSce***     是否投影地形\\倾斜摄影
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+var animAreaBufferInfo = new BlackHole3D.REAnimAreaBufferInfo();
+
+animAreaBufferInfo.groupName = \"Area\";
+
+animAreaBufferInfo.name = \"Area01\";
+
+animAreaBufferInfo.potList = \[
+
+\[16.8049, 48.3428, 4.7014\],
+
+\[16.8049, 46.3428, 4.7014\],
+
+\[16.8049, 44.3428, 4.7014\],
+
+\[16.8049, 42.3428, 4.7014\],
+
+\[16.8049, 40.3428, 4.7014\],
+
+\[16.8478, 38.3428, 4.7014\],
+
+\[16.7265, 36.3428, 3.9596\],
+
+\[16.7265, 34.3428, 3.9596\],
+
+\[16.7265, 32.3428, 3.9596\],
+
+\[16.7265, 30.3428, 3.9596\],
+
+\[16.6537, 28.3428, 3.9596\],
+
+\[16.6537, 26.3428, 3.9596\],
+
+\];
+
+animAreaBufferInfo.texPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/RealBIMWeb_Test_UV01/dynamic01.png\";
+
+animAreaBufferInfo.width = 0.5;
+
+animAreaBufferInfo.policy = 0;
+
+BlackHole3D.Animation.addAnimAreaBuffer(animAreaBufferInfo);
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"Area\";
+
+animStyle.nameList = \[\];
+
+animStyle.animClr = new BlackHole3D.REColor(0, 255, 255);
+
+animStyle.clrWeight = 0;
+
+animStyle.scaleAndOffset = \[1.0, 1.0, -0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+![](./images/media/image5.png){width="3.2569444444444446in"
+height="1.2722222222222221in"}
+
+## setShapeAnimStyle {#setshapeanimstyle .样式4}
+
+**功能：**
+
+按组名称设置矢量动画的参数
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***animStyleInfo***   矢量动画参数（REShpAnimStyle类型）
+
+  ---- --------------------- ------------------------------------------------------
+
+**REShpAnimStyle模型解析：**
+
++:-----:+----------------------+---------------------------------------------------------------------+
+| 1     | ***groupName***      | 矢量动画组名称，此参数不能为空                                      |
++-------+----------------------+---------------------------------------------------------------------+
+| **2** | ***nameList***       | 矢量动画名称集合，如果nameList为空,则设置该组下所有的矢量动画信息； |
++-------+----------------------+---------------------------------------------------------------------+
+| **3** | ***animClr***        | 期望的矢量动画颜色（REColor 类型）                                  |
++-------+----------------------+---------------------------------------------------------------------+
+| **2** | ***clrWeight***      | 颜色权重, 此权重要使用必须配合颜色值存在                            |
++-------+----------------------+---------------------------------------------------------------------+
+| **5** | ***scaleAndOffset*** | UV动画缩放、速度及方向，正负控制方向，数值控制速度,                 |
+|       |                      |                                                                     |
+|       |                      | \[U缩放，V缩放，U速度，V速度\]                                      |
++-------+----------------------+---------------------------------------------------------------------+
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+//参考以上5种类型的动画参数设置接口
+
+var animStyle = new BlackHole3D.REShpAnimStyle();
+
+animStyle.groupName = \"polyWall\";
+
+animStyle.nameList = \[\];
+
+animStyle.animClr = new BlackHole3D.REColor(0,255,255,255);
+
+animStyle.clrWeight = 255;
+
+animStyle.scaleAndOffset = \[1.0, 1.0, 0.5, 0.0\];
+
+BlackHole3D.Animation.setShapeAnimStyle(animStyle);
+
+## delShpAnimation {#delshpanimation .样式4}
+
+**功能：**
+
+删除矢量动画
+
+**参数：**
+
+  --- ----------------- ---------------------------------------------------------------------
+   1  ***groupName***   矢量动画组名称，为空字符串删除所有
+
+   2  ***nameList***    矢量动画名称集合，如果nameList为空,则删除该组下所有的矢量动画信息；
+  --- ----------------- ---------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，删除成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Animation.delShpAnimation(\"polyWall\", \[\]);
+
+# 小地图（MiniMap）
+
+## 加载
+
+## loadCAD {#loadcad-1 .样式4}
+
+**功能：**
+
+加载小地图中的CAD数据
+
+注：加载时机放在场景模型加载成功之后或者360全景图片设置成功之后
+
+加载完成触发REMiniMapLoadCAD事件回调
+
+**参数：**
+
++:-:+----------------+-------------------------------------------------------+
+| 1 | ***filePath*** | 图纸的资源发布路径                                    |
++---+----------------+-------------------------------------------------------+
+| 2 | ***unit***     | 图纸的单位 (RECadUnitEm 类型)（默认为米）：           |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Inch//英寸                                   |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Foot//英尺                                   |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Mile//英里                                   |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Millimeter//毫米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Centimeter//厘米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Meter//米                                    |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Kilometer//千米                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Microinch//微英寸                            |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Mil//毫英寸                                  |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Yard//码                                     |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Angstrom//埃                                 |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Nanometer//纳米                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Micron//微米                                 |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Decimeter//分米                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Decameter //十米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Hectometer//百米                             |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Gigameter//百万公里                          |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Astro//天文                                  |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Lightyear//光年                              |
+|   |                |                                                       |
+|   |                | CAD_UNIT_Parsec//天体                                 |
++---+----------------+-------------------------------------------------------+
+| 3 | ***scale***    | 图纸的比例尺信息（默认为1:1）                         |
++---+----------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//加载小地图CAD数据
+
+BlackHole3D.MiniMap.loadCAD(\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=res_cad/103-Floor
+Plan - 三层建筑平面图.dwg\",
+BlackHole3D.RECadUnitEm.CAD_UNIT_Millimeter, 1.0);
+
+## loadImage {#loadimage .样式4}
+
+**功能：**
+
+加载小地图中的图片文件
+
+注：加载时机放在场景模型加载成功之后或者360全景图片设置成功之后
+
+**参数：**
+
+  --- ----------------- --------------------------------------------------------
+   1  ***texPath***     图片路径
+
+   2  ***picSize***     图片尺寸
+
+   3  ***texSize***     材质像素尺寸
+
+   4  ***insertPos***   材质相对插入点
+
+   5  ***alpha***       材质透明度 默认值：255，取值范围
+                        0\~255，0表示全透明，255表示不透明
+  --- ----------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//先设置小地图的尺寸
+
+BlackHole3D.MiniMap.setMaxRegion(\[300, 300\]);//设置概略图最大的宽高
+
+var scaleOrigin = \[0, 0\];//原点相对于主界面宽高的比例 \[0,0\]
+取值范围0-1
+
+var scaleDiagonal = \[0.5, 0.5\];//对角点相对于主界面宽高的比例
+\[0.3,0.3\] 取值范围0-1
+
+BlackHole3D.MiniMap.setRegion(scaleOrigin,
+scaleDiagonal);//设置概略图占据主界面宽高比例
+
+var texPath =
+\"http://realbim.bjblackhole.cn:8008/default.aspx?dir=url_res02&path=res_temp/pics/a04.png\";
+
+var picSize = \[60, 40\];
+
+var texSize = \[860,500\];
+
+var insertPos = \[0, 0\];
+
+var alpha = 255;
+
+BlackHole3D.MiniMap.loadImage(texPath, picSize, texSize, insertPos,
+alpha)
+
+BlackHole3D.MiniMap.setVisible(true);//设置概略图显示状态
+
+BlackHole3D.MiniMap.setShowRangeRefresh();//调整CAD小地图显示，缩放到当前小地图展示范围
+
+## setShowRangeRefresh {#setshowrangerefresh .样式4}
+
+**功能：**
+
+调整CAD小地图显示，缩放到当前小地图展示范围
+
+注：在设置小地图显示（setVisible）之后调用
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setShowRangeRefresh();
+
+## 渲染设置
+
+## getVisible {#getvisible .样式4}
+
+**功能：**
+
+获取小地图的显示状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，小地图显示状态，true表示显示，false表示隐藏
+
+**调用示例：**
+
+BlackHole3D.MiniMap.getVisible();
+
+## setVisible {#setvisible-2 .样式4}
+
+**功能：**
+
+设置小地图的显示状态
+
+**参数：**
+
+  --- --------------- --------------------------------------------------------
+   1  ***visible***   是否显示
+
+  --- --------------- --------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setVisible(true);
+
+## setBackClr {#setbackclr-1 .样式4}
+
+**功能：**
+
+设置小地图的背景颜色
+
+**参数：**
+
+  ---- ------------- -------------------------------------------------------
+   1   ***bgClr***   背景颜（REColor 类型）
+
+  ---- ------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setBackClr(new BlackHole3D.REColor(255,0,0,255));
+
+## getRegion {#getregion .样式4}
+
+**功能：**
+
+获取小地图的显示区域范围 (小地图显示的实际范围（像素）)
+
+**参数：**
+
+无
+
+**返回值：**
+
+四元整型值
+
+**调用示例：**
+
+BlackHole3D.MiniMap.getRegion();
+
+## setRegion {#setregion .样式4}
+
+**功能：**
+
+设置小地图的显示区域比例（原点和对焦点相对主界面宽高的百分比）！！！
+
+注：显示范围限制在小地图最大的宽高设置。在最大宽度之后设置。例：最大宽度设置为\[500,500\]，主屏宽度1920，x的比例设置为0.5，即1920\*0.5=960\>最大宽度500，显示设置为500，如果x的比例设置为0.2，即1920\*0.2=384\<最大宽度500，显示设置为384。高度设置同理宽度。
+
+**参数：**
+
+  --- --------------------- ------------------------------------------------------
+   1  ***scaleOrigin***     原点相对于主界面宽高的比例 \[0,0\] 取值范围0-1
+
+   2  ***scaleDiagonal***   对角点相对于主界面宽高的比例 \[0.3,0.3\] 取值范围0-1
+  --- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+var scaleOrigin = \[0, 0\];//原点相对于主界面宽高的比例 \[0,0\]
+取值范围0-1
+
+var scaleDiagonal = \[0.5, 0.5\];//对角点相对于主界面宽高的比例
+\[0.3,0.3\] 取值范围0-1
+
+BlackHole3D.MiniMap.setRegion(scaleOrigin,
+scaleDiagonal);//设置概略图占据主界面宽高比例
+
+## getMaxRegion {#getmaxregion .样式4}
+
+**功能：**
+
+获取小地图的最大宽高 (像素值, xy分别表示最大宽度和高度)
+
+**参数：**
+
+无
+
+**返回值：**
+
+二元整型
+
+**调用示例：**
+
+BlackHole3D.MiniMap.getMaxRegion();
+
+## setMaxRegion {#setmaxregion .样式4}
+
+**功能：**
+
+设置小地图的最大宽高 (像素值, xy分别表示最大宽度和高度)
+
+注：在loadCAD之前调用
+
+**参数：**
+
+  --- -------------- -----------------------------------------------------
+   1  ***region***   xy分别表示最大宽度和高度（像素值）
+
+  --- -------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setMaxRegion(\[300, 300\]);
+
+## getMinRegion {#getminregion .样式4}
+
+**功能：**
+
+获取小地图的最小宽高 (像素值, xy分别表示最小宽度和高度)
+
+**参数：**
+
+无
+
+**返回值：**
+
+二元整型
+
+**调用示例：**
+
+BlackHole3D.MiniMap.getMinRegion();
+
+## setMinRegion {#setminregion .样式4}
+
+**功能：**
+
+设置小地图的最小宽高 (像素值, xy分别表示最小宽度和高度)
+
+注：在loadCAD之前调用
+
+**参数：**
+
+  --- -------------- -----------------------------------------------------
+   1  ***region***   xy分别表示最小宽度和高度（像素值）
+
+  --- -------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setMinRegion(\[100, 100\]);
+
+## setIconStyle {#seticonstyle .样式4}
+
+**功能：**
+
+设置小地图相机显示样式
+
+**参数：**
+
+  --- ---------------- -----------------------------------------------------
+   1  ***iconClr***    图标颜色信息（alpha字段代表了颜色权重）
+
+   2  ***iconSize***   图标大小（按屏幕分辨率） 默认值20px
+  --- ---------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setIconStyle(new
+BlackHole3D.REColor(245,108,108,255), 20);
+
+## 相机
+
+## setCamLocateTo {#setcamlocateto-2 .样式4}
+
+**功能：**
+
+设置小地图相机位置
+
+**参数：**
+
+  ------- -------------- -------------------------------------------------------
+     1    ***camPos***   位置坐标 必传 \[x,y\]
+
+   **2**  ***camDir***   相机朝向 可不传 \[x,y\]
+  ------- -------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setCamLocateTo(\[50.6, 5.5\], \[0, 1\]);
+
+## setConvertCamTransInfo {#setconvertcamtransinfo .样式4}
+
+**功能：**
+
+通过顶点映射信息设置小地图相机变换
+
+**参数：**
+
+  --- ----------------- -----------------------------------------------------
+   1  ***pointList***   对应的BIM和CAD点集合，最少大于等于3个数据
+                        (RECADConvertInfo 类型)
+
+   2  ***unit***        CAD单位 RECadUnitEm 枚举值
+  --- ----------------- -----------------------------------------------------
+
+**RECADConvertInfo模型解析：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***bimPoint***   BIM顶点
+
+   2   ***cadPoint***   CAD顶点
+  ---- ---------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var pointList = \[\];
+
+var conv1 = new BlackHole3D.RECADConvertInfo();
+
+conv1.bimPoint = \[-260.9, 136.1, 0\];
+
+conv1.cadPoint = \[-152231.4198, 252077.9952\];
+
+pointList.push(conv1);
+
+var conv2 = new BlackHole3D.RECADConvertInfo();
+
+conv2.bimPoint = \[-241.5, 104.1, 0\];
+
+conv2.cadPoint = \[-152231.4198, 214377.9952\];
+
+pointList.push(conv2);
+
+var conv3 = new BlackHole3D.RECADConvertInfo();
+
+conv3.bimPoint = \[-186.5, 138.1, 0\];
+
+conv3.cadPoint = \[-87531.4198, 214377.9952\];
+
+pointList.push(conv3);
+
+var unit = BlackHole3D.RE_CAD_UNIT.Millimeter;//CAD单位
+
+BlackHole3D.MiniMap.setConvertCamTransInfo(pointList, unit);//设置转换
+
+## getConvertCamTransInfo {#getconvertcamtransinfo .样式4}
+
+**功能：**
+
+获取顶点映射信息转换为小地图相机相对模型相机的变换数据
+
+**参数：**
+
+  --- ----------------- -----------------------------------------------------
+   1  ***pointList***   对应的BIM和CAD点集合，最少大于等于3个数据
+                        (RECADConvertInfo 类型)
+
+   2  ***unit***        CAD单位 RECadUnitEm 枚举值
+  --- ----------------- -----------------------------------------------------
+
+**RECADConvertInfo模型解析：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***bimPoint***   BIM顶点
+
+   2   ***cadPoint***   CAD顶点
+  ---- ---------------- ------------------------------------------------------
+
+**返回值：**
+
+对象类型（RECADTransInfo对象类型）
+
+  ---- ------------------- ------------------------------------------------------
+   1   ***basePos***       变换基点
+
+   2   ***offset***        偏移量
+
+   3   ***scaleFactor***   缩放比例
+
+   4   ***angle***         旋转角度
+
+   5   ***normal***        法向量
+
+   6   ***axis***          镜像轴向以基点为基准
+  ---- ------------------- ------------------------------------------------------
+
+**调用示例：**
+
+var pointList = \[\];
+
+var conv1 = new BlackHole3D.RECADConvertInfo();
+
+conv1.bimPoint = \[-260.9, 136.1, 0\];
+
+conv1.cadPoint = \[-152231.4198, 252077.9952\];
+
+pointList.push(conv1);
+
+var conv2 = new BlackHole3D.RECADConvertInfo();
+
+conv2.bimPoint = \[-241.5, 104.1, 0\];
+
+conv2.cadPoint = \[-152231.4198, 214377.9952\];
+
+pointList.push(conv2);
+
+var conv3 = new BlackHole3D.RECADConvertInfo();
+
+conv3.bimPoint = \[-186.5, 138.1, 0\];
+
+conv3.cadPoint = \[-87531.4198, 214377.9952\];
+
+pointList.push(conv3);
+
+var unit = BlackHole3D.RE_CAD_UNIT.Millimeter;//CAD单位
+
+var camTransInfo = BlackHole3D.MiniMap.getConvertCamTransInfo(pointList,
+unit);//获取小地图相机变换数据
+
+console.log(camTransInfo);
+
+## setCamTransInfo {#setcamtransinfo .样式4}
+
+**功能：**
+
+设置小地图相机变换数据 (通过 RECADTransInfo对象)
+
+**参数：**
+
+  ---- -------------------- -------------------------------------------------------
+   1   ***cadTransInfo***   变换信息（RECADTransInfo类型）
+
+  ---- -------------------- -------------------------------------------------------
+
+**RECADTransInfo模型解析：**
+
+  ---- ------------------- ------------------------------------------------------
+   1   ***basePos***       变换基点
+
+   2   ***offset***        偏移量
+
+   3   ***scaleFactor***   缩放比例
+
+   4   ***angle***         旋转角度
+
+   5   ***normal***        法向量
+
+   6   ***axis***          镜像轴向以基点为基准
+  ---- ------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var transInfo = new BlackHole3D.RECADTransInfo();
+
+transInfo.basePos = \[0, 0, 0\];//变换基点
+
+transInfo.offset = \[0, 0, 0\];//偏移量
+
+transInfo.scaleFactor = 1;//缩放比例
+
+transInfo.angle = 0;//旋转角度
+
+transInfo.normal = \[0, 0, 1\];//法向量
+
+transInfo.axis = \[0, 0, 0\];//镜像轴向以基点为基准
+
+BlackHole3D.MiniMap.setCamTransInfo(transInfo);
+
+## getCamTransInfo {#getcamtransinfo .样式4}
+
+**功能：**
+
+获取小地图相机相对模型相机的变换数据
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（RECADTransInfo对象类型）
+
+  ---- ------------------- ------------------------------------------------------
+   1   ***basePos***       变换基点
+
+   2   ***offset***        偏移量
+
+   3   ***scaleFactor***   缩放比例
+
+   4   ***angle***         旋转角度
+
+   5   ***normal***        法向量
+
+   6   ***axis***          镜像轴向以基点为基准
+  ---- ------------------- ------------------------------------------------------
+
+**调用示例：**
+
+var transInfo = BlackHole3D.MiniMap.getCamTransInfo();
+
+## setCADGroupShpAncScale {#setcadgroupshpancscale .样式4}
+
+**功能：**
+
+设置指定组 CAD类型小地图矢量锚点的相机缩放边界值
+
+**参数：**
+
+  --- ---------------- -----------------------------------------------------
+   1  ***groupId***    标识锚点组的标识ID
+
+   2  ***minScale***   缩放最小边界
+
+   3  ***maxScale***   缩放最大边界
+  --- ---------------- -----------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setCADGroupShpAncScale(\"group001\",10,30);
+
+## setCurViewportRange {#setcurviewportrange-1 .样式4}
+
+**功能：**
+
+设置小地图当前视口范围及相机定位
+
+**注**：如果没有布局，默认标识Model
+
+**参数：**
+
+  ---------------- ----------------------------------------------------------
+  ***minPot***     视口左下角坐标
+
+  ***maxPot***     视口右上角坐标
+
+  ***layoutId***   布局标识
+  ---------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.MiniMap.setCurViewportRange(\[-10,-10\],\[10,10\]);
+
+## 锚点
+
+## addCADShpAnc {#addcadshpanc .样式4}
+
+**功能：**
+
+添加一系列CAD类型小地图矢量锚点 (要在CAD加载完成之后添加)
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***ancList***   表示要添加的锚点信息集合（RECADShpAnc类型）
+
+  ---- --------------- -------------------------------------------------------
+
+**RECADShpAnc模型解析：**
+
++:-:+-----------------+-------------------------------------------------------------------+
+| 1 | ***anchorId***  | 锚点的名称(字符串，唯一标识)                                      |
++---+-----------------+-------------------------------------------------------------------+
+| 2 | ***pos***       | 锚点的位置，默认值 \[0,0,0\]                                      |
++---+-----------------+-------------------------------------------------------------------+
+| 3 | ***shpPath***   | 表示使用的矢量文件路径                                            |
++---+-----------------+-------------------------------------------------------------------+
+| 4 | ***groupId***   | 表示锚点所属的组名称ID                                            |
++---+-----------------+-------------------------------------------------------------------+
+| 5 | ***text***      | 表示锚点的文字内容                                                |
++---+-----------------+-------------------------------------------------------------------+
+| 6 | ***textClr***   | 表示锚点文字的颜色                                                |
++---+-----------------+-------------------------------------------------------------------+
+| 7 | ***textSize***  | 文字的高度                                                        |
++---+-----------------+-------------------------------------------------------------------+
+| 8 | ***textAlign*** | 表示锚点文字相对矢量图标的对齐方式（九宫格：以图片为中心\[0,0\]） |
+|   |                 |                                                                   |
+|   |                 | REGridPosEm 枚举类型                                              |
+|   |                 |                                                                   |
+|   |                 | LT//左上区域                                                      |
+|   |                 |                                                                   |
+|   |                 | MT//中上区域                                                      |
+|   |                 |                                                                   |
+|   |                 | RT//右上区域                                                      |
+|   |                 |                                                                   |
+|   |                 | LM//左中区域                                                      |
+|   |                 |                                                                   |
+|   |                 | MM//中中区域                                                      |
+|   |                 |                                                                   |
+|   |                 | RM//右中区域                                                      |
+|   |                 |                                                                   |
+|   |                 | LB//左下区域                                                      |
+|   |                 |                                                                   |
+|   |                 | MB//中下区域                                                      |
+|   |                 |                                                                   |
+|   |                 | RB//右下区域                                                      |
++---+-----------------+-------------------------------------------------------------------+
+
+**返回值：**
+
+添加成功返回true, 失败返回false
+
+**调用示例：**
+
+var shpAncList = \[\];
+
+var shpAnc1 = new BlackHole3D.RECADShpAnc();
+
+shpAnc1.anchorId = \"anc001\";
+
+shpAnc1.pos = \[-7, 0\];
+
+shpAnc1.shpPath = \"http://realbim.bjblackhole.cn:8008/img/test01.svg\";
+
+shpAnc1.groupId = \"group001\";
+
+shpAnc1.text = \"锚点1\";
+
+shpAnc1.textClr = new BlackHole3D.REColor(0, 255, 0, 255);
+
+shpAnc1.textSize = 16.0;
+
+shpAnc1.textAlign = BlackHole3D.REGridPosEm.MM;
+
+shpAncList.push(shpAnc1);
+
+var shpAnc2 = new BlackHole3D.RECADShpAnc();
+
+shpAnc2.anchorId = \"anc002\";
+
+shpAnc2.pos = \[5, -3\];
+
+shpAnc2.shpPath = \"http://realbim.bjblackhole.cn:8008/img/test02.svg\";
+
+shpAnc2.groupId = \"group001\";
+
+shpAnc2.text = \"锚点2\";
+
+shpAnc2.textClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+shpAnc2.textSize = 16.0;
+
+shpAnc2.textAlign = BlackHole3D.REGridPosEm.MM;
+
+shpAncList.push(shpAnc2);
+
+BlackHole3D.MiniMap.addCADShpAnc(shpAncList);
+
+## getCADShpAncNum {#getcadshpancnum .样式4}
+
+**功能：**
+
+获取系统中的CAD类型小地图矢量锚点总数
+
+**参数：**
+
+无
+
+**返回值：**
+
+Int值，锚点总数
+
+**调用示例：**
+
+BlackHole3D.MiniMap.getCADShpAncNum();
+
+## getAllCADShpAnc {#getallcadshpanc .样式4}
+
+**功能：**
+
+获取系统中所有的CAD类型小地图矢量锚点信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，锚点对象列表(RECADShpAnc对象)
+
+**调用示例：**
+
+var shpAncList = BlackHole3D.MiniMap.getAllCADShpAnc();
+
+## getCADShpAnc {#getcadshpanc .样式4}
+
+**功能：**
+
+获取一个CAD类型小地图矢量锚点的信息
+
+**参数：**
+
+  --- ---------------- -----------------------------------------------------
+   1  ***anchorId***   CAD锚点ID 唯一id
+
+  --- ---------------- -----------------------------------------------------
+
+**返回值：**
+
+对象类型（RECADShpAnc对象类型）
+
+  ---- ----------------- -------------------------------------------------------------------
+   1   ***anchorId***    锚点的名称(字符串，唯一标识)
+
+   2   ***pos***         锚点的位置，二维数组
+
+   3   ***shpPath***     表示使用的矢量文件路径
+
+   4   ***groupID***     表示锚点所属的组名称ID
+
+   5   ***text***        表示锚点的文字内容
+
+   6   ***color***       表示锚点文字的颜色
+
+   7   ***textSize***    文字的高度
+
+   8   ***textAlign***   表示锚点文字相对矢量图标的对齐方式（九宫格：以图片为中心\[0,0\]）
+  ---- ----------------- -------------------------------------------------------------------
+
+**调用示例：**
+
+var shpAnc = BlackHole3D.MiniMap.getAllCADShpAnc(\"anc001\");
+
+## getAllCADShpAncGroupIDs {#getallcadshpancgroupids .样式4}
+
+**功能：**
+
+获取系统中所有CAD类型小地图矢量锚点组的名称
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 所有的锚点组的名称
+
+**调用示例：**
+
+BlackHole3D.MiniMap.getAllCADShpAncGroupIDs();
+
+## getCADGroupShpAnc {#getcadgroupshpanc .样式4}
+
+**功能：**
+
+获取系统中某个CAD类型小地图矢量锚点组包含的所有CAD矢量锚点信息
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***groupId***   锚点组ID
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+数组, 当前组的锚点信息集合（RECADShpAnc对象类型）
+
+**调用示例：**
+
+var shpAncList = BlackHole3D.MiniMap.getCADGroupShpAnc(\"group01\");
+
+## delAllCADShpAnc {#delallcadshpanc .样式4}
+
+**功能：**
+
+删除系统所有的CAD类型小地图矢量锚点
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+//删除所有矢量锚点
+
+BlackHole3D.MiniMap.delAllCADShpAnc();
+
+## delCADShpAnc {#delcadshpanc .样式4}
+
+**功能：**
+
+删除对应ID列表的 CAD类型小地图矢量锚点
+
+**参数：**
+
+  ---- -------------------- -------------------------------------------------------
+   1   ***anchorIdList***   锚点id数组
+
+  ---- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+//删除锚点
+
+var shpAncList = BlackHole3D.MiniMap.getAllCADShpAnc();
+
+var cadShpAnc = shpAncList\[0\];
+
+BlackHole3D.MiniMap.delCADShpAnc(\[cadShpAnc.anchorId\]);
+
+## delCADGroupShpAnc {#delcadgroupshpanc .样式4}
+
+**功能：**
+
+删除对应组 包含的所有CAD矢量锚点
+
+**参数：**
+
+  ---- --------------- -------------------------------------------------------
+   1   ***groupId***   锚点组ID
+
+  ---- --------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值, 删除成功返回true, 失败返回false
+
+**调用示例：**
+
+BlackHole3D.MiniMap.delCADGroupShpAnc(\"group01\");
+
+# 管道（Pipe）
+
+## 加载
+
+## addContPipe {#addcontpipe .样式4}
+
+**功能：**
+
+添加一组连续管道
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***pipeInfo***   管道信息 （REPipeInfo 类型）
+
+  ---- ---------------- -------------------------------------------------------
+
+**REPipeInfo模型解析：**
+
+  ------- --------------------- --------------------------------------------
+   **1**  ***dataSetId***       数据集标识
+
+   **2**  ***pipeId***          管道唯一标识
+
+   **3**  ***elemIdList***      连续的构件id集合
+
+   **4**  ***texPath***         纹理路径
+
+   **5**  ***pipeClr***         管道显示的颜色 （REColor 类型）
+  ------- --------------------- --------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var pipeInfo = new BlackHole3D.REPipeInfo();
+
+pipeInfo.dataSetId = \"dataSet01\";
+
+pipeInfo.pipeId = \"pipe01\";
+
+pipeInfo.elemIdList = \[728, 735, 749, 757, 751, 731, 729\];
+
+BlackHole3D.Pipe.addContPipe(pipeInfo);
+
+## delContPipe {#delcontpipe .样式4}
+
+**功能：**
+
+删除连续管道
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***pipeIdList***   管道id集合，空数组表示所有管道
+
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.delContPipe(\[\"pipe01\"\]);
+
+## getAllContPipeId {#getallcontpipeid .样式4}
+
+**功能：**
+
+获取连续管道的标识集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组, 所有的管道标识
+
+**调用示例：**
+
+BlackHole3D.Pipe.getAllContPipeId();
+
+## getContPipeElemIDs {#getcontpipeelemids .样式4}
+
+**功能：**
+
+获取连续管道信息中构件的ID集合
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***pipeId***   管道标识
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型
+
+  ------- ------------------ ------------------------------------------------------
+   **1**  ***dataSetId***    数据集标识
+
+     2    ***elemIdList***   构件id集合
+  ------- ------------------ ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Pipe.getContPipeElemIDs(\"pipe01\");
+
+## setContPipeInfoXMLStr {#setcontpipeinfoxmlstr .样式4}
+
+**功能：**
+
+加载连续管道信息XML字符串
+
+**参数：**
+
+  ---- ---------------------- -----------------------------------------------------
+   1   ***dataSetId***        数据集标识
+
+   2   ***pipeInfoXMLStr***   管道信息xml字符串
+  ---- ---------------------- -----------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.setContPipeInfoXMLStr(\"dataSet01\",\"XML字符串\");
+
+## getContPipeInfoXMLStr {#getcontpipeinfoxmlstr .样式4}
+
+**功能：**
+
+获取连续管道信息XML字符串
+
+**参数：**
+
+  ---- ------------------ -----------------------------------------------------
+   1   ***pipeIdList***   管道标识集合, 为空数组代表所有管道
+
+  ---- ------------------ -----------------------------------------------------
+
+**返回值：**
+
+字符串，管道信息XML
+
+**调用示例：**
+
+BlackHole3D.Pipe.getContPipeInfoXMLStr(\[\"pipe01\"\]);
+
+## setGenContPipeCenterLine {#setgencontpipecenterline .样式4}
+
+**功能：**
+
+生成连续管道中心线
+
+注：接口进度由监听事件REGenPipeCenterLineProgress返回
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***pipeIdList***   管道标识集合, 为空数组代表所有管道
+
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.setGenContPipeCenterLine(\[\"pipe01\"\]);
+
+## 渲染设置
+
+## getContPipeTex {#getcontpipetex .样式4}
+
+**功能：**
+
+获取连续管道的纹理路径
+
+**参数：**
+
+  ---- -------------- ------------------------------------------------------
+   1   ***pipeId***   管道标识
+
+  ---- -------------- ------------------------------------------------------
+
+**返回值：**
+
+字符串类型
+
+**调用示例：**
+
+BlackHole3D.Pipe.getContPipeTex(\"pipe01\");
+
+## setContPipeTex {#setcontpipetex .样式4}
+
+**功能：**
+
+设置连续管道的纹理
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***pipeId***    管道标识
+
+   2   ***picPath***   纹理地址
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+var pipeId = \"pipe01\";
+
+var picPath =
+\"http://realbim.bjblackhole.cn:8000/TestPages/pic/flow50.png\";
+
+BlackHole3D.Pipe.setContPipeTex(pipeId, picPath);
+
+## setContPipeClr {#setcontpipeclr .样式4}
+
+**功能：**
+
+设置连续管道的颜色
+
+**参数：**
+
+  --- --------------- --------------------------------------------------------
+   1  ***pipeId***    管道标识
+
+   2  ***pipeClr***   管道颜色（REColor 类型）
+  --- --------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.setContPipeClr(\"pipe01\",new BlackHole3D.REColor(0,
+0,255, 255));
+
+## getContPipeClr {#getcontpipeclr .样式4}
+
+**功能：**
+
+获取连续管道的颜色
+
+**参数：**
+
+  --- -------------- --------------------------------------------------------
+   1  ***pipeId***   管道标识
+
+  --- -------------- --------------------------------------------------------
+
+**返回值：**
+
+对象类型（REColor对象类型）
+
+  ---- ------------- ------------------------------------------------------
+   1   ***red***     红色（取值范围0\~255）
+
+   2   ***green***   绿色（取值范围0\~255）
+
+   3   ***blue***    蓝色（取值范围0\~255）
+
+   4   ***alpha***   透明度（取值范围0\~255）最小可见数值为2
+  ---- ------------- ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Pipe.getContPipeClr(\"pipe01\");
+
+## setCurContPipeClr {#setcurcontpipeclr .样式4}
+
+**功能：**
+
+设置当前连续管道的颜色
+
+**参数：**
+
+  --- --------------- --------------------------------------------------------
+   1  ***pipeClr***   管道颜色（REColor 类型）
+
+  --- --------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.setCurContPipeClr(new BlackHole3D.REColor(0, 0,255,
+255));
+
+## getCurContPipeClr {#getcurcontpipeclr .样式4}
+
+**功能：**
+
+获取当前连续管道的颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（REColor对象类型）
+
+  ---- ------------- ------------------------------------------------------
+   1   ***red***     红色（取值范围0\~255）
+
+   2   ***green***   绿色（取值范围0\~255）
+
+   3   ***blue***    蓝色（取值范围0\~255）
+
+   4   ***alpha***   透明度（取值范围0\~255）最小可见数值为2
+  ---- ------------- ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Pipe.getCurContPipeClr();
+
+## setShowContPipe {#setshowcontpipe .样式4}
+
+**功能：**
+
+设置连续管道是否显示
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***pipeIdList***   管道id集合
+
+   2   ***enable***       是否显示
+
+   3   ***showAnc***      是否显示锚点，仅在 enable 为true时设置才有效
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.setShowContPipe(\[\"pipe01\"\],true,false);
+
+## 编辑
+
+## startEditContPipeMode {#starteditcontpipemode .样式4}
+
+**功能：**
+
+开始进入连续管道交互状态
+
+注：右键结束当前的编辑，监听回调事件REAddContPipeSuccessEvent
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.startEditContPipeMode();
+
+## endEditContPipeMode {#endeditcontpipemode .样式4}
+
+**功能：**
+
+结束连续管道交互模式
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.endEditContPipeMode();
+
+## getContPipeMode {#getcontpipemode .样式4}
+
+**功能：**
+
+获取是否在连续管道编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true正在编辑，false未编辑
+
+**调用示例：**
+
+BlackHole3D.Pipe.getContPipeMode();
+
+## setCurContPipe {#setcurcontpipe .样式4}
+
+**功能：**
+
+设置当前连续管道
+
+**参数：**
+
+  ---- -------------- -------------------------------------------------------
+   1   ***pipeId***   管道标识
+
+  ---- -------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.setCurContPipe(\"pipe01\");
+
+## getCurContPipe {#getcurcontpipe .样式4}
+
+**功能：**
+
+获取当前连续管道ID
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串，管道id
+
+**调用示例：**
+
+BlackHole3D.Pipe.getCurContPipe();
+
+## saveCurContPipe {#savecurcontpipe .样式4}
+
+**功能：**
+
+保存当前连续管道
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.saveCurContPipe();
+
+## resetCurContPipe {#resetcurcontpipe .样式4}
+
+**功能：**
+
+重置当前连续管道
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.resetCurContPipe();
+
+## removeCurContPipeSubElem {#removecurcontpipesubelem .样式4}
+
+**功能：**
+
+从当前操作的管道中移除构件
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***dataSetId***    数据集标识
+
+   2   ***elemIdList***   构件标识集合, 为空数组代表所有构件
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Pipe.removeCurContPipeSubElem(\"pipe01\",\[1,2,3\]);
+
+## getCurContPipeAllElemIDs {#getcurcontpipeallelemids .样式4}
+
+**功能：**
+
+获取当前连续管道的构件ID集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型
+
+  ------- ------------------ ------------------------------------------------------
+   **1**  ***dataSetId***    数据集标识
+
+     2    ***elemIdList***   构件id集合
+  ------- ------------------ ------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Pipe.getCurContPipeAllElemIDs();
+
+# 单构件（Entity）
+
+## 加载
+
+## getAllTypeNames {#getalltypenames .样式4}
+
+**功能：**
+
+获取所有构件类型的唯一标识集合
+
+注：要在REDataSetLoadFinish监听事件之后调用
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，类型名称集合
+
+**调用示例：**
+
+BlackHole3D.Entity.getAllTypeNames(\"dataSet01\");
+
+## addEntities {#addentities .样式4}
+
+**功能：**
+
+添加一系列实例对象
+
+注：添加需要进入编辑模式
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***entityList***   实例信息集合 （REEntityInfo 类型）
+
+  ---- ------------------ ------------------------------------------------------
+
+**REEntityInfo模型解析：**
+
+  --- ------------------ -------------------------------------------------------
+   1  ***dataSetId***    数据集标识
+
+   2  ***entityType***   实例类型名称
+
+   3  ***elemId***       构件唯一标识（数值），重复添加无效, 0代表引擎自增创建id
+
+   4  ***scale***        缩放，默认值：\[1.0, 1.0, 1.0\]
+
+   5  ***rotate***       旋转，默认值：\[0.0, 0.0, 0.0, 1.0\]
+
+   6  ***offset***       平移，默认值：\[0.0, 0.0, 0.0\]
+
+   7  ***dataSetCRS***   坐标系标识
+  --- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false（重复elemId不会多次添加）
+
+**调用示例：**
+
+BlackHole3D.Entity.enterEditMode();//进入编辑模式
+
+let typeNames =
+BlackHole3D.Entity.getAllTypeNames(\"单构件模版\");//获取所有的实例类型名称
+
+if (typeNames.length) {
+
+let entityList = \[\];
+
+let entity = new BlackHole3D.REEntityInfo();//创建实例信息对象
+
+entity.dataSetId = \"单构件模版\";
+
+entity.entityType = typeNames\[0\];
+
+entity.elemId = 1;//自定义构件id，不可重复，重复添加失败
+
+entity.scale = \[1.0, 1.0, 1.0\];// 缩放
+
+entity.rotate = \[0.0, 0.0, 0.0, 1.0\];// 旋转
+
+entity.offset = \[0.0, 0.0, 0.0\];// 平移
+
+entity.dataSetCRS = \"\";// 坐标系标识
+
+entityList.push(entity);
+
+let add = BlackHole3D.Entity.addEntities(entityList);//添加实例对象
+
+add ? alert(\"实例添加成功\") : alert(\"实例添加失败\");
+
+}
+
+BlackHole3D.Entity.exitEditMode();//结束编辑模式
+
+## getEntitys {#getentitys .样式4}
+
+**功能：**
+
+添加一系列实例对象
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***dataSetId***    数据集标识, 空字符串获取所有项目的实例信息
+
+   2   ***entityType***   实例类型名称, 空字符串获取当前项目所有类型的实例信息
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+数组类型，REEntityInfo类型集合
+
+**调用示例：**
+
+BlackHole3D.Entity.getEntitys(\"单构件模版\",\"\[glb\]out1\")
+
+## delEntities {#delentities .样式4}
+
+**功能：**
+
+删除实例信息
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***dataSetId***    数据集标识, 空字符串删除所有数据集的实例信息
+
+   2   ***entityType***   实例类型名称, 空字符串删除指定数据集所有类型的实例信息
+
+   3   ***elemIdList***   实例id集合,
+                          空数组删除指定数据集指定类型下的所有实例id匹配实例
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.delEntities(\"单构件模版\",\"\[glb\]out1\",\[\])
+
+## 编辑
+
+## getEditMode {#geteditmode .样式4}
+
+**功能：**
+
+获取是否在实体编辑状态
+
+注：要在REDataSetLoadFinish监听事件之后调用
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true：在编辑状态，false：不在编辑状态
+
+**调用示例：**
+
+BlackHole3D.Entity.getEditMode();
+
+## enterEditMode {#entereditmode .样式4}
+
+**功能：**
+
+开始进入实体交互状态
+
+注：要在REDataSetLoadFinish监听事件之后调用
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.enterEditMode();
+
+## exitEditMode {#exiteditmode .样式4}
+
+**功能：**
+
+结束交互交互模式
+
+注：要在REDataSetLoadFinish监听事件之后调用
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.exitEditMode();
+
+## setMultiAddEntity {#setmultiaddentity .样式4}
+
+**功能：**
+
+设置是否连续添加实例
+
+注：单次添加模式：鼠标左键结束添加；连续添加模式：鼠标左键添加，右键结束添加
+
+**参数：**
+
+  ---- ---------------- ------------------------------------------------------
+   1   ***multiAdd***   true为连续添加， false为单次添加
+
+  ---- ---------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setMultiAddEntity(true)
+
+## setMouseAddEntity {#setmouseaddentity .样式4}
+
+**功能：**
+
+设置鼠标操作添加实例的模板信息
+
+注：REExitEntityEditMode
+事件表示退出添加，开始编辑保持上次设置的类型进行添加，
+
+进入编辑模式后鼠标点击触发
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***dataSetId***    数据集标识，必填
+
+   2   ***entityType***   实例类型名称，必填
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setMouseAddEntity(\"单构件模版\",\"\[glb\]out1\")
+
+## getTransInfo {#gettransinfo .样式4}
+
+**功能：**
+
+获取实例的仿射变换信息
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***dataSetId***    数据集标识，必填
+
+   2   ***elemIdList***   构件id集合，空数组表示获取全部
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+数组类型（RELocInfo对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***scale***    缩放
+
+   2   ***rotate***   旋转
+
+   3   ***offset***   平移
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Entity.getTransInfo(\"单构件模版\",\[\])
+
+## setTransInfo {#settransinfo .样式4}
+
+**功能：**
+
+设置实例的仿射变换信息
+
+**参数：**
+
+  ---- ----------------- ------------------------------------------------------
+   1   ***dataSetId***   数据集标识，必填
+
+   2   ***elemId***      构件id
+
+   3   ***locInfo***     位置信息（RELocInfo对象类型）
+  ---- ----------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，true成功，false失败
+
+**调用示例：**
+
+var locInfo = new BlackHole3D.RELocInfo();
+
+locInfo.scale = \[1, 1, 1\];
+
+locInfo.rotate = \[0, 0, 0, 1\];
+
+locInfo.offset = \[10, 0, 0\];
+
+BlackHole3D.Entity.setTransInfo(\"单构件模版\", 1, locInfo);
+
+## setBVShpVisiable {#setbvshpvisiable .样式4}
+
+**功能：**
+
+设置模型内子元素集合的总包围盒矢量是否显示
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***visible***   是否显示
+
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setBVShpVisiable(true);
+
+## setBVShpStyle {#setbvshpstyle .样式4}
+
+**功能：**
+
+设置包围盒矢量的样式
+
+**参数：**
+
+  -------------------- -------------------------------------------------------
+  ***entityBVInfo***   包围盒信息 （REEntityBVInfo 类型）
+
+  -------------------- -------------------------------------------------------
+
+**REEntityBVInfo模型解析：**
+
++--------------------+---------------------------------------------------------+
+| ***lineClr***      | 包围盒线颜色 （REColor 类型）                           |
++--------------------+---------------------------------------------------------+
+| ***lineWidth***    | 包围盒线宽度                                            |
++--------------------+---------------------------------------------------------+
+| ***faceClr***      | 包围盒面颜色 （REColor 类型）                           |
++--------------------+---------------------------------------------------------+
+| ***visiableType*** | 显示类型 （默认显示全部）                               |
+|                    |                                                         |
+|                    | 0：全部显示                                             |
+|                    |                                                         |
+|                    | 1：只显示线                                             |
+|                    |                                                         |
+|                    | 2：只显示面                                             |
++--------------------+---------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let entityBVInfo = new BlackHole3D.REEntityBVInfo();//创建包围盒样式信息
+
+entityBVInfo.lineClr = new BlackHole3D.REColor(255,0,0,255);
+
+entityBVInfo.lineWidth = 5;
+
+entityBVInfo.faceClr = new BlackHole3D.REColor(0,255,0,255);
+
+entityBVInfo.visiableType = 2;
+
+BlackHole3D.Entity.setBVShpStyle(entityBVInfo);//设置包围盒矢量的样式
+
+## setBVShpRange {#setbvshprange .样式4}
+
+**功能：**
+
+设置包围盒展示的范围
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***dataSetId***    数据集标识，为空串则表示处理所有项目
+
+  ***elemIdList***   构件id集合, 为空数组则表示处理所有构件
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setBVShpRange(\"单构件模版\", \[1, 2\])
+
+## 渲染效果
+
+## setShadowPrefer {#setshadowprefer .样式4}
+
+**功能：**
+
+设置单构件实例实时阴影偏好
+
+**注：动态单构件实例默认没有实时阴影效果，需要自行打开**
+
+**参数：**
+
+  ---------------------- ------------------------------------------------------
+  ***dataSetId***        数据集标识，为空串则表示处理所有项目
+
+  ***elemIdList***       构件id集合, 为空数组则表示处理所有构件
+
+  ***preferRealtime***   偏好实时阴影效果
+  ---------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setShadowPrefer(\"单构件模版\", \[1, 2\], true)
+
+## 动画通用
+
+## getSelfAnimNameList {#getselfanimnamelist .样式4}
+
+**功能：**
+
+根据动画类型获取动画名称列表
+
+**参数：**
+
+  ------------------ ---------------------------------------------------------
+  ***dataSetId***    数据集标识，必填
+
+  ***entityType***   实例类型名称，必填
+  ------------------ ---------------------------------------------------------
+
+**返回值：**
+
+数组类型，动画名称集合
+
+**调用示例：**
+
+let typeNames = BlackHole3D.Entity.getAllTypeNames(\'单构件模版\');
+
+let selfAnimNameList =
+BlackHole3D.Entity.getSelfAnimNameList(\'单构件模版\', typeNames\[0\]);
+
+## setAnimPlayMode {#setanimplaymode .样式4}
+
+**功能：**
+
+设置实体动画的播放信息
+
+**参数：**
+
+  ------------------------ ---------------------------------------------------
+  ***animPlayModeInfo***   动画类型信息 （REEntityAnimPlayInfo 类型）
+
+  ------------------------ ---------------------------------------------------
+
+**REEntityAnimPlayInfo模型解析：**
+
++---------------------+---------------------------------------------------------------------------+
+| ***dataSetId***     | 数据集标识                                                                |
++---------------------+---------------------------------------------------------------------------+
+| ***entityType***    | 实例类型名称                                                              |
++---------------------+---------------------------------------------------------------------------+
+| ***elemIdList***    | 构件标识集合                                                              |
++---------------------+---------------------------------------------------------------------------+
+| ***animPlayMode***  | 动画的播放模式 （REEntityAnimPlayModeEm 枚举类型）                        |
+|                     |                                                                           |
+|                     | ONCE：表示仅播放一次，播放到边界处时停止，位置/方向保持不变               |
+|                     |                                                                           |
+|                     | ONCETURN：表示仅播放一次，播放到边界处时停止，位置不变，方向调转          |
+|                     |                                                                           |
+|                     | ONCERESET：表示仅播放一次，播放到边界处时停止，位置移到另一边界，方向不变 |
+|                     |                                                                           |
+|                     | REPEAT：表示重复播放，当播放到边界处时方向不变从另一边界处继续播放        |
+|                     |                                                                           |
+|                     | REPEATTURN：表示重复播放，当播放到边界处时方向调转继续播放                |
++---------------------+---------------------------------------------------------------------------+
+| ***animPlayState*** | 动画的播放状态（REEntityAnimPlayStateEm 枚举类型）                        |
+|                     |                                                                           |
+|                     | PLAY：表示当前正处于播放状态                                              |
+|                     |                                                                           |
+|                     | PAUSE：表示当前正处于暂停状态                                             |
+|                     |                                                                           |
+|                     | STOPMIN：表示当前正处于停止状态，播放位置在最小边界处                     |
+|                     |                                                                           |
+|                     | STOPMAX：表示当前正处于停止状态，播放位置在最大边界处                     |
++---------------------+---------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let typeNames =
+BlackHole3D.Entity.getAllTypeNames(\"单构件模版\");//获取所有的实例类型名称
+
+let animPlayInfo = new
+BlackHole3D.REEntityAnimPlayInfo();//创建实例动画信息
+
+animPlayInfo.dataSetId = \"单构件模版\";
+
+animPlayInfo.entityType = typeNames\[0\];
+
+animPlayInfo.elemIdList = \[\];
+
+animPlayInfo.animPlayMode =
+BlackHole3D.REEntityAnimPlayModeEm.REPEATTURN;//动画的播放模式
+
+animPlayInfo.animPlayState =
+BlackHole3D.REEntityAnimPlayStateEm.PLAY;//动画的播放状态
+
+BlackHole3D.Entity.setAnimPlayMode(animPlayInfo);//设置实体动画的播放信息
+
+## setAnimPlayModeSingle {#setanimplaymodesingle .样式4}
+
+**功能：**
+
+设置单一实体动画的播放状态信息
+
+**参数：**
+
+  -------------------- -------------------------------------------------------
+  ***animPlayInfo***   动画播放状态信息 （REEntitySingleAnimPlayInfo 类型）
+
+  -------------------- -------------------------------------------------------
+
+**REEntitySingleAnimPlayInfo模型解析：**
+
++---------------------+---------------------------------------------------------------------------+
+| ***dataSetId***     | 数据集标识                                                                |
++---------------------+---------------------------------------------------------------------------+
+| ***elemId***        | 构件标识                                                                  |
++---------------------+---------------------------------------------------------------------------+
+| ***animName***      | 动画标识，世界空间动画类型，该字段无效                                    |
++---------------------+---------------------------------------------------------------------------+
+| ***animLevel***     | 动画级别                                                                  |
+|                     |                                                                           |
+|                     | 0：世界空间动画                                                           |
+|                     |                                                                           |
+|                     | 1：自身动画                                                               |
++---------------------+---------------------------------------------------------------------------+
+| ***animPlayMode***  | 动画的播放模式 （REEntityAnimPlayModeEm 枚举类型）                        |
+|                     |                                                                           |
+|                     | ONCE：表示仅播放一次，播放到边界处时停止，位置/方向保持不变               |
+|                     |                                                                           |
+|                     | ONCETURN：表示仅播放一次，播放到边界处时停止，位置不变，方向调转          |
+|                     |                                                                           |
+|                     | ONCERESET：表示仅播放一次，播放到边界处时停止，位置移到另一边界，方向不变 |
+|                     |                                                                           |
+|                     | REPEAT：表示重复播放，当播放到边界处时方向不变从另一边界处继续播放        |
+|                     |                                                                           |
+|                     | REPEATTURN：表示重复播放，当播放到边界处时方向调转继续播放                |
++---------------------+---------------------------------------------------------------------------+
+| ***animPlayState*** | 动画的播放状态（REEntityAnimPlayStateEm 枚举类型）                        |
+|                     |                                                                           |
+|                     | PLAY：表示当前正处于播放状态                                              |
+|                     |                                                                           |
+|                     | PAUSE：表示当前正处于暂停状态                                             |
+|                     |                                                                           |
+|                     | STOPMIN：表示当前正处于停止状态，播放位置在最小边界处                     |
+|                     |                                                                           |
+|                     | STOPMAX：表示当前正处于停止状态，播放位置在最大边界处                     |
++---------------------+---------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let typeNames =
+BlackHole3D.Entity.getAllTypeNames(\'单构件模版\');//获取所有的实例类型名称
+
+let animPlayStateInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+
+animPlayStateInfo.dataSetId = \'单构件模版\';
+
+animPlayStateInfo.elemId = 1;
+
+animPlayStateInfo.animName = \'ani001\';
+
+animPlayStateInfo.animLevel = 1;
+
+animPlayStateInfo.animPlayMode =
+BlackHole3D.REEntityAnimPlayModeEm.REPEATTURN;
+
+animPlayStateInfo.animPlayState =
+BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+
+BlackHole3D.Entity.setAnimPlayModeSingle(animPlayStateInfo);
+
+## getAnimTimeLen {#getanimtimelen .样式4}
+
+**功能：**
+
+获取单构件动画的播放时长
+
+**注：世界空间动画需要先行设置完成后才能获取播放时长**
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------
+  ***dataSetId***   数据集标识，必填
+
+  ***elemId***      构件标识，必填
+
+  ***animLevel***   动画级别（默认为0） 0：世界空间动画 1：自身动画
+
+  ***animName***    动画标识，**世界空间动画类型，该字段无效，可不传**
+  ----------------- ---------------------------------------------------------
+
+**返回值：**
+
+数值类型，动画播放时长
+
+**调用示例：**
+
+// 世界空间动画时长
+
+BlackHole3D.Entity.getAnimTimeLen(\'huoche\', 1);
+
+// 自身动画时长\
+BlackHole3D.Entity.getAnimTimeLen(\'huoche\', 1, 1, \"ani001\");
+
+## 轨迹动画
+
+## setTrackAnim {#settrackanim .样式4}
+
+**功能：**
+
+设置单构件轨迹动画信息
+
+**注：轨迹动画归属动画级别为世界空间动画**
+
+**参数：**
+
+  --------------------- ------------------------------------------------------
+  ***trackAnimInfo***   单构件轨迹动画信息（REEntityTrackAnimInfo 类型）
+
+  --------------------- ------------------------------------------------------
+
+**REEntityTrackAnimInfo模型解析：**
+
+  ---------------------- ---------------------------------------------------------
+  ***dataSetId***        数据集标识
+
+  ***elemId***           构件标识
+
+  ***trackPointList***   表示轨迹顶点信息集合（RETrackPointInfo 类型）
+
+  ***pathColsed***       表示路径是否闭合
+
+  ***speed***            表示动画运动速度（单位m/s）
+  ---------------------- ---------------------------------------------------------
+
+**RETrackPointInfo模型解析：**
+
+  ---------------- ---------------------------------------------------------
+  ***pos***        轨迹顶点坐标
+
+  ***selfVect***   轨迹顶点对应的单构件自身姿态正方向
+  ---------------- ---------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'changdi\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\',
+
+},
+
+{
+
+dataSetId: \'huoche\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_testani/hc\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加单构件
+
+BlackHole3D.Entity.enterEditMode();
+
+let entityList = \[\];
+
+let typeNames_huoche = BlackHole3D.Entity.getAllTypeNames(\'huoche\');
+
+if (typeNames_huoche.length) {
+
+let entity = new BlackHole3D.REEntityInfo();
+
+entity.dataSetId = \'huoche\';
+
+entity.entityType = typeNames_huoche\[0\];
+
+entity.elemId = 1;
+
+entity.scale = \[1.0, 1.0, 1.0\];
+
+entity.rotate = \[0.0, 0.0, 0.0, 1.0\];
+
+entity.offset = \[300.0, 400.0, 2.163\];
+
+entityList.push(entity);
+
+}
+
+BlackHole3D.Entity.addEntities(entityList); //添加实例对象
+
+BlackHole3D.Entity.exitEditMode(); //结束编辑模式
+
+// 添加辅助矢量线
+
+var lineShpInfo = new BlackHole3D.RELineShpInfo();
+
+lineShpInfo.shpName = \'lineShp001\';
+
+lineShpInfo.potList = \[
+
+\[230.0, 480.0, 2.163\],
+
+\[230.0, 466.0, 2.163\],
+
+\[280.0, 390.0, 2.163\],
+
+\[320.0, 390.0, 2.163\],
+
+\[230.0, 390.0, 2.163\],
+
+\];
+
+lineShpInfo.fillState = 0;
+
+lineShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+
+// 添加轨迹动画
+
+let trackInfo = new BlackHole3D.REEntityTrackAnimInfo();
+
+trackInfo.dataSetId = \'huoche\';
+
+trackInfo.elemId = 1;
+
+trackInfo.trackPointList = \[
+
+{ pos: \[230.0, 480.0, 2.163\], selfVect: \[0.0, -1.0, 0.0\] },
+
+{ pos: \[230.0, 466.0, 2.163\], selfVect: \[0.0, -1.0, 0.0\] },
+
+{ pos: \[280.0, 390.0, 2.163\], selfVect: \[0.0, -1.0, 0.0\] },
+
+{ pos: \[320.0, 390.0, 2.163\], selfVect: \[0.0, 1.0, 0.0\] },
+
+{ pos: \[230.0, 390.0, 2.163\], selfVect: \[0.0, 1.0, 0.0\] },
+
+\];
+
+trackInfo.pathColsed = false;
+
+trackInfo.speed = 10.0;
+
+BlackHole3D.Entity.setTrackAnim(trackInfo);
+
+// 播放轨迹动画
+
+let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+
+animPlayInfo.dataSetId = \'huoche\';
+
+animPlayInfo.elemId = 1;
+
+animPlayInfo.animName = \'\';
+
+animPlayInfo.animLevel = 0;
+
+animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+
+animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+
+BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+
+## 动画脚本
+
+## addAnimScript {#addanimscript .样式4}
+
+**功能：**
+
+增加一个动画脚本
+
+**参数：**
+
+  ---------------------- ------------------------------------------------------
+  ***animScriptInfo***   动画脚本信息 （REEntityAnimScriptInfo类型）
+
+  ---------------------- ------------------------------------------------------
+
+**REEntityAnimScriptInfo模型解析：**
+
+  --------------------- ---------------------------------------------------------
+  ***playScriptId***    动画脚本标识
+
+  ***playerSetList***   动画播放器设置集合（REPlayerSetInfo 类型）
+
+  ***totalTimeLen***    动画脚本总时长
+  --------------------- ---------------------------------------------------------
+
+**REPlayerSetInfo模型解析：**
+
++--------------------+---------------------------------------------------------------------------+
+| ***dataSetId***    | 数据集标识                                                                |
++--------------------+---------------------------------------------------------------------------+
+| ***elemId***       | 构件标识                                                                  |
++--------------------+---------------------------------------------------------------------------+
+| ***animLevel***    | 动画级别                                                                  |
+|                    |                                                                           |
+|                    | 0：世界空间动画                                                           |
+|                    |                                                                           |
+|                    | 1：自身动画                                                               |
++--------------------+---------------------------------------------------------------------------+
+| ***animName***     | 动画标识，世界空间动画类型，该字段无效                                    |
++--------------------+---------------------------------------------------------------------------+
+| ***animPlayMode*** | 动画的播放模式 （REEntityAnimPlayModeEm 枚举类型）                        |
+|                    |                                                                           |
+|                    | ONCE：表示仅播放一次，播放到边界处时停止，位置/方向保持不变               |
+|                    |                                                                           |
+|                    | ONCETURN：表示仅播放一次，播放到边界处时停止，位置不变，方向调转          |
+|                    |                                                                           |
+|                    | ONCERESET：表示仅播放一次，播放到边界处时停止，位置移到另一边界，方向不变 |
+|                    |                                                                           |
+|                    | REPEAT：表示重复播放，当播放到边界处时方向不变从另一边界处继续播放        |
+|                    |                                                                           |
+|                    | REPEATTURN：表示重复播放，当播放到边界处时方向调转继续播放                |
++--------------------+---------------------------------------------------------------------------+
+| ***startTime***    | 动画播放开始时间                                                          |
++--------------------+---------------------------------------------------------------------------+
+| ***timeLen***      | 动画播放时长                                                              |
++--------------------+---------------------------------------------------------------------------+
+| ***playSetList***  | 动画播放设置集合（REPlaySetInfo 类型）                                    |
++--------------------+---------------------------------------------------------------------------+
+
+**REPlaySetInfo模型解析：**
+
++-------------+---------------------------------------------------------+
+| ***time***  | 播放位置（所在整个动画脚本的总时长）                    |
++-------------+---------------------------------------------------------+
+| ***state*** | 动画的播放状态（REEntityAnimPlayStateEm 枚举类型）      |
+|             |                                                         |
+|             | PLAY：表示当前正处于播放状态                            |
+|             |                                                         |
+|             | PAUSE：表示当前正处于暂停状态                           |
+|             |                                                         |
+|             | STOPMIN：表示当前正处于停止状态，播放位置在最小边界处   |
+|             |                                                         |
+|             | STOPMAX：表示当前正处于停止状态，播放位置在最大边界处   |
++-------------+---------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'changdi\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\',
+
+},
+
+{
+
+dataSetId: \'huoche\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_testani/hc\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加单构件
+
+BlackHole3D.Entity.enterEditMode();
+
+let entityList = \[\];
+
+let typeNames_huoche = BlackHole3D.Entity.getAllTypeNames(\'huoche\');
+
+if (typeNames_huoche.length) {
+
+let entity = new BlackHole3D.REEntityInfo();
+
+entity.dataSetId = \'huoche\';
+
+entity.entityType = typeNames_huoche\[0\];
+
+entity.elemId = 1;
+
+entity.scale = \[1.0, 1.0, 1.0\];
+
+entity.rotate = \[0.0, 0.0, 0.0, 1.0\];
+
+entity.offset = \[230.0, 480.0, 2.163\];
+
+entityList.push(entity);
+
+}
+
+BlackHole3D.Entity.addEntities(entityList); //添加实例对象
+
+BlackHole3D.Entity.exitEditMode(); //结束编辑模式
+
+// 添加辅助矢量线
+
+{
+
+var lineShpInfo = new BlackHole3D.RELineShpInfo();
+
+lineShpInfo.shpName = \'lineShp001\';
+
+lineShpInfo.potList = \[
+
+\[230.0, 480.0, 2.163\],
+
+\[230.0, 466.0, 2.163\],
+
+\[280.0, 390.0, 2.163\],
+
+\[320.0, 390.0, 2.163\],
+
+\[230.0, 390.0, 2.163\],
+
+\];
+
+lineShpInfo.fillState = 0;
+
+lineShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+
+}
+
+// 添加轨迹动画
+
+{
+
+let trackInfo = new BlackHole3D.REEntityTrackAnimInfo();
+
+trackInfo.dataSetId = \'huoche\';
+
+trackInfo.elemId = 1;
+
+trackInfo.trackPointList = \[
+
+{ pos: \[230.0, 480.0, 2.163\], selfVect: \[0.0, 1.0, 0.0\] },
+
+{ pos: \[230.0, 466.0, 2.163\], selfVect: \[0.0, 1.0, 0.0\] },
+
+{ pos: \[280.0, 390.0, 2.163\], selfVect: \[0.0, 1.0, 0.0\] },
+
+{ pos: \[320.0, 390.0, 2.163\], selfVect: \[0.0, -1.0, 0.0\] },
+
+{ pos: \[230.0, 390.0, 2.163\], selfVect: \[0.0, -1.0, 0.0\] },
+
+\];
+
+trackInfo.pathColsed = false;
+
+trackInfo.speed = 10.0;
+
+BlackHole3D.Entity.setTrackAnim(trackInfo);
+
+}
+
+// 创建动画脚本
+
+{
+
+let animScriptInfo = new BlackHole3D.REEntityAnimScriptInfo();
+
+animScriptInfo.totalTimeLen = 40.0;
+
+animScriptInfo.playScriptId = \'anim_script_1\';
+
+animScriptInfo.playerSetList = \[\];
+
+// 动画脚本 - 货车（路径）
+
+{
+
+let playerSetInfo = new BlackHole3D.REPlayerSetInfo();
+
+playerSetInfo.dataSetId = \'huoche\';
+
+playerSetInfo.elemId = 1;
+
+playerSetInfo.animLevel = 0;
+
+playerSetInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+
+playerSetInfo.animName = \'\';
+
+playerSetInfo.startTime = 0;
+
+playerSetInfo.timeLen = 30;
+
+playerSetInfo.playSetList = \[\];
+
+let playSetInfo_1 = new BlackHole3D.REPlaySetInfo();
+
+playSetInfo_1.time = 0.0;
+
+playSetInfo_1.state = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+
+playerSetInfo.playSetList.push(playSetInfo_1);
+
+let playSetInfo_2 = new BlackHole3D.REPlaySetInfo();
+
+playSetInfo_2.time = 30.0;
+
+playSetInfo_2.state = BlackHole3D.REEntityAnimPlayStateEm.PAUSE;
+
+playerSetInfo.playSetList.push(playSetInfo_2);
+
+animScriptInfo.playerSetList.push(playerSetInfo);
+
+}
+
+// 动画脚本 - 货车（卸货）
+
+{
+
+let playerSetInfo = new BlackHole3D.REPlayerSetInfo();
+
+playerSetInfo.dataSetId = \'huoche\';
+
+playerSetInfo.elemId = 1;
+
+playerSetInfo.animLevel = 1;
+
+playerSetInfo.animPlayMode =
+BlackHole3D.REEntityAnimPlayModeEm.REPEATTURN;
+
+playerSetInfo.animName = \'ani001\';
+
+playerSetInfo.startTime = 24;
+
+playerSetInfo.timeLen = 34;
+
+playerSetInfo.playSetList = \[\];
+
+let playSetInfo_1 = new BlackHole3D.REPlaySetInfo();
+
+playSetInfo_1.time = 0.0;
+
+playSetInfo_1.state = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+
+playerSetInfo.playSetList.push(playSetInfo_1);
+
+let playSetInfo_2 = new BlackHole3D.REPlaySetInfo();
+
+playSetInfo_2.time = 10.0;
+
+playSetInfo_2.state = BlackHole3D.REEntityAnimPlayStateEm.STOPMIN;
+
+playerSetInfo.playSetList.push(playSetInfo_2);
+
+animScriptInfo.playerSetList.push(playerSetInfo);
+
+}
+
+BlackHole3D.Entity.addAnimScript(animScriptInfo);
+
+}
+
+BlackHole3D.Entity.setAnimScriptActive(\'anim_script_1\'); //
+激活一个动画脚本
+
+BlackHole3D.Entity.setAnimScriptPlayState(\'anim_script_1\',
+BlackHole3D.REEntityAnimPlayStateEm.PLAY); // 设置脚本播放状态
+
+## delAnimScript {#delanimscript .样式4}
+
+**功能：**
+
+清除动画脚本
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.delAnimScript();
+
+## setAnimScriptPlayState {#setanimscriptplaystate .样式4}
+
+**功能：**
+
+设置动画脚本播放状态
+
+**参数：**
+
++---------------------+-------------------------------------------------------+
+| ***playScriptId***  | 动画脚本标识                                          |
++---------------------+-------------------------------------------------------+
+| ***animPlayState*** | 动画的播放状态（REEntityAnimPlayStateEm 枚举类型）    |
+|                     |                                                       |
+|                     | PLAY：表示当前正处于播放状态                          |
+|                     |                                                       |
+|                     | PAUSE：表示当前正处于暂停状态                         |
+|                     |                                                       |
+|                     | STOPMIN：表示当前正处于停止状态，播放位置在最小边界处 |
+|                     |                                                       |
+|                     | STOPMAX：表示当前正处于停止状态，播放位置在最大边界处 |
++---------------------+-------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setAnimScriptPlayState(\'anim_script_1\',
+BlackHole3D.REEntityAnimPlayStateEm.PLAY); // 设置脚本播放状态
+
+## setAnimScriptActive {#setanimscriptactive .样式4}
+
+**功能：**
+
+激活一个动画脚本
+
+**参数：**
+
+  -------------------- ------------------------------------------------------
+  ***playScriptId***   动画脚本标识
+
+  -------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setAnimScriptActive(\'anim_script_1\');
+
+## setAnimScriptStop {#setanimscriptstop .样式4}
+
+**功能：**
+
+停止一个动画脚本
+
+**参数：**
+
+  -------------------- ------------------------------------------------------
+  ***playScriptId***   动画脚本标识
+
+  -------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Entity.setAnimScriptStop(\'anim_script_1\');
+
+## 动画控制
+
+## getAnimCtlGroupNames {#getanimctlgroupnames .样式4}
+
+**功能：**
+
+获取动画控制组名称
+
+**参数：**
+
+  ------------------ ------------------------------------------------------
+  ***dataSetId***    数据集标识
+
+  ***entityType***   实例类型名称
+  ------------------ ------------------------------------------------------
+
+**返回值：**
+
+数组类型，控制组名称集合
+
+**调用示例：**
+
+BlackHole3D.Entity.getAnimCtlGroupNames(\'huoche\', \'1\');
+
+## setAnimCtlByGroup {#setanimctlbygroup .样式4}
+
+**功能：**
+
+设置实体动画的播放信息
+
+**参数：**
+
+  ------------------- ---------------------------------------------------
+  ***animCtlInfo***   动画控制信息（REAnimCtlInfo 类型）
+
+  ------------------- ---------------------------------------------------
+
+**REAnimCtlInfo模型解析：**
+
++---------------------+---------------------------------------------------------------------------+
+| ***dataSetId***     | 数据集标识                                                                |
++---------------------+---------------------------------------------------------------------------+
+| ***elemId***        | 构件唯一标识                                                              |
++---------------------+---------------------------------------------------------------------------+
+| ***groupName***     | 组名称                                                                    |
++---------------------+---------------------------------------------------------------------------+
+| ***animPlayMode***  | 动画的播放模式 （REEntityAnimPlayModeEm 枚举类型）                        |
+|                     |                                                                           |
+|                     | ONCE：表示仅播放一次，播放到边界处时停止，位置/方向保持不变               |
+|                     |                                                                           |
+|                     | ONCETURN：表示仅播放一次，播放到边界处时停止，位置不变，方向调转          |
+|                     |                                                                           |
+|                     | ONCERESET：表示仅播放一次，播放到边界处时停止，位置移到另一边界，方向不变 |
+|                     |                                                                           |
+|                     | REPEAT：表示重复播放，当播放到边界处时方向不变从另一边界处继续播放        |
+|                     |                                                                           |
+|                     | REPEATTURN：表示重复播放，当播放到边界处时方向调转继续播放                |
++---------------------+---------------------------------------------------------------------------+
+| ***animPlayState*** | 动画的播放状态（REEntityAnimPlayStateEm 枚举类型）                        |
+|                     |                                                                           |
+|                     | PLAY：表示当前正处于播放状态                                              |
+|                     |                                                                           |
+|                     | PAUSE：表示当前正处于暂停状态                                             |
+|                     |                                                                           |
+|                     | STOPMIN：表示当前正处于停止状态，播放位置在最小边界处                     |
+|                     |                                                                           |
+|                     | STOPMAX：表示当前正处于停止状态，播放位置在最大边界处                     |
++---------------------+---------------------------------------------------------------------------+
+| ***bound***         | 动画播放区间（二元素数组）                                                |
++---------------------+---------------------------------------------------------------------------+
+| ***speed***         | 动画播放速度                                                              |
++---------------------+---------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let animCtlInfo = new BlackHole3D.REAnimCtlInfo();
+
+animCtlInfo.dataSetId = \'jxb\';
+
+animCtlInfo.elemId = 1;
+
+animCtlInfo.groupName = animNameList\[i\];
+
+animCtlInfo.animPlayMode =
+BlackHole3D.REEntityAnimPlayModeEm.REPEATTURN;
+
+animCtlInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+
+animCtlInfo.bound = \[0, 1\];
+
+animCtlInfo.speed = 0.2;
+
+BlackHole3D.Entity.setAnimCtlByGroup(animCtlInfo);
+
+## setAnimPosByGroup {#setanimposbygroup .样式4}
+
+**功能：**
+
+设置一组动画位置
+
+**参数：**
+
+  ----------------- ------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***elemId***      构件唯一标识
+
+  ***groupName***   组名称
+
+  ***pos***         动画播放位置
+  ----------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let animNameList = BlackHole3D.Entity.getAnimCtlGroupNames(\'jxb\',
+\'1\');
+
+BlackHole3D.Entity.setAnimPosByGroup(\'jxb\', 1, animNameList\[i\], 0);
+
+## getAnimPosByGroup {#getanimposbygroup .样式4}
+
+**功能：**
+
+获取一组动画位置
+
+**参数：**
+
+  ----------------- ------------------------------------------------------
+  ***dataSetId***   数据集标识
+
+  ***elemId***      构件唯一标识
+
+  ***groupName***   组名称
+  ----------------- ------------------------------------------------------
+
+**返回值：**
+
+数值类型，动画位置
+
+**调用示例：**
+
+let animNameList = BlackHole3D.Entity.getAnimCtlGroupNames(\'jxb\',
+\'1\');
+
+BlackHole3D.Entity.getAnimPosByGroup(\'jxb\', 1, animNameList\[i\]);
+
+# 三维分析（Analysis3D）
+
+## 天际线
+
+## setSkylineClr {#setskylineclr .样式4}
+
+**功能：**
+
+设置天际线颜色和透明度
+
+**注：需要配合地形加载做限制，才有效果**
+
+**参数：**
+
+  ---- ------------- ------------------------------------------------------
+   1   ***color***   颜色（REColor 类型）, alpha=0 表示禁用
+
+  ---- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.setSkylineClr(new
+BlackHole3D.REColor(255,0,0,255));
+
+## getSkylineClr {#getskylineclr .样式4}
+
+**功能：**
+
+获取天际线颜色和透明度
+
+**参数：**
+
+无
+
+**返回值：**
+
+REColor 类型，天际线颜色
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.getSkylineClr();
+
+## 可视域分析
+
+## setViewRegionFovCam {#setviewregionfovcam .样式4}
+
+**功能：**
+
+设置可视域的相机参数
+
+**注：基于视场角的透视投影**
+
+**参数：**
+
+  --------------- -------------------------------------------------------
+  ***camInfo***   相机参数（REViewRegionFOVCamInfo 类型）
+
+  --------------- -------------------------------------------------------
+
+**REViewRegionFOVCamInfo模型解析：**
+
+  ----------------- ----------------------------------------------------------
+  ***fisheye***     是否为鱼眼球面相机，相机的可视球面可视半径将为farDis
+
+  ***camPos***      相机的位置，三元素数组
+
+  ***camRotate***   相机的朝向，四元素数组
+
+  ***camFovY***     相机在视点空间Y轴上的视角(弧度)
+
+  ***nearDis***     近裁面距离
+
+  ***farDis***      远裁面距离
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 添加视域分析
+
+var fovCam = new BlackHole3D.REViewRegionFOVCamInfo();
+
+fovCam.fisheye = false;
+
+fovCam.camPos = \[301.1194528709103, 393.2743221960581,
+128.6624804802928\];
+
+fovCam.camRotate = \[0, 0, 0, 1\];
+
+fovCam.camFovY = Math.PI / 6.0;
+
+fovCam.nearDis = 0.1;
+
+fovCam.farDis = 200;
+
+BlackHole3D.Analysis3D.setViewRegionFovCam(fovCam);
+
+BlackHole3D.Analysis3D.setViewRegionAttrs(new BlackHole3D.REColor(0,
+255, 0, 204), new BlackHole3D.REColor(255, 0, 0, 204));
+
+## setViewRegionAttrs {#setviewregionattrs .样式4}
+
+**功能：**
+
+设置可视域的属性信息
+
+**注：设置属性之前效果不可见，属性设置即时生效**
+
+**参数：**
+
+  ------------------- ---------------------------------------------------------------
+  ***visibleClr***    可见区域颜色（REColor 类型）,
+                      **alpha代表和模型的颜色混合权重，数值越大带代表颜色权重越大**
+
+  ***occludedClr***   遮挡区域颜色（REColor 类型）,
+                      **alpha代表和模型的颜色混合权重，数值越大带代表颜色权重越大**
+  ------------------- ---------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 添加视域分析
+
+var fovCam = new BlackHole3D.REViewRegionFOVCamInfo();
+
+fovCam.fisheye = false;
+
+fovCam.camPos = \[301.1194528709103, 393.2743221960581,
+128.6624804802928\];
+
+fovCam.camRotate = \[0, 0, 0, 1\];
+
+fovCam.camFovY = Math.PI / 6.0;
+
+fovCam.nearDis = 0.1;
+
+fovCam.farDis = 200;
+
+BlackHole3D.Analysis3D.setViewRegionFovCam(fovCam);
+
+BlackHole3D.Analysis3D.setViewRegionAttrs(new BlackHole3D.REColor(0,
+255, 0, 204), new BlackHole3D.REColor(255, 0, 0, 204));
+
+## 通视分析
+
+## addSightLineViewer {#addsightlineviewer .样式4}
+
+**功能：**
+
+加入一个通视观察点
+
+**注：若已存在则更新位置信息，一个观察点可以对应多个目标点**
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***pos***        观察点位置（三元素数组）
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'观察点1\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_viewer_1\';
+
+potShpInfo.pos = \[310.334622994716, 406.6545212343275,
+3.2293477942338527\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_viewer\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视观察点
+
+BlackHole3D.Analysis3D.addSightLineViewer(\'viewer_1\',
+\[310.334622994716, 406.6545212343275, 3.2293477942338527\]);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'目标点1\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_target_1\';
+
+potShpInfo.pos = \[343.09427095861145, 353.338787059138,
+6.56492630464961\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_target\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视目标点
+
+BlackHole3D.Analysis3D.addSightLineTarget(\'viewer_1\', \'target_1\',
+\[343.09427095861145, 353.338787059138, 6.56492630464961\]);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'目标点2\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_target_2\';
+
+potShpInfo.pos = \[283.23912409673704, 312.4673186258203,
+11.888850335907883\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_target\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视目标点
+
+BlackHole3D.Analysis3D.addSightLineTarget(\'viewer_1\', \'target_2\',
+\[283.23912409673704, 312.4673186258203, 11.888850335907883\]);
+
+// 设置属性信息
+
+BlackHole3D.Analysis3D.setSightLineAttrs(new BlackHole3D.REColor(0, 255,
+0, 204), new BlackHole3D.REColor(255, 0, 0, 204));
+
+## getSightLineAllViewerId {#getsightlineallviewerid .样式4}
+
+**功能：**
+
+获取所有的通视观察点标识
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+数组类型，观察点标识集合
+
+**调用示例：**
+
+const viewIdList = BlackHole3D.Analysis3D.getSightLineAllViewerId();
+
+## getSightLineViewerPos {#getsightlineviewerpos .样式4}
+
+**功能：**
+
+获取一个通视观察点的位置信息
+
+**注：绝对值大于1e19表示无效信息**
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+数组类型，观察点坐标
+
+**调用示例：**
+
+const viewerPos =
+BlackHole3D.Analysis3D.getSightLineTargetPos(\"viewer_1\");
+
+## delSightLineViewer {#delsightlineviewer .样式4}
+
+**功能：**
+
+删除一个通视观察点
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.delSightLineViewer(\"viewer_1\");
+
+## delSightLineAllViewer {#delsightlineallviewer .样式4}
+
+**功能：**
+
+删除所有的通视观察点
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.delSightLineAllViewer();
+
+## addSightLineTarget {#addsightlinetarget .样式4}
+
+**功能：**
+
+加入一个通视目标点
+
+**注：若已存在则更新位置信息，一个观察点可以对应多个目标点**
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***targetId***   通视目标点标识
+
+  ***pos***        目标点位置（三元素数组）
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'观察点1\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_viewer_1\';
+
+potShpInfo.pos = \[310.334622994716, 406.6545212343275,
+3.2293477942338527\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_viewer\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视观察点
+
+BlackHole3D.Analysis3D.addSightLineViewer(\'viewer_1\',
+\[310.334622994716, 406.6545212343275, 3.2293477942338527\]);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'目标点1\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_target_1\';
+
+potShpInfo.pos = \[343.09427095861145, 353.338787059138,
+6.56492630464961\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_target\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视目标点
+
+BlackHole3D.Analysis3D.addSightLineTarget(\'viewer_1\', \'target_1\',
+\[343.09427095861145, 353.338787059138, 6.56492630464961\]);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'目标点2\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_target_2\';
+
+potShpInfo.pos = \[283.23912409673704, 312.4673186258203,
+11.888850335907883\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_target\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视目标点
+
+BlackHole3D.Analysis3D.addSightLineTarget(\'viewer_1\', \'target_2\',
+\[283.23912409673704, 312.4673186258203, 11.888850335907883\]);
+
+// 设置属性信息
+
+BlackHole3D.Analysis3D.setSightLineAttrs(new BlackHole3D.REColor(0, 255,
+0, 204), new BlackHole3D.REColor(255, 0, 0, 204));
+
+## getSightLineAllTargetId {#getsightlinealltargetid .样式4}
+
+**功能：**
+
+获取所有的通视目标点标识
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+数组类型，观察点标识集合
+
+**调用示例：**
+
+const targetIdList =
+BlackHole3D.Analysis3D.getSightLineAllTargetId(\'viewer_1\');
+
+## getSightLineTargetPos {#getsightlinetargetpos .样式4}
+
+**功能：**
+
+获取一个通视目标点的位置信息
+
+**注：绝对值大于1e19表示无效信息**
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***targetId***   通视目标点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+数组类型，目标点坐标
+
+**调用示例：**
+
+const targetPos =
+BlackHole3D.Analysis3D.getSightLineTargetPos(\"viewer_1\",
+\'target_2\');
+
+## getSightLineTargetOccPos {#getsightlinetargetoccpos .样式4}
+
+**功能：**
+
+获取一个通视目标点的被遮挡位置信息
+
+**注：绝对值大于1e19表示无效信息,
+如果无遮挡点则返回数值和目标点位置一致，忽略精度问题**
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***targetId***   通视目标点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+数组类型，目标点坐标
+
+**调用示例：**
+
+const occPos =
+BlackHole3D.Analysis3D.getSightLineTargetOccPos(\"viewer_1\",
+\'target_2\');
+
+## delSightLineTarget {#delsightlinetarget .样式4}
+
+**功能：**
+
+删除一个通视目标点
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***targetId***   通视目标点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.delSightLineTarget(\"viewer_1\", \'target_2\');
+
+## delSightLineAllTarget {#delsightlinealltarget .样式4}
+
+**功能：**
+
+删除所有的通视观察点
+
+**参数：**
+
+  ---------------- -----------------------------------------------------------------------------
+  ***viewerId***   通视观察点标识
+
+  ***viewport***   视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ---------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.delSightLineAllTarget(\"viewer_1\");
+
+## setSightLineAttrs {#setsightlineattrs .样式4}
+
+**功能：**
+
+设置通视线的属性信息
+
+**注：设置属性之前效果不可见，属性设置即时生效**
+
+**参数：**
+
+  ------------------- -----------------------------------------------------------------------------
+  ***visibleClr***    可见区域颜色（REColor 类型）
+
+  ***occludedClr***   遮挡区域颜色（REColor 类型）
+
+  ***viewport***      视口索引，默认为0，可不传，**多视口模式下可以调节，不同视口的通视分析独立**
+  ------------------- -----------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'观察点1\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_viewer_1\';
+
+potShpInfo.pos = \[310.334622994716, 406.6545212343275,
+3.2293477942338527\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_viewer\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视观察点
+
+BlackHole3D.Analysis3D.addSightLineViewer(\'viewer_1\',
+\[310.334622994716, 406.6545212343275, 3.2293477942338527\]);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'目标点1\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_target_1\';
+
+potShpInfo.pos = \[343.09427095861145, 353.338787059138,
+6.56492630464961\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_target\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视目标点
+
+BlackHole3D.Analysis3D.addSightLineTarget(\'viewer_1\', \'target_1\',
+\[343.09427095861145, 353.338787059138, 6.56492630464961\]);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'目标点2\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_target_2\';
+
+potShpInfo.pos = \[283.23912409673704, 312.4673186258203,
+11.888850335907883\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_target\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加通视目标点
+
+BlackHole3D.Analysis3D.addSightLineTarget(\'viewer_1\', \'target_2\',
+\[283.23912409673704, 312.4673186258203, 11.888850335907883\]);
+
+// 设置属性信息
+
+BlackHole3D.Analysis3D.setSightLineAttrs(new BlackHole3D.REColor(0, 255,
+0, 204), new BlackHole3D.REColor(255, 0, 0, 204));
+
+## 限高分析
+
+## setHeightLimitInfo {#setheightlimitinfo .样式4}
+
+**功能：**
+
+设置限高分析信息
+
+**参数：**
+
+  ----------------------- ------------------------------------------------------
+  ***heightlimitInfo***   限高信息（REHeightLimitInfo 类型）
+
+  ----------------------- ------------------------------------------------------
+
+**REHeightLimitInfo模型解析：**
+
+  ----------------- ----------------------------------------------------------
+  ***centerX***     限高中心点X
+
+  ***centerY***     限高中心点Y
+
+  ***radius***      限高作用半径
+
+  ***criticalZ***   限高临界高度Z
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 矢量点信息
+
+var shpTextInfo = new BlackHole3D.REShpTextInfo();
+
+shpTextInfo.text = \'限高中心点\';
+
+shpTextInfo.texBias = \[1, 0\];
+
+var potShpInfo = new BlackHole3D.REPotShpInfo();
+
+potShpInfo.shpName = \'shp_center\';
+
+potShpInfo.pos = \[300.0, 370.0, 7.0\];
+
+potShpInfo.potSize = 4;
+
+potShpInfo.potClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+potShpInfo.textInfo = shpTextInfo;
+
+potShpInfo.groupName = \'group_heightL\';
+
+BlackHole3D.Geometry.addPotShp(potShpInfo);
+
+// 添加限高分析
+
+let limitHeight = new BlackHole3D.REHeightLimitInfo();
+
+limitHeight.centerX = 300.0;
+
+limitHeight.centerY = 370.0;
+
+limitHeight.radius = 8.0;
+
+limitHeight.criticalZ = 9.0;
+
+BlackHole3D.Analysis3D.setHeightLimitInfo(limitHeight);
+
+// 设置属性信息
+
+BlackHole3D.Analysis3D.setHeightLimitClr(new BlackHole3D.REColor(255, 0,
+0, 128));
+
+## getHeightLimitInfo {#getheightlimitinfo .样式4}
+
+**功能：**
+
+获取限高分析信息
+
+**参数：**
+
+无
+
+**返回值：**
+
+REHeightLimitInfo类型，限高分析信息
+
+**调用示例：**
+
+const heightLimitInfo = BlackHole3D.Analysis3D.getHeightLimitInfo();
+
+## delHeightLimit {#delheightlimit .样式4}
+
+**功能：**
+
+删除限高分析
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.delHeightLimit();
+
+## setHeightLimitClr {#setheightlimitclr .样式4}
+
+**功能：**
+
+设置超出限高临界高度后的颜色
+
+**参数：**
+
+  ---- ------------- ------------------------------------------------------
+   1   ***color***   颜色（REColor 类型）
+
+  ---- ------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.setHeightLimitClr(new
+BlackHole3D.REColor(255,0,0,128));
+
+## getHeightLimitClr {#getheightlimitclr .样式4}
+
+**功能：**
+
+获取超出限高临界高度后的颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+REColor 类型，限高临界高度后的颜色
+
+**调用示例：**
+
+BlackHole3D.Analysis3D.getHeightLimitClr();
+
+# 粒子效果（Particle）
+
+## 天气系统
+
+## setWeatherSysTex {#setweathersystex .样式4}
+
+**功能：**
+
+设置天气系统纹理信息
+
+**注：纹理标识由 Particle.addTexGroup 添加的纹理组的标识**
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***texGroupId***   纹理组标识，由 Particle.addTexGroup 添加的纹理组标识
+
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Particle.addTexGroup(\'weatherParTex_weather\', \[
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/rain.png\',
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/snow.png\',
+
+\]);
+
+BlackHole3D.Particle.setWeatherSysTex(\'weatherParTex_weather\');
+
+## createWeatherSys {#createweathersys .样式4}
+
+**功能：**
+
+创建天气系统
+
+**参数：**
+
+  -------------------------- ---------------------------------------------------
+  ***weatherSysInfoList***   天气系统信息集合（REWeatherSysInfo 类型）
+
+  -------------------------- ---------------------------------------------------
+
+**REWeatherSysInfo模型解析：**
+
+  -------------------------- -----------------------------------------------------------------------------------------------------------------------------
+  ***weatherSysId***         天气系统标识
+
+  ***descendSpeedRange***    下降速度范围，【最大值，最小值】，最大值最小值相同表示下降速度为定值，不同表示范围随机
+
+  ***disperseSpeedRange***   分散速度范围，【最大值，最小值】，最大值最小值相同表示分散速度为定值，不同表示范围随机，数值符号代表方向，＋为正向，-为反向
+
+  ***sizeRange***            粒子半径范围，【最小值，最大值】，最大值最小值相同表示粒子大小为定值，不同表示范围随机
+
+  ***texId***                对应纹理id（已经添加的纹理数组内的索引）
+
+  ***level***                对应粒子数量等级，从1开始，数值越大，粒子越多，范围【1，50】
+  -------------------------- -----------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[{
+
+\"dataSetId\": \"bim模型\",
+
+\"resourcesAddress\":
+\"https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\",
+
+\"useTransInfo\": true, \"transInfo\": \[\[1, 1, 1\], \[0, 0, 0, 1\],
+\[0.0, 0.0, 0.0\]\],
+
+\"dataSetCRS\": \"\", \"dataSetCRSNorth\": 0.0
+
+}\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 添加纹理组
+
+BlackHole3D.Particle.addTexGroup(\'weatherParTex_weather\', \[
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/rain.png\',
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/snow.png\',
+
+\]);
+
+// 将纹理组配置给天气系统
+
+BlackHole3D.Particle.setWeatherSysTex(\'weatherParTex_weather\');
+
+// 添加天气系统（雨）
+
+let weatherSys_rain = new BlackHole3D.REWeatherSysInfo();
+
+weatherSys_rain.weatherSysId = \'weather_rain\';
+
+weatherSys_rain.descendSpeedRange = \[14.6, 19.0\];
+
+weatherSys_rain.disperseSpeedRange = \[0.0, 0.0\];
+
+weatherSys_rain.sizeRange = \[2.5, 3.5\];
+
+weatherSys_rain.texId = 0;
+
+weatherSys_rain.level = 22;
+
+BlackHole3D.Particle.createWeatherSys(\[weatherSys_rain\]);
+
+//添加天气系统（雪）
+
+let weatherSys_snow = new BlackHole3D.REWeatherSysInfo();
+
+weatherSys_snow.weatherSysId = \'weather_snow\';
+
+weatherSys_snow.descendSpeedRange = \[10.6, 15.0\];
+
+weatherSys_snow.disperseSpeedRange = \[-1.0, 1.0\];
+
+weatherSys_snow.sizeRange = \[0.2, 0.7\];
+
+weatherSys_snow.texId = 1;
+
+weatherSys_snow.level = 10;
+
+BlackHole3D.Particle.createWeatherSys(\[weatherSys_snow\]);
+
+## getWeatherSysInfo {#getweathersysinfo .样式4}
+
+获取指定天气系统的信息
+
+**参数：**
+
+  ---- -------------------- -------------------------------------------------------
+   1   ***weatherSysId***   天气系统标识
+
+  ---- -------------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（REWeatherSysInfo对象类型）
+
+  ---- -------------------------- -----------------------------------------------------------------------------------------------------------------------------
+   1   ***particleId***           天气粒子标识
+
+   2   ***descendSpeedRange***    下降速度范围，【最大值，最小值】，最大值最小值相同表示下降速度为定值，不同表示范围随机
+
+   3   ***disperseSpeedRange***   分散速度范围，【最大值，最小值】，最大值最小值相同表示分散速度为定值，不同表示范围随机，数值符号代表方向，＋为正向，-为反向
+
+   4   ***sizeRange***            粒子半径范围，【最小值，最大值】，最大值最小值相同表示粒子大小为定值，不同表示范围随机
+
+   5   ***texId***                对应纹理id（已经添加的纹理数组内的索引）
+  ---- -------------------------- -----------------------------------------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Particle.getWeatherSysInfo(\"weather_rain\");
+
+## getAllWeatherSysIds {#getallweathersysids .样式4}
+
+**功能：**
+
+获取所有的天气系统的标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，标识集合
+
+**调用示例：**
+
+BlackHole3D.Particle.getAllWeatherSysIds();
+
+## delWeatherSys {#delweathersys .样式4}
+
+**功能：**
+
+删除天气系统
+
+**参数：**
+
+  ---- ------------------------ ----------------------------------------------------
+   1   ***weatherSysIdList***   天气系统标识集合，空数组代表删除所有
+
+  ---- ------------------------ ----------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Particle.delWeatherSys(\[\"weather_rain\"\]);
+
+## 发射系统
+
+## setTransmitSysTex {#settransmitsystex .样式4}
+
+**功能：**
+
+设置发射系统纹理信息
+
+**注：纹理标识由 Particle.addTexGroup 添加的纹理组的标识**
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***texGroupId***   纹理组标识，由 Particle.addTexGroup 添加的纹理组标识
+
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Particle.addTexGroup(\'transmitParTex_fountain\', \[
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/spray.png\',
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/smoke.png\',
+
+\]);
+
+BlackHole3D.Particle.setTransmitSysTex(\'transmitParTex_fountain\');
+
+## getAllTransmitSysIds {#getalltransmitsysids .样式4}
+
+**功能：**
+
+获取所有的发射系统的标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，标识集合
+
+**调用示例：**
+
+BlackHole3D.Particle.getAllTransmitSysIds();
+
+## delTransmitSys {#deltransmitsys .样式4}
+
+**功能：**
+
+删除发射系统
+
+**参数：**
+
+  ---- ---------------------- ------------------------------------------------------
+   1   ***transmitIdList***   发射系统标识集合，空数组代表删除所有
+
+  ---- ---------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Particle.delTransmitSys(\[\"rect_transmitSys_fire\"\]);
+
+## （点）发射系统
+
+## createTransmitSysPos {#createtransmitsyspos .样式4}
+
+**功能：**
+
+创建（点）发射系统
+
+**参数：**
+
+  ------------------------------ ------------------------------------------------
+  ***posTransmitSysInfoList***   （点）发射系统信息集合（REPosTransmitSysInfo
+                                 类型）
+
+  ------------------------------ ------------------------------------------------
+
+**REPosTransmitSysInfo模型解析：**
+
+  ------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ***transmitSysId***             发射系统标识
+
+  ***pos***                       发射器位置
+
+  ***planNormal***                发射器所在平面法向量，作用于发射方向
+
+  ***planDirectionAngleRange***   限制发射朝向相对于发射器所在平面的角度范围，取值范围【0，360°】，【最大值，最小值】，最大值最小值相同表示限制粒子相对发射器所在平面的方向为定值，不同表示范围随机,
+                                  planNormalIncludedAngle=0, 范围无效，粒子发射方向为延发射器平面法向量方向
+
+  ***planNormalIncludedAngle***   限制发射朝向相对于发射器所在平面法向量方向的夹角度数，取值范围【0，90°】，夹角数值是相对发射器平面法向量方向，实际粒子发射方向范围为 planDirectionAngleRange
+                                  限制角度范围内的所有与法向量夹角度数的空间范围， 夹角度数为0，planDirectionAngleRange参数无效，粒子发射方向为延发射器平面法向量方向
+
+  ***particleInfo***              粒子信息（REParticleInfo 类型）
+  ------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**REParticleInfo模型解析：**
+
+  ----------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ***texId***             对应纹理id（已经添加的纹理数组内的索引）
+
+  ***num***               粒子数量（**生命周期内做多存在的粒子数量**）
+
+  ***lifeTime***          粒子生命周期
+
+  ***speedRange***        粒子速度范围，【最大值，最小值】，最大值最小值相同表示粒子速度为定值，不同表示范围随机
+
+  ***sizeRange***         粒子半径范围，【最小值，最大值】，最大值最小值相同表示粒子大小为定值，不同表示范围随机
+
+  ***sizeChangeRange***   粒子生命周期内粒子半径变化系数过度范围，粒子大小在粒子生命周期内过度的缩放系数范围，【初始值，结束值】，初始值结束值相同表示粒子大小变化为定值，不同表示生命周期过度
+
+  ***gravity***           重力系数
+
+  ***dampingFactor***     阻尼系数（**取值范围0-1，设置参数一般取值0.001**）
+
+  ***color***             粒子颜色（REColor 类型）
+
+  ***alphaRange***        粒子生命周期内透明度过度范围，【初始值，结束值】，初始值结束值相同表示粒子透明度为定值，不同表示生命周期过度
+
+  ***faceDirection***     粒子面向方向，0：发射方向, 1: 相机方向， 默认为0
+
+  ***texUVRotAngle***     贴图UV旋转弧度（**范围值随机**）
+  ----------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+// 设置世界坐标
+
+var worldCRS = \'EPSG:3857\';
+
+BlackHole3D.Coordinate.setEngineWorldCRS(worldCRS); //设置引擎参考坐标系
+
+// 设置默认相机
+
+var forceCamLoc = new BlackHole3D.REForceCamLoc();
+
+forceCamLoc.force = true;
+
+forceCamLoc.camPos = \[12776960.551609863, 4683546.090482709,
+230.40473858219903\];
+
+forceCamLoc.camRotate = \[0.3560458340930769, -0.3960194622519575,
+-0.6294208876823961, 0.5658880593295286\];
+
+BlackHole3D.Camera.setCamForcedInitLoc(forceCamLoc);
+
+// 加载bim模型资源
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'天地图\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a15a068a3032c8ac7dc86033efa9159\',
+
+},
+
+{
+
+dataSetId: \'大坝\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a15f274c9f6c7566cdff46b0058ae63\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0.17688231607442104, 0.9842320083497329\],
+
+\[-7.168819741146358, -1.6519206655641199, 127.9460643631269\],
+
+\],
+
+dataSetCRS: \'ENU:38.7337,114.77835\',
+
+},
+
+{
+
+dataSetId: \'区域地图\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a15f27cd17b394959b55b26a049bcb3\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 添加纹理组
+
+BlackHole3D.Particle.addTexGroup(\'transmitParTex_fountain\', \[
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/spray.png\',
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/smoke.png\',
+
+\]);
+
+// 将纹理组配置给天气系统
+
+BlackHole3D.Particle.setTransmitSysTex(\'transmitParTex_fountain\');
+
+// 添加（水流效果）
+
+let particle_water = new BlackHole3D.REParticleInfo();
+
+particle_water.texId = 0;
+
+particle_water.num = 100;
+
+particle_water.lifeTime = 3.5;
+
+particle_water.gravity = 9.8;
+
+particle_water.speedRange = \[35.0, 37.0\];
+
+particle_water.sizeRange = \[30.0, 32.0\];
+
+particle_water.sizeChangeRange = \[0.12, 0.12\];
+
+particle_water.alphaRange = \[0.5, 1.0\];
+
+particle_water.texUVRotAngle = 3.14;
+
+let transmitSys_water_01 = new BlackHole3D.REPosTransmitSysInfo();
+
+transmitSys_water_01.transmitSysId = \'pos_transmitSys_water_01\';
+
+transmitSys_water_01.pos = \[12777100.053, 4683598.675, 171.581\];
+
+transmitSys_water_01.planNormal = \[0.5, -0.7, -1.0\];
+
+transmitSys_water_01.planDirectionAngleRange = \[0.0, 0.0\];
+
+transmitSys_water_01.particleInfo = particle_water;
+
+BlackHole3D.Particle.createTransmitSysPos(\[transmitSys_water_01\]);
+
+//添加（烟雾效果）
+
+let particle_water_smoke = new BlackHole3D.REParticleInfo();
+
+particle_water_smoke.texId = 1;
+
+particle_water_smoke.num = 100;
+
+particle_water_smoke.lifeTime = 6.0;
+
+particle_water_smoke.gravity = 3.5;
+
+particle_water_smoke.speedRange = \[20.0, 20.0\];
+
+particle_water_smoke.sizeRange = \[30.0, 32.0\];
+
+particle_water_smoke.sizeChangeRange = \[0.2, 1.0\];
+
+particle_water_smoke.alphaRange = \[0.2, 0.2\];
+
+let transmitSys_water_smoke_01 = new BlackHole3D.REPosTransmitSysInfo();
+
+transmitSys_water_smoke_01.transmitSysId =
+\'pos_transmitSys_water_smoke_01\';
+
+transmitSys_water_smoke_01.pos = \[12777100.053, 4683598.675, 171.581\];
+
+transmitSys_water_smoke_01.planNormal = \[0.5, -0.7, -1.0\];
+
+transmitSys_water_smoke_01.planDirectionAngleRange = \[0.0, 0.0\];
+
+transmitSys_water_smoke_01.particleInfo = particle_water_smoke;
+
+BlackHole3D.Particle.createTransmitSysPos(\[transmitSys_water_smoke_01\]);
+
+//添加（扩散效果）
+
+let particle_water_diffuse = new BlackHole3D.REParticleInfo();
+
+particle_water_diffuse.texId = 1;
+
+particle_water_diffuse.num = 100;
+
+particle_water_diffuse.lifeTime = 8.2;
+
+particle_water_diffuse.gravity = 2.5;
+
+particle_water_diffuse.speedRange = \[12.0, 12.0\];
+
+particle_water_diffuse.sizeRange = \[50.0, 52.0\];
+
+particle_water_diffuse.sizeChangeRange = \[0.8, 1.0\];
+
+particle_water_diffuse.alphaRange = \[0.04, 0.05\];
+
+let transmitSys_water_diffuse_01 = new
+BlackHole3D.REPosTransmitSysInfo();
+
+transmitSys_water_diffuse_01.transmitSysId =
+\'pos_transmitSys_water_diffuse_01\';
+
+transmitSys_water_diffuse_01.pos = \[12777149.107, 4683500.457,
+170.881\];
+
+transmitSys_water_diffuse_01.planNormal = \[0.0, -1.0, 0.0\];
+
+transmitSys_water_diffuse_01.planDirectionAngleRange = \[0.0, 360.0\];
+
+transmitSys_water_diffuse_01.planNormalIncludedAngle = 60.0;
+
+transmitSys_water_diffuse_01.particleInfo = particle_water_diffuse;
+
+BlackHole3D.Particle.createTransmitSysPos(\[transmitSys_water_diffuse_01\]);
+
+//添加（水花效果）
+
+let particle_water_spray = new BlackHole3D.REParticleInfo();
+
+particle_water_spray.texId = 1;
+
+particle_water_spray.num = 100;
+
+particle_water_spray.lifeTime = 3.5;
+
+particle_water_spray.gravity = 0;
+
+particle_water_spray.dampingFactor = 0.015;
+
+particle_water_spray.speedRange = \[18.0, 18.0\];
+
+particle_water_spray.sizeRange = \[10.0, 12.0\];
+
+particle_water_spray.sizeChangeRange = \[0.8, 1.0\];
+
+particle_water_spray.alphaRange = \[1.0, 0.01\];
+
+particle_water_spray.faceDirection = 1;
+
+let transmitSys_water_spray_01 = new BlackHole3D.REPosTransmitSysInfo();
+
+transmitSys_water_spray_01.transmitSysId =
+\'pos_transmitSys_water_spray_01\';
+
+transmitSys_water_spray_01.pos = \[12777149.107, 4683500.457, 170.881\];
+
+transmitSys_water_spray_01.planNormal = \[0.0, 1.0, 0.0\];
+
+transmitSys_water_spray_01.planDirectionAngleRange = \[0.0, 360.0\];
+
+transmitSys_water_spray_01.planNormalIncludedAngle = 90.0;
+
+transmitSys_water_spray_01.particleInfo = particle_water_spray;
+
+BlackHole3D.Particle.createTransmitSysPos(\[transmitSys_water_spray_01\]);
+
+## getTransmitSysInfoPos {#gettransmitsysinfopos .样式4}
+
+**功能：**
+
+获取指定（点）发射系统信息
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***transmitSysId***   发射系统标识
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（REPosTransmitSysInfo对象类型）
+
+**调用示例：**
+
+BlackHole3D.Particle.getTransmitSysInfoPos(\"pos_transmitSys_water_01\");
+
+## （矩形）发射系统
+
+## createTransmitSysRect {#createtransmitsysrect .样式4}
+
+**功能：**
+
+创建（矩形）发射系统
+
+**参数：**
+
+  ------------------------------- -------------------------------------------------
+  ***rectTransmitSysInfoList***   （矩形）发射系统信息集合（RERectTransmitSysInfo
+                                  类型）
+
+  ------------------------------- -------------------------------------------------
+
+**RERectTransmitSysInfo模型解析：**
+
+  ------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ***transmitSysId***             发射系统标识
+
+  ***pos***                       发射器位置
+
+  ***planWidth***                 发射器平面宽度
+
+  ***planHeight***                发射器平面高度
+
+  ***planNormal***                发射器所在平面法向量，作用于发射方向
+
+  ***planRightDirection***        发射器所在平面指定右方向，作用与确定平面空间位置形态
+
+  ***planDirectionAngleRange***   限制发射朝向相对于发射器所在平面的角度范围，取值范围【0，360°】，【最大值，最小值】，最大值最小值相同表示限制粒子相对发射器所在平面的方向为定值，不同表示范围随机,
+                                  planNormalIncludedAngle=0, 范围无效，粒子发射方向为延发射器平面法向量方向
+
+  ***planNormalIncludedAngle***   限制发射朝向相对于发射器所在平面法向量方向的夹角度数，取值范围【0，90°】，夹角数值是相对发射器平面法向量方向，实际粒子发射方向范围为 planDirectionAngleRange
+                                  限制角度范围内的所有与法向量夹角度数的空间范围， 夹角度数为0，planDirectionAngleRange参数无效，粒子发射方向为延发射器平面法向量方向
+
+  ***particleInfo***              粒子信息（REParticleInfo 类型）
+  ------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**REParticleInfo模型解析：**
+
+  ----------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ***texId***             对应纹理id（已经添加的纹理数组内的索引）
+
+  ***num***               粒子数量（**生命周期内做多存在的粒子数量**）
+
+  ***lifeTime***          粒子生命周期
+
+  ***speedRange***        粒子速度范围，【最大值，最小值】，最大值最小值相同表示粒子速度为定值，不同表示范围随机
+
+  ***sizeRange***         粒子半径范围，【最小值，最大值】，最大值最小值相同表示粒子大小为定值，不同表示范围随机
+
+  ***sizeChangeRange***   粒子生命周期内粒子半径变化系数过度范围，粒子大小在粒子生命周期内过度的缩放系数范围，【初始值，结束值】，初始值结束值相同表示粒子大小变化为定值，不同表示生命周期过度
+
+  ***gravity***           重力系数
+
+  ***dampingFactor***     阻尼系数（**取值范围0-1，设置参数一般取值0.001**）
+
+  ***color***             粒子颜色（REColor 类型）
+
+  ***alphaRange***        粒子生命周期内透明度过度范围，【初始值，结束值】，初始值结束值相同表示粒子透明度为定值，不同表示生命周期过度
+
+  ***faceDirection***     粒子面向方向，0：发射方向, 1: 相机方向， 默认为0
+
+  ***texUVRotAngle***     贴图UV旋转角度弧度（**范围值随机**）
+  ----------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+// 加载bim模型资源
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'房子\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a16e091acfee92721089d116117fe0c\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 添加纹理组
+
+BlackHole3D.Particle.addTexGroup(\'transmitParTex_fire\',
+\[\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/fire.png\'\]);
+
+// 将纹理组配置给天气粒子系统
+
+BlackHole3D.Particle.setTransmitSysTex(\'transmitParTex_fire\');
+
+// 添加火焰
+
+let particle = new BlackHole3D.REParticleInfo();
+
+particle.texId = 0;
+
+particle.num = 300;
+
+particle.lifeTime = 4.0;
+
+particle.gravity = 0.0;
+
+particle.speedRange = \[1.6, 1.6\];
+
+particle.sizeRange = \[4.0, 6.0\];
+
+particle.sizeChangeRange = \[0.2, 1.0\];
+
+particle.alphaRange = \[0.5, 0.01\];
+
+particle.texUVRotAngle = 0.68;
+
+let transmitSys_pos = new BlackHole3D.RERectTransmitSysInfo();
+
+transmitSys_pos.transmitSysId = \'rect_transmitSys_fire\';
+
+transmitSys_pos.pos = \[3.0, 3.0, 3.0\];
+
+transmitSys_pos.planWidth = 1.0;
+
+transmitSys_pos.planHeight = 1.0;
+
+transmitSys_pos.planNormal = \[0.0, -1.0, 0.0\];
+
+transmitSys_pos.planRightDirection = \[1.0, 0.0, 0.0\];
+
+transmitSys_pos.planDirectionAngleRange = \[0.0, 0.0\];
+
+transmitSys_pos.particleInfo = particle;
+
+BlackHole3D.Particle.createTransmitSysRect(\[transmitSys_pos\]);
+
+## getTransmitSysInfoRect {#gettransmitsysinforect .样式4}
+
+**功能：**
+
+获取指定（矩形）发射系统信息
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***transmitSysId***   发射系统标识
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（RERectTransmitSysInfo对象类型）
+
+**调用示例：**
+
+BlackHole3D.Particle.getTransmitSysInfoRect(\"rect_transmitSys_fire\");
+
+## 纹理资源
+
+## addTexGroup {#addtexgroup .样式4}
+
+**功能：**
+
+添加粒子纹理组
+
+**注：每个纹理组最多添加 64 张图片，如果不过再增加纹理组**
+
+**参数：**
+
+  ---- ------------------- ------------------------------------------------------
+   1   ***texGroupId***    纹理组标识
+
+   2   ***texPathList***   纹理路径集合
+  ---- ------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Particle.addTexGroup(\'weatherParTex_weather\', \[
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/rain.png\',
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/particle/snow.png\',
+
+\]);
+
+## getTexGroupIds {#gettexgroupids .样式4}
+
+**功能：**
+
+获取粒子纹理组标识集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组，标识集合
+
+**调用示例：**
+
+BlackHole3D.Particle.getTexGroupIds();
+
+## delTexGroup {#deltexgroup .样式4}
+
+**功能：**
+
+删除一个粒子纹理组
+
+**参数：**
+
+  ---- ------------------ ------------------------------------------------------
+   1   ***texGroupId***   纹理组标识
+
+  ---- ------------------ ------------------------------------------------------
+
+**返回值：**
+
+布尔值，添加成功返回true，失败返回false
+
+**调用示例：**
+
+BlackHole3D.Particle.delTexGroup(\"weatherParTex_weather\");
+
+## delAllTexGroup {#delalltexgroup .样式4}
+
+**功能：**
+
+删除所有粒子纹理组
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Particle.delAllTexGroup();
+
+# 水面（Water）
+
+## 加载
+
+## setData {#setdata-3 .样式4}
+
+**功能：**
+
+创建水域对象
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***waterInfoList***   水面数据集合（REWaterInfo 类型）
+
+  ---- --------------------- -------------------------------------------------------
+
+**REWaterInfo模型解析：**
+
+  ---- ------------------ -----------------------------------------------------------------
+   1   ***waterName***    水面名称（唯一），必填
+
+   2   ***waterClr***     水面颜色，（REColor类型）
+
+   3   ***blendDist***    混合系数，值越大边缘混合效果越强，默认1.0 取值范围 0-1
+
+   4   ***visible***      是否可见,，默认可见
+
+   5   ***expandDist***   表示水面区域的边界扩充距离
+
+   6   ***depthBias***    表示水面的深度偏移，正值表示向下偏移，负值表示向上偏移， 取值范围
+                          【-0.0001，0.0001】，只有产生叠加闪烁现象使用，其他情况默认即可
+
+   7   ***visDist***      表示水面的最远可视距离
+
+   8   ***rgnList***      水面区域集合 （RECornerRgnInfo
+                          类型），同一个水面标识可拥有多个区域构成
+  ---- ------------------ -----------------------------------------------------------------
+
+**RECornerRgnInfo模型解析：**
+
+  ---- ----------------- ------------------------------------------------------------------------------------------------------
+   1   ***pointList***   顶点集合**，至少三个顶点构成平面**
+
+   2   ***indexList***   三角网顶点索引值集合，（**根据索引值构面，空数组为引擎自动构面，不需要自定义构面，原数据返回即可**）
+  ---- ----------------- ------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 创建水面顶点区域对象（1）
+
+let rgnList_1 = \[\];
+
+let cornerRgnInfo_1 = new BlackHole3D.RECornerRgnInfo();
+
+cornerRgnInfo_1.pointList = \[
+
+\[40, 80, 0\],
+
+\[-20, 80, 0\],
+
+\[-30, 50, 0\],
+
+\];
+
+rgnList_1.push(cornerRgnInfo_1);
+
+// 创建水面对象（1）
+
+let waterInfo_1 = new BlackHole3D.REWaterInfo();
+
+waterInfo_1.waterName = \'water_1\';
+
+waterInfo_1.waterClr = new BlackHole3D.REColor(255, 0, 0, 255);
+//水面颜色
+
+waterInfo_1.blendDist = 1.0; //混合系数
+
+waterInfo_1.visible = true; //是否可见
+
+waterInfo_1.rgnList = rgnList_1;
+
+// 创建水面顶点区域对象（2）
+
+let rgnList_2 = \[\];
+
+let cornerRgnInfo_2 = new BlackHole3D.RECornerRgnInfo();
+
+cornerRgnInfo_2.pointList = \[
+
+\[28, 50, 0\],
+
+\[0, 52.810488, 0\],
+
+\[0, 0, 0\],
+
+\[28, 0, 0\],
+
+\];
+
+rgnList_2.push(cornerRgnInfo_2);
+
+// 创建水面对象（2）
+
+let waterInfo_2 = new BlackHole3D.REWaterInfo();
+
+waterInfo_2.waterName = \'water_2\';
+
+waterInfo_2.rgnList = rgnList_2;
+
+// 创建水面对象集合
+
+let waterList = \[waterInfo_1, waterInfo_2\];
+
+BlackHole3D.Water.setData(waterList);
+
+## getData {#getdata-2 .样式4}
+
+**功能：**
+
+获取当前场景中水面对象集合
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***waterNameList***   水面名称标识集合
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+数组类型，（REWaterInfo对象类型）
+
+  ---- ------------------ -------------------------------------------------
+   1   ***waterName***    水面名称（唯一）
+
+   2   ***waterClr***     水面颜色，（REColor类型）
+
+   3   ***blendDist***    混合系数，值越大边缘混合效果越强，默认1.0
+                          取值范围 0-1
+
+   4   ***visible***      是否可见,，默认可见
+
+   5   ***expandDist***   表示水面区域的边界扩充距离
+
+   6   ***depthBias***    表示水面的深度偏移
+
+   7   ***visDist***      表示水面的最远可视距离
+
+   8   ***rgnList***      水面区域集合 （RECornerRgnInfo
+                          类型），同一个水面标识可拥有多个区域构成
+  ---- ------------------ -------------------------------------------------
+
+**RECornerRgnInfo模型解析：**
+
+  ---- ----------------- ----------------------------------------------------------------
+   1   ***pointList***   顶点集合**，至少三个顶点构成平面**
+
+   2   ***indexList***   三角网顶点索引值集合，（根据索引值构面，空数组为引擎自动构面）
+  ---- ----------------- ----------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Water.getData(\[\'water_0\', \'water_1\'\]);
+
+## delData {#deldata-2 .样式4}
+
+**功能：**
+
+通过水面名称删除指定的水面对象
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***waterNameList***   水面名称集合，空数组代表删除所有
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.delData(\[\'water_0\', \'water_1\'\])
+
+## getAllWaterName {#getallwatername .样式4}
+
+**功能：**
+
+获取所有水面对象的名称标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，所有水面对象的名称标识
+
+**调用示例：**
+
+BlackHole3D.Water.getAllWaterName();
+
+## getErrorDrawWaterIds {#geterrordrawwaterids .样式4}
+
+**功能：**
+
+获取错误绘制的水面区域的标识集合
+
+**注：监听事件REAddWaterRgnCheck获取到失败标识之后此接口才可以作用**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前添加的区域绘制错误的标识集合
+
+**调用示例：**
+
+document.addEventListener(\"REAddWaterRgnCheck\", REAddWaterRgnCheck);
+
+function REAddWaterRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.Water.getErrorDrawWaterIds();
+
+}
+
+}
+
+## 编辑
+
+## startEditState {#starteditstate .样式4}
+
+**功能：**
+
+进入水面编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.startEditState();
+
+## endEditState {#endeditstate .样式4}
+
+**功能：**
+
+退出水面编辑状态
+
+**注：会触发监听事件REEditWaterFinish相应**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.endEditState();
+
+## startAddWaterState {#startaddwaterstate .样式4}
+
+**功能：**
+
+进入水面添加状态
+
+**注：如果已经结束了添加状态再次设置已有的水面标识表示为当前水面标识下增加水域，同一个水面标识下可以有多个水域信息，点添加会触发构面合规检测的监听事件REAddWaterRgnCheck**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.startAddWaterState(\'water_0\');
+
+// 添加构面合规检测事件
+
+document.addEventListener(\'REAddWaterRgnCheck\', REAddWaterRgnCheck);
+
+function REAddWaterRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.Water.getErrorDrawWaterIds();
+
+}
+
+}
+
+## endAddWaterState {#endaddwaterstate .样式4}
+
+**功能：**
+
+退出水面添加状态
+
+**注：鼠标右键操作或接口调用，结束添加状态会触发添加完成回调，相同名称标识的水面添加多个水域对象完成都会触发此回调，回调名称REAddWaterRgnFinish**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.endAddWaterState();
+
+## getCurWaterName {#getcurwatername .样式4}
+
+**功能：**
+
+获取当前编辑水面的名称
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串类型，当前编辑的水面名称标识
+
+**调用示例：**
+
+BlackHole3D.Water.getCurWaterName();
+
+## setShowState {#setshowstate .样式4}
+
+**功能：**
+
+设置指定水面显示状态
+
+**注：要在进入水面编辑状态之后有效, 只能改变当前已有的水面对象**
+
+**参数：**
+
+  --------------------- ---------------------------------------------------------
+  ***waterNameList***   水面标识集合，空数组代表所有
+
+  ***showState***       显示状态（默认几何矢量状态），0：显示几何矢量
+                        1：显示渲染效果
+  --------------------- ---------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.startEditState();
+
+BlackHole3D.Water.setShowState(\[\'Water_0\'\], 0);
+
+## getIdsByShowState {#getidsbyshowstate .样式4}
+
+**功能：**
+
+获取指定水面状态的所有标识集合
+
+**注：要在进入水面编辑状态之后有效**
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------
+  ***showState***   显示状态（默认几何矢量状态），0：显示几何矢量
+                    1：显示渲染效果
+
+  ----------------- ---------------------------------------------------------
+
+**返回值：**
+
+数组类型，对应类型的标识集合
+
+**调用示例：**
+
+BlackHole3D.Water.startEditState();
+
+BlackHole3D.Water.getIdsByShowState(0);
+
+## 渲染效果
+
+## setVisible {#setvisible-3 .样式4}
+
+**功能：**
+
+设置指定水面对象的可见性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+   2   ***visible***     是否可见
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setVisible(\'water_0\',false);
+
+## getVisible {#getvisible-1 .样式4}
+
+**功能：**
+
+获取指定水面对象的可见性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，可见返回true；不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Water.getVisible(\'water_0\');
+
+## setClr {#setclr-2 .样式4}
+
+**功能：**
+
+设置水面颜色
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+   2   ***waterClr***    水面颜色 （REColor 类型）
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setClr(\'water_0\',new BlackHole3D.REColor(255, 0, 0,
+255));
+
+## getClr {#getclr .样式4}
+
+**功能：**
+
+获取水面颜色
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（REColor对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***red***      红色
+
+   2   ***green***    绿色
+
+   3   ***blue***     蓝色
+
+   4   ***alpha***    透明度
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Water.getClr(\'water_0\');
+
+## setBlendDist {#setblenddist .样式4}
+
+**功能：**
+
+设置水面跟模型混合系数
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+   2   ***blendDist***   混合系数，值越大边缘混合效果越强 取值范围 0-10
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setBlendDist(\'water_0\',1.0);
+
+## getBlendDist {#getblenddist .样式4}
+
+**功能：**
+
+获取水面跟模型混合系数
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，水面跟模型混合系数
+
+**调用示例：**
+
+BlackHole3D.Water.getBlendDist(\'water_0\');
+
+## setExpandDist {#setexpanddist .样式4}
+
+**功能：**
+
+设置水体扩展距离
+
+**参数：**
+
+  ---- ------------------ -------------------------------------------------------
+   1   ***waterName***    水面唯一标识
+
+   2   ***expandDist***   表示水面区域的边界扩充距离
+  ---- ------------------ -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setExpandDist(\'water_0\',10.0);
+
+## getExpandDist {#getexpanddist .样式4}
+
+**功能：**
+
+获取水体扩展距离
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，水体扩展距离
+
+**调用示例：**
+
+BlackHole3D.Water.getExpandDist(\'water_0\');
+
+## setDepthBias {#setdepthbias .样式4}
+
+**功能：**
+
+设置水体的深度偏移
+
+**注：只有产生叠加闪烁现象使用，其他情况默认即可**
+
+**参数：**
+
+  ---- ----------------- ----------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+   2   ***depthBias***   表示水面的深度偏移，正值表示向下偏移，负值表示向上偏移，
+                         取值范围 【-0.0001，0.0001】
+  ---- ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setDepthBias(\'water_0\',0.000001);
+
+## getDepthBias {#getdepthbias .样式4}
+
+**功能：**
+
+获取水体的深度偏移
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，水体的深度偏移
+
+**调用示例：**
+
+BlackHole3D.Water.getDepthBias(\'water_0\');
+
+## setVisDist {#setvisdist .样式4}
+
+**功能：**
+
+设置水体的最远可视距离
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+   2   ***visDist***     表示水面的最远可视距离
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setVisDist(\'water_0\',200000);
+
+## getVisDist {#getvisdist .样式4}
+
+**功能：**
+
+获取水体的深度偏移
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***waterName***   水面唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，水体的最远可视距离
+
+**调用示例：**
+
+BlackHole3D.Water.getVisDist(\'water_0\');
+
+## setDefaultAttr {#setdefaultattr .样式4}
+
+**功能：**
+
+设置水面默认属性
+
+**注：设置完成后的下一次添加生效**
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***attrInfo***   水面属性信息 （REWaterAttrInfo 类型）
+
+  ---- ---------------- -------------------------------------------------------
+
+**REWaterAttrInfo模型解析：**
+
+  ---- ------------------ -------------------------------------------------
+   1   ***waterClr***     水面颜色，（REColor类型）
+
+   2   ***blendDist***    混合系数，值越大边缘混合效果越强，默认1.0
+                          取值范围 0-1
+
+   3   ***visible***      是否可见,，默认可见
+
+   4   ***expandDist***   表示水面区域的边界扩充距离
+
+   5   ***depthBias***    表示水面的深度偏移
+
+   6   ***visDist***      表示水面的最远可视距离
+  ---- ------------------ -------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+var attrInfo = new BlackHole3D.REWaterAttrInfo();
+
+attrInfo.waterClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+attrInfo.blendDist = 1;
+
+attrInfo.visible = true;
+
+attrInfo.expandDist = 10.0;
+
+attrInfo.depthBias = 0.0;
+
+attrInfo.visDist = 200000.0
+
+BlackHole3D.Water.setDefaultAttr(attrInfo);
+
+## 相机
+
+## setCamToData {#setcamtodata .样式4}
+
+**功能：**
+
+根据水面名称定位到水面
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***waterNameList***   水面名称标识集合
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Water.setCamToData(\[\'water_0\', \'water_1\'\]);
+
+# 挤出（Extrude）
+
+## 加载
+
+## setData {#setdata-4 .样式4}
+
+**功能：**
+
+设置挤出区域对象集合
+
+**注：以区域面为基准，有效范围的模型向这个区域面展示不同类型的效果，需要在模型加载完成之后进行，无效类型资源包含（点云、有限元、地形矢量）**
+
+**参数：**
+
+  ---- ----------------------- ------------------------------------------------------
+   1   ***extrudeInfoList***   挤出信息集合 （REExtrudeInfo 类型）
+
+  ---- ----------------------- ------------------------------------------------------
+
+**REExtrudeInfo模型解析：**
+
++:-:+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 1 | ***extrudeId***       | 挤出标识（唯一），**必填**                                                                                                                                                                                                                                                                                  |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 2 | ***dataSetIdList***   | 数据集标识集合，挤出作用有效的范围                                                                                                                                                                                                                                                                          |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 3 | ***rgnList***         | 挤出区域集合，每个区域由点集合构成（至少三个点），**一个挤出表示可以由多个区域构成**                                                                                                                                                                                                                        |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 4 | ***depthLimitRange*** | 挤出区域面Z值偏移范围，包含在偏移范围内的模型即为有效（**只作用于挖坑效果，其余效果无用**），**\[区域面下方，区域面上方\]，负值为向下，正值为向上**，例如：区域面的Z高度为2，偏移范围为\[-2,3\]，即为以这个区域面高度为基准，X值为向下偏移2和Y值向上偏移3的范围内的模型为有效模型，不在这个范围内的模型无效 |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 5 | ***type***            | 挤出类型                                                                                                                                                                                                                                                                                                    |
+|   |                       |                                                                                                                                                                                                                                                                                                             |
+|   |                       | 0：挖洞（无封口）                                                                                                                                                                                                                                                                                           |
+|   |                       |                                                                                                                                                                                                                                                                                                             |
+|   |                       | 1：拍平（简易投射原纹理），**仅对倾斜摄影和带有高程的遥感影像有效**                                                                                                                                                                                                                                         |
+|   |                       |                                                                                                                                                                                                                                                                                                             |
+|   |                       | 2：挖坑（使用指定纹理封口），**对地形数据无效**                                                                                                                                                                                                                                                             |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 6 | ***texId***           | 纹理id **由 addExtrudeFaceTex 返回的id**                                                                                                                                                                                                                                                                    |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 7 | ***texPath***         | 纹理路径，**和纹理id选填一个即可**                                                                                                                                                                                                                                                                          |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 8 | ***texSize***         | 纹理大小                                                                                                                                                                                                                                                                                                    |
++---+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 挤出模块对模型的效果
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'挤出渲染1\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 挖空（无封口）
+
+let extrudeInfo_M_1_1 = new BlackHole3D.REExtrudeInfo();
+
+extrudeInfo_M_1_1.extrudeId = \'bim_extrude_M_1_1\';
+
+extrudeInfo_M_1_1.dataSetIdList = \[\'挤出渲染1\'\];
+
+extrudeInfo_M_1_1.rgnList = \[
+
+\[
+
+\[15.800412857366394, 60.49535601724977, -10\],
+
+\[18.50151481517439, 60.44579531565839, -10\],
+
+\[18.427172201834612, 56.654387751843075, -10\],
+
+\],
+
+\];
+
+extrudeInfo_M_1_1.depthLimitRange = \[-1e10, 1e10\];
+
+extrudeInfo_M_1_1.type = 0; // 挖空（无封口）
+
+// 挖坑（使用指定纹理封口）\-- 预加载图片
+
+let texId = BlackHole3D.Extrude.addExtrudeFaceTex(
+
+\'https://demo.bjblackhole.com/demopage/examplesImgs/skybox/06/right.jpg\',
+
+\[10.0, 10.0\]
+
+);
+
+let extrudeInfo_M_1_2 = new BlackHole3D.REExtrudeInfo();
+
+extrudeInfo_M_1_2.extrudeId = \'bim_extrude_M_1_2\';
+
+extrudeInfo_M_1_2.dataSetIdList = \[\'挤出渲染1\'\];
+
+extrudeInfo_M_1_2.rgnList = \[
+
+\[
+
+\[7.411574856531935, 15.798791358518626, -2\],
+
+\[9.539594099746182, 14.302615786948063, -2\],
+
+\[5.336109637237804, 14.029981974798545, -2\],
+
+\],
+
+\];
+
+extrudeInfo_M_1_2.type = 2; // 挖坑（使用指定纹理封口）
+
+extrudeInfo_M_1_2.texId = texId;
+
+// 挖坑（使用指定纹理封口）\-- 直接使用资源路径
+
+let extrudeInfo_M_1_3 = new BlackHole3D.REExtrudeInfo();
+
+extrudeInfo_M_1_3.extrudeId = \'bim_extrude_M_1_3\';
+
+extrudeInfo_M_1_3.dataSetIdList = \[\'挤出渲染1\'\];
+
+extrudeInfo_M_1_3.rgnList = \[
+
+\[
+
+\[11.84670899961667, 15.910498858891547, -10\],
+
+\[14.932312063439914, 17.083143304990916, -10\],
+
+\[15.718422613682986, 15.763081926251663, -10\],
+
+\[13.750290716208097, 14.835458514437304, -10\],
+
+\],
+
+\];
+
+extrudeInfo_M_1_3.type = 2; // 挖坑（使用指定纹理封口）
+
+extrudeInfo_M_1_3.texPath =
+\'https://demo.bjblackhole.com/demopage/examplesImgs/skybox/06/right.jpg\';
+
+extrudeInfo_M_1_3.texSize = \[10.0, 10.0\];
+
+// 创建挤出对象集合
+
+let extrudeList_bim = \[extrudeInfo_M_1_1, extrudeInfo_M_1_2,
+extrudeInfo_M_1_3\];
+
+BlackHole3D.Extrude.setData(extrudeList_bim);
+
+// 挤出模块对地形的效果
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'挤出渲染2\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_qxsy\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0, 1\],
+
+\[9200, 27000, 100.0\],
+
+\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 挖空（无封口）
+
+let extrudeInfo_OB_1_1 = new BlackHole3D.REExtrudeInfo();
+
+extrudeInfo_OB_1_1.extrudeId = \'ob_extrude_OB_1_1\';
+
+extrudeInfo_OB_1_1.dataSetIdList = \[\'挤出渲染2\'\];
+
+extrudeInfo_OB_1_1.rgnList = \[
+
+\[
+
+\[-61.0642090589232, 52.14752273116967, 133.505933093389785\],
+
+\[-179.11353798158603, 6.974919197468619, 131.26633716373194\],
+
+\[-111.3853527091256, -150.1309842989069, 131.953197100751275\],
+
+\],
+
+\];
+
+extrudeInfo_OB_1_1.depthLimitRange = \[-1e10, 1e10\];
+
+extrudeInfo_OB_1_1.type = 0; // 挖空（无封口）
+
+// 拍平（简易投射）
+
+let extrudeInfo_OB_1_2 = new BlackHole3D.REExtrudeInfo();
+
+extrudeInfo_OB_1_2.extrudeId = \'ob_extrude_OB_1_2\';
+
+extrudeInfo_OB_1_2.dataSetIdList = \[\'挤出渲染2\'\];
+
+extrudeInfo_OB_1_2.rgnList = \[
+
+\[
+
+\[-76.36813228299036, 139.9571317157323, 105\],
+
+\[-140.4087005702446, 120.92582981639804, 105\],
+
+\[-122.5245130427027, 61.058128177288026, 105\],
+
+\[-56.88037065725894, 81.19090521039169, 105\],
+
+\],
+
+\];
+
+extrudeInfo_OB_1_2.type = 1; // 拍平（简易投射）
+
+// 挖坑（使用指定纹理封口）\-- 直接使用资源路径
+
+let extrudeInfo_OB_1_3 = new BlackHole3D.REExtrudeInfo();
+
+extrudeInfo_OB_1_3.extrudeId = \'ob_extrude_OB_1_3\';
+
+extrudeInfo_OB_1_3.dataSetIdList = \[\'挤出渲染2\'\];
+
+extrudeInfo_OB_1_3.rgnList = \[
+
+\[
+
+\[75.31284764350141, 40.06958269072095, 121.60102105373987\],
+
+\[105.98689429098889, -77.58929957111067, 119.831430816020955\],
+
+\[47.68809862819077, -127.62685009588978, 119.7264403219731\],
+
+\[15.00934384469306, 15.321589233879294, 119.690912062320066\],
+
+\],
+
+\];
+
+extrudeInfo_OB_1_3.type = 2; // 挖坑（使用指定纹理封口）
+
+extrudeInfo_OB_1_3.texPath =
+\'https://demo.bjblackhole.com/demopage/examplesImgs/skybox/06/right.jpg\';
+
+extrudeInfo_OB_1_3.texSize = \[10.0, 10.0\];
+
+// 创建挤出对象集合
+
+let extrudeList_ob = \[extrudeInfo_OB_1_1, extrudeInfo_OB_1_2,
+extrudeInfo_OB_1_3\];
+
+BlackHole3D.Extrude.setData(extrudeList_ob);
+
+## getData {#getdata-3 .样式4}
+
+**功能：**
+
+获取当前场景挤出区域对象集合
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***extrudeIdList***   挤出标识集合
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型，（REExtrudeInfo对象类型）
+
+  ---- ----------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   1   ***extrudeId***         挤出标识（唯一），**必填**
+
+   2   ***dataSetIdList***     数据集标识集合，挤出作用有效的范围
+
+   3   ***rgnList***           挤出区域集合，每个区域由点集合构成（至少三个点），**一个挤出表示可以由多个区域构成**
+
+   4   ***depthLimitRange***   挤出区域面Z值偏移范围，包含在偏移范围内的模型即为有效（**只作用于挖坑效果，其余效果无用**），**\[区域面下方，区域面上方\]，负值为向下，正值为向上**，例如：区域面的Z高度为2，偏移范围为\[-2,3\]，即为以这个区域面高度为基准，X值为向下偏移2和Y值向上偏移3的范围内的模型为有效模型，不在这个范围内的模型无效
+
+   5   ***type***              挤出类型 0：挖空（无封口） 1：拍平（简易投射） 2：挖坑（使用指定纹理封口）
+
+   6   ***texId***             纹理id **由 addExtrudeFaceTex 返回的id**
+
+   7   ***texPath***           纹理路径，**和纹理id选填一个即可**
+
+   8   ***texSize***           纹理大小
+  ---- ----------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Extrude.getData(\[\'bim_extrude_M_1_1\',
+\'ob_extrude_OB_1_1\'\]);
+
+## delData {#deldata-3 .样式4}
+
+**功能：**
+
+根据标识删除指定挤出区域
+
+**注：删除需要在卸载模型之前进行**
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***extrudeIdList***   挤出标识集合，空数组代表删除所有
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.delData(\[\'bim_extrude_M_1_1\',
+\'ob_extrude_OB_1_1\'\]);
+
+## getAllExtrudeId {#getallextrudeid .样式4}
+
+**功能：**
+
+获取所有挤出区域标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，所有挤出区域标识
+
+**调用示例：**
+
+BlackHole3D.Extrude.getAllExtrudeId();
+
+## addExtrudeFaceTex {#addextrudefacetex .样式4}
+
+**功能：**
+
+添加挤出面上使用的纹理
+
+**注：添加后的纹理都会保存在纹理列表中，可以按照返回的id进行设置**
+
+**纹理路径和大小改变都会新增id，需要在模型加载完成之后调用，卸载模型会对应卸载加载的纹理资源**
+
+**参数：**
+
+  ---- --------------- ------------------------------------------------------
+   1   ***picPath***   纹理路径
+
+   2   ***size***      纹理大小
+  ---- --------------- ------------------------------------------------------
+
+**返回值：**
+
+数值类型，纹理id
+
+**调用示例：**
+
+BlackHole3D.Extrude.addExtrudeFaceTex(\"https://demo.bjblackhole.com/demopage/examplesImgs/skybox/06/right.jpg\",
+\[5.0,5.0\]);
+
+## delAllExtrudeFaceTex {#delallextrudefacetex .样式4}
+
+**功能：**
+
+清除挤出面使用的纹理
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔值，true：成功，false：失败
+
+**调用示例：**
+
+BlackHole3D.Extrude.delAllExtrudeFaceTex();
+
+## getErrorDrawExtrudeIds {#geterrordrawextrudeids .样式4}
+
+**功能：**
+
+获取错误绘制的挤出区域的标识集合
+
+**注：监听事件REAddExtrudeRgnCheck获取到失败标识之后此接口才可以作用**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前添加的区域绘制错误的标识集合
+
+**调用示例：**
+
+document.addEventListener(\"REAddExtrudeRgnCheck\",
+REAddExtrudeRgnCheck);
+
+function REAddExtrudeRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.Extrude.getErrorDrawExtrudeIds();
+
+}
+
+}
+
+## 编辑
+
+## startEditState {#starteditstate-1 .样式4}
+
+**功能：**
+
+进入挤出编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.startEditState();
+
+## endEditState {#endeditstate-1 .样式4}
+
+**功能：**
+
+退出挤出编辑状态
+
+**注：会触发监听事件REEditExtrudeFinish相应**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.endEditState();
+
+## startAddExtrudeState {#startaddextrudestate .样式4}
+
+**功能：**
+
+进入挤出添加状态
+
+**注：如果已经结束了添加状态再次设置已有的挤出标识表示为当前挤出标识下增加挤出区域，同一个挤出标识下可以有多个挤出信息，点添加会触发构面合规检测的监听事件REAddExtrudeRgnCheck**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.startAddExtrudeState(\'bim_extrude_M_1_1\');
+
+// 添加构面合规检测事件
+
+document.addEventListener(\'REAddExtrudeRgnCheck\',
+REAddExtrudeRgnCheck);
+
+function REAddExtrudeRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.Extrude.getErrorDrawExtrudeIds();
+
+}
+
+}
+
+## endAddExtrudeState {#endaddextrudestate .样式4}
+
+**功能：**
+
+退出挤出添加状态
+
+**注：鼠标右键操作或接口调用，结束添加状态会触发添加完成回调，相同名称标识的挤出添加多个挤出区域对象完成都会触发此回调，回调名称REAddExtrudeRgnFinish**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.endAddExtrudeState();
+
+## getCurExtrudeId {#getcurextrudeid .样式4}
+
+**功能：**
+
+获取当前编辑的挤出区域标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串类型，当前编辑的挤出区域标识
+
+**调用示例：**
+
+BlackHole3D.Extrude.getCurExtrudeId();
+
+## setExtrudeTexId {#setextrudetexid .样式4}
+
+**功能：**
+
+设置指定挤出区域使用的纹理标识
+
+**注：地形数据无法使用纹理信息**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+   2   ***texId***       纹理id **由 addExtrudeFaceTex 返回的id**
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+let texId =
+BlackHole3D.Extrude.addExtrudeFaceTex(\"https://demo.bjblackhole.com/demopage/examplesImgs/skybox/06/right.jpg\",
+\[5.0,5.0\]);
+
+BlackHole3D.Extrude.setExtrudeTexId(\'挤出渲染1\',texId);
+
+## getExtrudeTexId {#getextrudetexid .样式4}
+
+**功能：**
+
+获取指定挤出区域使用的纹理标识
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，纹理标识
+
+**调用示例：**
+
+BlackHole3D.Extrude.getExtrudeTexId(\'挤出渲染1\');
+
+## setDepthLimitRange {#setdepthlimitrange .样式4}
+
+**功能：**
+
+设置挤出区域面Z值偏移范围
+
+**注：只作用于挖坑效果，其余效果无用**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+   2   ***range***       挤出区域面Z值偏移范围，包含在偏移范围内的模型即为有效（**只作用于挖坑效果，其余效果无用**），**\[区域面下方，区域面上方\]，负值为向下，正值为向上**，例如：区域面的Z高度为2，偏移范围为\[-2,3\]，即为以这个区域面高度为基准，X值为向下偏移2和Y值向上偏移3的范围内的模型为有效模型，不在这个范围内的模型无效
+  ---- ----------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.setDepthLimitRange(\'挤出渲染1\',\[-1e10,1e10\]);
+
+## getDepthLimitRange {#getdepthlimitrange .样式4}
+
+**功能：**
+
+获取挤出区域面Z值偏移范围
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型，设置挤出区域面Z值偏移范围
+
+**调用示例：**
+
+BlackHole3D.Extrude.getDepthLimitRange(\'挤出渲染1\');
+
+## setShowState {#setshowstate-1 .样式4}
+
+**功能：**
+
+设置指定挤出显示类型
+
+**注：要在进入挤出编辑状态之后有效, 只能改变当前已有的挤出对象**
+
+**参数：**
+
+  --------------------- ---------------------------------------------------------
+  ***extrudeIdList***   挤出标识集合，空数组代表所有
+
+  ***showState***       显示状态（默认几何矢量状态），0：显示几何矢量
+                        1：显示渲染效果
+  --------------------- ---------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.startEditState();
+
+BlackHole3D.Extrude.setShowState(\[\'Extrude_0\'\], 0);
+
+## getIdsByShowState {#getidsbyshowstate-1 .样式4}
+
+**功能：**
+
+获取指定挤出状态的所有标识集合
+
+**注：要在进入挤出编辑状态之后有效**
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------
+  ***showState***   显示状态（默认几何矢量状态），0：显示几何矢量
+                    1：显示渲染效果
+
+  ----------------- ---------------------------------------------------------
+
+**返回值：**
+
+数组类型，对应类型的标识集合
+
+**调用示例：**
+
+BlackHole3D.Extrude.startEditState();
+
+BlackHole3D.Extrude.getIdsByShowState(0);
+
+## 渲染效果
+
+## setDataSetScope {#setdatasetscope .样式4}
+
+**功能：**
+
+设置挤出区域作用的数据集集合
+
+**注：挤出标识为空字符串代表默认的通用设置，通用设置需要在进入挤出添加状态，即矢量编辑状态前进行设置，挤出标识填写可以修改已经添加好的挤出对象，即时生效**
+
+**参数：**
+
+  ---- --------------------- ----------------------------------------------------------
+   1   ***extrudeId***       挤出唯一标识，空字符串代表默认通用挤出区域
+
+   2   ***dataSetIdList***   数据集标识集合，挤出作用有效的范围，空数组代表所有数据集
+  ---- --------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//设置默认的作用范围（需要在进入编辑状态前设置）
+
+BlackHole3D.Extrude.setDataSetScope(\'\', \[\'挤出渲染1\',
+\'挤出渲染2\'\]);
+
+//设置指定挤出对象的作用范围（可以修改已经存在的挤出对象作用范围）
+
+BlackHole3D.Extrude.setDataSetScope(\'Extrude_0\', \[\'挤出渲染1\'\]);
+
+## getDataSetScope {#getdatasetscope .样式4}
+
+**功能：**
+
+获取挤出区域作用的数据集集合
+
+**注：挤出标识为空字符串代表默认的通用设置范围**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识，空字符串代表默认通用挤出区域
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型，挤出区域作用的数据集集合
+
+**调用示例：**
+
+//获取默认的作用范围
+
+BlackHole3D.Extrude.getDataSetScope(\'\');
+
+//获取指定的挤出对象作用范围
+
+BlackHole3D.Extrude.getDataSetScope(\'Extrude_0\');
+
+## setShowType {#setshowtype .样式4}
+
+**功能：**
+
+设置挤出展示的类型
+
+**注：地形数据无法使用挖坑效果，拍平效果仅对倾斜摄影和带有高程的遥感影像有效**
+
+**参数：**
+
++:-:+-----------------+-------------------------------------------------------+
+| 1 | ***extrudeId*** | 挤出唯一标识                                          |
++---+-----------------+-------------------------------------------------------+
+| 2 | ***type***      | 挤出类型                                              |
+|   |                 |                                                       |
+|   |                 | 0：挖洞（挖空无封口）                                 |
+|   |                 |                                                       |
+|   |                 | 1：拍平（简易投射，原始纹理封口）                     |
+|   |                 | ，**仅对倾斜摄影和带有高程的遥感影像有效**            |
+|   |                 |                                                       |
+|   |                 | 2：挖坑（使用指定纹理封口），**对地形数据无效**       |
++---+-----------------+-------------------------------------------------------+
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.setShowType(\'Extrude_0\',0);
+
+## getShowType {#getshowtype .样式4}
+
+**功能：**
+
+获取挤出展示的类型
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+数值类型，挤出展示的类型
+
+**调用示例：**
+
+BlackHole3D.Extrude.getShowType(\'Extrude_0\');
+
+## setVisible {#setvisible-4 .样式4}
+
+**功能：**
+
+置指定挤出对象的可见性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+   2   ***visible***     是否可见
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.setVisible(\'挤出渲染1\',true);
+
+## getVisible {#getvisible-2 .样式4}
+
+**功能：**
+
+获取指定挤出对象的可见性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***extrudeId***   挤出唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值类型，可见返回true；不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.getVisible(\'挤出渲染1\');
+
+## 相机
+
+## setCamToData {#setcamtodata-1 .样式4}
+
+**功能：**
+
+根据挤出标识定位到挤出区域
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------
+   1   ***extrudeIdList***   挤出标识集合，空数组无效
+
+  ---- --------------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Extrude.setCamToData(\[\'bim_extrude_M_1_1\',
+\'ob_extrude_OB_1_1\'\]);
+
+# 单体化（Monomer）
+
+## 加载
+
+## setData {#setdata-5 .样式4}
+
+**功能：**
+
+设置单体化区域对象集合
+
+**注：如果不设置数据集标识应用，代表创建的单体化为全局模式，数据集坐标变化不影响单体化，如果设置数据集标识则单体化区域会跟随数据集的坐标变换**
+
+**参数：**
+
+  ---- ----------------------- ----------------------------------------------------
+   1   ***monomerInfoList***   单体化信息集合 （REMonomerInfo 类型）
+
+  ---- ----------------------- ----------------------------------------------------
+
+**REMonomerInfo模型解析：**
+
+  ------------------ ------------------------------------------------------------------------------------------
+  ***monomerId***    单体化矢量标识（唯一），**必填**
+
+  ***dataSetId***    数据集标识，设置代表单体化跟随数据集坐标变换
+
+  ***rgnList***      单体化区域集合，每个区域由点集合构成（至少三个点），**一个单体化表示可以由多个区域构成**
+
+  ***heightMin***    包围体最小高度
+
+  ***heightMax***    包围体最大高度
+
+  ***faceClr***      面颜色（REColor类型）
+
+  ***lineClr***      线颜色（REColor类型），仅盒子模式有效
+
+  ***expandDist***   单体化区域的边界扩充距离
+
+  ***showState***    显示类型（默认为1）,
+                     0：显示几何矢量效果（**仅在编辑模式下有效**），1：显示贴合模型效果，2：显示包围盒效果
+  ------------------ ------------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 单体化（全局模式）
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'单体化_Grid\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_qxsy\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0, 1\],
+
+\[9200, 27000, 0\],
+
+\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 创建单体化区域信息
+
+let monomerList_G_1 = \[
+
+{
+
+monomerId: \'Monomer_0\',
+
+dataSetId: \'\',
+
+rgnList: \[
+
+\[
+
+\[-61.67774934727383, 3.424645380783204, 4.132206926800052\],
+
+\[-27.254584318521353, -6.182742964305589, 4.058364616482663\],
+
+\[-38.81458425621646, -47.81937794175078, 3.107119337608083\],
+
+\[-73.71501556850993, -37.65186470412394, 4.10686332599343\],
+
+\],
+
+\],
+
+heightMin: -0.05030632019042969,
+
+heightMax: 7.633930206298828,
+
+faceClr: {
+
+red: 255,
+
+green: 255,
+
+blue: 255,
+
+alpha: 112,
+
+},
+
+},
+
+\];
+
+BlackHole3D.Monomer.setData(monomerList_G_1);
+
+// 单体化（局部模式）
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'单体化_Grid\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_qxsy\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0, 1\],
+
+\[9200, 27000, 0\],
+
+\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 创建单体化区域信息
+
+let monomerList_G_2 = \[
+
+{
+
+monomerId: \'Monomer_1\',
+
+dataSetId: \'单体化_Grid\',
+
+rgnList: \[
+
+\[
+
+\[-134.99482602877904, 90.2449559014846, 4.438253198464224\],
+
+\[-123.7431652770344, 61.88729248396948, 6.745667181328059\],
+
+\[-54.159998284461565, 83.44853318315445, 4.255847611475758\],
+
+\[-65.82862888643471, 109.79127016378877, 11.30490320999533\],
+
+\],
+
+\],
+
+heightMin: 2.7619876861572266,
+
+heightMax: 24.217763900756836,
+
+faceClr: {
+
+red: 255,
+
+green: 255,
+
+blue: 255,
+
+alpha: 112,
+
+},
+
+},
+
+{
+
+monomerId: \'Monomer_2\',
+
+dataSetId: \'单体化_Grid\',
+
+rgnList: \[
+
+\[
+
+\[-144.56666233328914, 123.92812973704821, 4.805209064068151\],
+
+\[-133.79950885687975, 98.5154223093341, 4.768856028880606\],
+
+\[-66.63583768674545, 120.6456658392095, 8.337526229534348\],
+
+\[-74.01634646160095, 145.80553186992626, 6.829441363873656\],
+
+\],
+
+\],
+
+heightMin: 2.6684436798095703,
+
+heightMax: 24.579421997070312,
+
+showState: 2
+
+faceClr: {
+
+red: 255,
+
+green: 255,
+
+blue: 255,
+
+alpha: 112,
+
+},
+
+lineClr: {
+
+red: 0,
+
+green: 255,
+
+blue: 255,
+
+alpha: 112,
+
+},
+
+},
+
+\];
+
+BlackHole3D.Monomer.setData(monomerList_G_2);
+
+## getData {#getdata-4 .样式4}
+
+**功能：**
+
+获取当前场景单体化区域对象集合
+
+**参数：**
+
+  --------------------- ---------------------------------------------------------
+  ***monomerIdList***   单体化标识集合，空数组代表所有
+
+  --------------------- ---------------------------------------------------------
+
+**返回值：**
+
+数组类型，（REMonomerInfo对象类型）
+
+  ------------------ ------------------------------------------------------------------------------------------
+  ***monomerId***    单体化矢量标识（唯一）
+
+  ***dataSetId***    数据集标识，设置代表单体化跟随数据集坐标变换
+
+  ***rgnList***      单体化区域集合，每个区域由点集合构成（至少三个点），**一个单体化表示可以由多个区域构成**
+
+  ***heightMin***    包围体最小高度
+
+  ***heightMax***    包围体最大高度
+
+  ***faceClr***      面颜色（REColor类型）
+
+  ***lineClr***      线颜色（REColor类型），仅盒子模式有效
+
+  ***expandDist***   单体化区域的边界扩充距离
+
+  ***showState***    显示类型（默认为1）,
+                     0：显示几何矢量效果（**仅在编辑模式下有效**），1：显示贴合模型效果，2：显示包围盒效果
+  ------------------ ------------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Monomer.getData(\[\'Monomer_0\', \'Monomer_1\'\]);
+
+## delData {#deldata-4 .样式4}
+
+**功能：**
+
+根据标识删除指定单体化区域
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***monomerIdList***   单体化标识集合，空数组代表删除所有
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.delData(\[\'Monomer_0\', \'Monomer_1\'\]);
+
+## getAllMonomerId {#getallmonomerid .样式4}
+
+**功能：**
+
+获取所有单体化标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，所有单体化标识
+
+**调用示例：**
+
+BlackHole3D.Monomer.getAllMonomerId();
+
+## getErrorDrawMonomerIds {#geterrordrawmonomerids .样式4}
+
+**功能：**
+
+获取错误绘制的单体化区域的标识集合
+
+**注：监听事件REAddMonomerRgnCheck获取到失败标识之后此接口才可以作用**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前添加的区域绘制错误的标识集合
+
+**调用示例：**
+
+// 添加构面合规检测事件
+
+document.addEventListener(\'REAddMonomerRgnCheck\',
+REAddMonomerRgnCheck);
+
+function REAddMonomerRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.Monomer.getErrorDrawMonomerIds();
+
+}
+
+}
+
+## 编辑
+
+## startEditState {#starteditstate-2 .样式4}
+
+**功能：**
+
+进入单体化编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.startEditState();
+
+## endEditState {#endeditstate-2 .样式4}
+
+**功能：**
+
+退出单体化编辑状态
+
+**注：会触发监听事件REEditMonomerFinish相应**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.endEditState();
+
+## startAddMonomerState {#startaddmonomerstate .样式4}
+
+**功能：**
+
+进入单体化添加状态
+
+**注：如果已经结束了添加状态再次设置已有的单体化标识表示为当前单体化标识下增加单体化区域，同一个单体化标识下可以有多个单体化信息，点添加会触发构面合规检测的监听事件REAddMonomerRgnCheck**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***monomerId***   单体化唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.startAddMonomerState(\'Monomer_0\');
+
+// 添加构面合规检测事件
+
+document.addEventListener(\'REAddMonomerRgnCheck\',
+REAddMonomerRgnCheck);
+
+function REAddMonomerRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.Monomer.getErrorDrawMonomerIds();
+
+}
+
+}
+
+## endAddMonomerState {#endaddmonomerstate .样式4}
+
+**功能：**
+
+退出单体化添加状态
+
+**注：鼠标右键操作或接口调用，结束添加状态会触发添加完成回调，相同名称标识的单体化添加多个单体化区域对象完成都会触发此回调，回调名称REAddMonomerRgnFinish**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.endAddMonomerState();
+
+## getCurMonomerId {#getcurmonomerid .样式4}
+
+**功能：**
+
+获取当前编辑的单体化标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串类型，当前编辑的单体化标识
+
+**调用示例：**
+
+BlackHole3D.Monomer.getCurMonomerId();
+
+## setEditApplyDataSetId {#seteditapplydatasetid .样式4}
+
+**功能：**
+
+设置当前编辑单体化应用的数据集名称
+
+**注：在 startAddMonomerState 之前进行设置，设置后全局有效**
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***dataSetId***   数据集标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.setEditApplyDataSetId(\'单体化_Grid\');
+
+## getEditApplyDataSetId {#geteditapplydatasetid .样式4}
+
+**功能：**
+
+获取当前编辑单体化应用的数据集名称
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串类型，当前编辑单体化应用的数据集名称
+
+**调用示例：**
+
+BlackHole3D.Monomer.getEditApplyDataSetId();
+
+## setDefaultEditMinMaxHeight {#setdefaulteditminmaxheight .样式4}
+
+**功能：**
+
+设置默认单体化编辑时包围体最小最大高度
+
+**注：设置表示使用自动计算包围体高度，如果需要改成自动需要调用
+setEditAutoCalcMinMaxHeight，在 startAddMonomerState 之前进行设置**
+
+**参数：**
+
+  ---- -------------------- ------------------------------------------------------
+   1   ***minMaxHeight***   包围体最小最大高度, \[最小高度，最大高度\]
+
+  ---- -------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setDefaultEditMinMaxHeight(\[0,20\]);
+
+## getDefaultEditMinMaxHeight {#getdefaulteditminmaxheight .样式4}
+
+**功能：**
+
+获取默认单体化编辑时包围体最小最大高度
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，单体化编辑时包围体最小最大高度
+
+**调用示例：**
+
+BlackHole3D.Monomer.getDefaultEditMinMaxHeight();
+
+## setEditAutoCalcMinMaxHeight {#seteditautocalcminmaxheight .样式4}
+
+**功能：**
+
+设置使用自动计算包围体高度
+
+**注：在设置 setEditMinMaxHeight 后如果需要自动模式需要手动设置，在
+startAddMonomerState 之前进行设置**
+
+**参数：**
+
+无
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setEditAutoCalcMinMaxHeight();
+
+## getEditAutoCalcMinMaxHeight {#geteditautocalcminmaxheight .样式4}
+
+**功能：**
+
+获取是否使用自动计算包围体高度
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，自动返回true；不自动返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.getEditAutoCalcMinMaxHeight();
+
+## setShowState {#setshowstate-2 .样式4}
+
+**功能：**
+
+设置指定水面显示状态
+
+**注：要在进入单体化编辑状态之后有效, 只能改变当前已有的单体化对象**
+
+**参数：**
+
+  --------------------- ---------------------------------------------------------
+  ***monomerIdList***   单体化标识集合，空数组代表所有
+
+  ***showState***       显示状态（默认几何矢量状态），0：显示几何矢量效果
+                        1：显示贴合模型效果 2：显示包围盒效果
+  --------------------- ---------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.startEditState();
+
+BlackHole3D.Monomer.setShowState(\[\'Water_0\'\], 0);
+
+## getIdsByShowState {#getidsbyshowstate-2 .样式4}
+
+**功能：**
+
+获取指定单体化状态的所有标识集合
+
+**注：要在进入单体化编辑状态之后有效**
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------
+  ***showState***   显示状态（默认几何矢量状态），0：显示几何矢量效果
+                    1：显示贴合模型效果 2：显示包围盒效果
+
+  ----------------- ---------------------------------------------------------
+
+**返回值：**
+
+数组类型，对应类型的标识集合
+
+**调用示例：**
+
+BlackHole3D.Monomer.startEditState();
+
+BlackHole3D.Monomer.getIdsByShowState(0);
+
+## 渲染效果
+
+## setDefaultClr {#setdefaultclr .样式4}
+
+**功能：**
+
+设置单体化数据的默认颜色
+
+**注：在 startAddMonomerState 之前进行设置，设置后全局有效**
+
+**参数：**
+
+  --------------- ----------------------------------------------------------
+  ***faceClr***   面颜色（REColor类型）
+
+  ***lineClr***   线颜色（REColor类型），仅盒子模式有效
+  --------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setDefaultClr(new BlackHole3D.REColor(255, 255, 0,
+128),new BlackHole3D.REColor(0, 255, 0, 128));
+
+## getDefaultClr {#getdefaultclr .样式4}
+
+**功能：**
+
+获取单体化数据的默认颜色
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  --------------- ----------------------------------------------------
+  ***faceClr***   面颜色（REColor类型）
+
+  ***lineClr***   线颜色（REColor类型），仅盒子模式有效
+  --------------- ----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Monomer.getDefaultClr(\'Monomer_0\');
+
+## setClr {#setclr-3 .样式4}
+
+**功能：**
+
+设置单体化颜色
+
+**参数：**
+
+  --------------------- ---------------------------------------------------------
+  ***monomerIdList***   单体化标识集合，空数组代表设置所有区域
+
+  ***faceClr***         面颜色（REColor类型）
+
+  ***lineClr***         线颜色（REColor类型），仅盒子模式有效
+  --------------------- ---------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setClr(\[\'Monomer_0\'\],new
+BlackHole3D.REColor(255, 0, 255, 128),new BlackHole3D.REColor(0, 0, 255,
+128));
+
+## getClr {#getclr-1 .样式4}
+
+**功能：**
+
+获取单体化颜色
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***monomerId***   单体化唯一标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  --------------- ----------------------------------------------------
+  ***faceClr***   面颜色（REColor类型）
+
+  ***lineClr***   线颜色（REColor类型），仅盒子模式有效
+  --------------- ----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Monomer.getClr(\'Monomer_0\');
+
+## setVisible {#setvisible-5 .样式4}
+
+**功能：**
+
+设置单体化的可见性
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***monomerIdList***   单体化标识集合，空数组代表设置所有
+
+   2   ***visible***         是否可见
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.setVisible(\[\'Monomer_0\'\],false);
+
+## getVisible {#getvisible-3 .样式4}
+
+**功能：**
+
+获取单体化的可见性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***monomerId***   单体化标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，可见返回true；不可见返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.getVisible(\'Monomer_0\');
+
+## setMinMaxHeight {#setminmaxheight .样式4}
+
+**功能：**
+
+设置指定单体化包围体的最小最大高度
+
+**参数：**
+
+  --------------------- ---------------------------------------------------------
+  ***monomerIdList***   单体化标识集合，空数组代表设置所有区域
+
+  ***minMaxHeight***    包围体最小最大高度, \[最小高度，最大高度\]
+  --------------------- ---------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setMinMaxHeight(\[\'Monomer_0\'\], \[0,20\]);
+
+## getMinMaxHeight {#getminmaxheight .样式4}
+
+**功能：**
+
+获取指定单体化包围体的最小最大高度
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------
+  ***monomerId***   单体化标识
+
+  ----------------- ---------------------------------------------------------
+
+**返回值：**
+
+二元素数组类型，【最小高度，最大高度】
+
+**调用示例：**
+
+BlackHole3D.Monomer.getMinMaxHeight(\'Monomer_0\');
+
+## setExpandDist {#setexpanddist-1 .样式4}
+
+**功能：**
+
+设置指定单体化包围体的扩展距离
+
+**参数：**
+
+  ------------------ ---------------------------------------------------------
+  ***monomerId***    单体化标识
+
+  ***expandDist***   扩展距离
+  ------------------ ---------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setExpandDist(\'Monomer_0\', 1.0);
+
+## getExpandDist {#getexpanddist-1 .样式4}
+
+**功能：**
+
+获取指定单体化包围体的扩展距离
+
+**参数：**
+
+  ----------------- ---------------------------------------------------------
+  ***monomerId***   单体化标识
+
+  ----------------- ---------------------------------------------------------
+
+**返回值：**
+
+数值类型，扩展距离
+
+**调用示例：**
+
+BlackHole3D.Monomer.getExpandDist(\'Monomer_0\');
+
+## 选择集
+
+## addToSel {#addtosel .样式4}
+
+**功能：**
+
+添加单体化区域到选择集中
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***monomerIdList***   单体化标识集合
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.addToSel(\[\'Monomer_0\', \'Monomer_1\'\]);
+
+## delFromSel {#delfromsel .样式4}
+
+**功能：**
+
+从选择集中删除单体化区域
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***monomerIdList***   单体化标识集合，空数组代表移除所有
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.delFromSel(\[\'Monomer_0\', \'Monomer_1\'\]);
+
+## getAllCurSel {#getallcursel .样式4}
+
+**功能：**
+
+获取当前的选择集单体化标识集合
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前的选择集单体化标识集合
+
+**调用示例：**
+
+BlackHole3D.Monomer.getAllCurSel();
+
+## setSelAttr {#setselattr .样式4}
+
+**功能：**
+
+设置单体化选择集属性
+
+**参数：**
+
+  ------------------- ----------------------------------------------------------
+  ***selAttrInfo***   选择集属性信息（REMonomerClrAttr 类型）
+
+  ------------------- ----------------------------------------------------------
+
+**REMonomerClrAttr模型解析：**
+
+  ----------------------- --------------------------------------------------
+  ***faceClr***           面颜色（REColor类型）
+
+  ***faceClrWeight***     面颜色权重,
+                          此权重要使用必须配合面颜色值存在（选填）
+
+  ***faceAlphaWeight***   面透明度权重,
+                          此权重要使用必须配合面透明度值存在（选填）
+
+  ***lineClr***           线颜色（REColor类型）（仅包围盒效果模式下有效）
+
+  ***lineClrWeight***     线颜色权重,
+                          此权重要使用必须配合线颜色值存在（选填）
+
+  ***lineAlphaWeight***   线透明度权重,
+                          此权重要使用必须配合线透明度值存在（选填）
+  ----------------------- --------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let selAttrInfo = {
+
+faceClr: {
+
+red: 0,
+
+green: 255,
+
+blue: 0,
+
+alpha: 128,
+
+},
+
+faceClrWeight: 255,
+
+faceAlphaWeight: 255,
+
+lineClr: {
+
+red: 255,
+
+green: 255,
+
+blue: 0,
+
+alpha: 128,
+
+},
+
+lineClrWeight: 255,
+
+lineAlphaWeight: 255,
+
+};
+
+BlackHole3D.Monomer.setSelAttr(selAttrInfo);
+
+## getSelAttr {#getselattr .样式4}
+
+**功能：**
+
+获取单体化选择集属性
+
+**参数：**
+
+无
+
+**返回值：**
+
+对象类型，（REMonomerClrAttr对象类型）
+
+  ----------------------- --------------------------------------------------
+  ***faceClr***           面颜色（REColor类型）
+
+  ***faceClrWeight***     面颜色权重,
+                          此权重要使用必须配合面颜色值存在（选填）
+
+  ***faceAlphaWeight***   面透明度权重,
+                          此权重要使用必须配合面透明度值存在（选填）
+
+  ***lineClr***           线颜色（REColor类型）（仅包围盒效果模式下有效）
+
+  ***lineClrWeight***     线颜色权重,
+                          此权重要使用必须配合线颜色值存在（选填）
+
+  ***lineAlphaWeight***   线透明度权重,
+                          此权重要使用必须配合线透明度值存在（选填）
+  ----------------------- --------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Monomer.getSelAttr();
+
+## setMultiSel {#setmultisel .样式4}
+
+**功能：**
+
+设置是否支持多选（Ctrl+点击）
+
+**参数：**
+
+  ---- ---------------- -------------------------------------------------------
+   1   ***multiSel***   是否支持多选，true表示支持多选，false表示单选
+
+  ---- ---------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setMultiSel(false);
+
+## getMultiSel {#getmultisel .样式4}
+
+**功能：**
+
+获取是否支持多选
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，支持多选返回true；不支持多选返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.getMultiSel();
+
+## setCanProbe {#setcanprobe .样式4}
+
+**功能：**
+
+设置单体化是否可以被选中
+
+**参数：**
+
+  ---- --------------------- -------------------------------------------------------------
+   1   ***monomerIdList***   单体化标识集合，空数组代表设置所有
+
+   2   ***probeEnable***     是否可以探测，为true,表示可被探测；设为false,表示不可被探测
+  ---- --------------------- -------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Monomer.setCanProbe(\[\'Monomer_0\'\],false);
+
+## getCanProbe {#getcanprobe .样式4}
+
+**功能：**
+
+获取单体化是否可以被选中
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***monomerId***   单体化标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔类型，可以被选中返回true；不可以被选中返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.getCanProbe(\'Monomer_0\');
+
+## 高亮标记
+
+## setHighlightAttr {#sethighlightattr .样式4}
+
+**功能：**
+
+设置单体化高亮标记属性
+
+**注：高亮颜色不会对单体化包围体设置的颜色进行覆盖，取消高亮颜色，会恢复单体化包围体原本设置的颜色**
+
+**参数：**
+
+  ---- ------------------------- -----------------------------------------------------
+   1   ***monomerIdList***       单体化标识集合，空数组代表设置所有
+
+   2   ***highlightAttrInfo***   高亮标记属性信息（REMonomerClrAttr 类型）
+  ---- ------------------------- -----------------------------------------------------
+
+**REMonomerClrAttr模型解析：**
+
+  ----------------------- --------------------------------------------------
+  ***faceClr***           面颜色（REColor类型）
+
+  ***faceClrWeight***     面颜色权重,
+                          此权重要使用必须配合面颜色值存在（选填）
+
+  ***faceAlphaWeight***   面透明度权重,
+                          此权重要使用必须配合面透明度值存在（选填）
+
+  ***lineClr***           线颜色（REColor类型）（仅包围盒效果模式下有效）
+
+  ***lineClrWeight***     线颜色权重,
+                          此权重要使用必须配合线颜色值存在（选填）
+
+  ***lineAlphaWeight***   线透明度权重,
+                          此权重要使用必须配合线透明度值存在（选填）
+  ----------------------- --------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+let attrInfo = {
+
+faceClr: {
+
+red: 0,
+
+green: 255,
+
+blue: 0,
+
+alpha: 128,
+
+},
+
+faceClrWeight: 255,
+
+faceAlphaWeight: 255,
+
+lineClr: {
+
+red: 255,
+
+green: 255,
+
+blue: 0,
+
+alpha: 128,
+
+},
+
+lineClrWeight: 255,
+
+lineAlphaWeight: 255,
+
+};
+
+let monomerIdList = \[\'Monomer_0\', \'Monomer_2\', \'Monomer_4\'\];
+
+BlackHole3D.Monomer.setHighlightAttr(monomerIdList, attrInfo);
+
+## getHighlightAttr {#gethighlightattr .样式4}
+
+**功能：**
+
+获取单体化高亮标记属性
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***monomerId***   单体化标识
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型，（REMonomerClrAttr对象类型）
+
+  ----------------------- --------------------------------------------------
+  ***faceClr***           面颜色（REColor类型）
+
+  ***faceClrWeight***     面颜色权重,
+                          此权重要使用必须配合面颜色值存在（选填）
+
+  ***faceAlphaWeight***   面透明度权重,
+                          此权重要使用必须配合面透明度值存在（选填）
+
+  ***lineClr***           线颜色（REColor类型）（仅包围盒效果模式下有效）
+
+  ***lineClrWeight***     线颜色权重,
+                          此权重要使用必须配合线颜色值存在（选填）
+
+  ***lineAlphaWeight***   线透明度权重,
+                          此权重要使用必须配合线透明度值存在（选填）
+  ----------------------- --------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Monomer.getHighlightAttr(\'Monomer_0\');
+
+## 相机
+
+## setCamToData {#setcamtodata-2 .样式4}
+
+**功能：**
+
+根据单体化标识定位到单体化区域
+
+**参数：**
+
+  ---- --------------------- ------------------------------------------------------
+   1   ***monomerIdList***   单体化标识集合，空数组无效
+
+  ---- --------------------- ------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Monomer.setCamToData(\[\'Monomer_0\', \'Monomer_1\'\]);
+
+# 矢量编辑（ShpEdit）
+
+## 加载
+
+## setData {#setdata-6 .样式4}
+
+**功能：**
+
+设置矢量区域对象集合
+
+**参数：**
+
+  ------------------- ----------------------------------------------------------
+  ***shpInfoList***   矢量信息集合 （REShpInfo 类型）
+
+  ------------------- ----------------------------------------------------------
+
+**REShpInfo模型解析：**
+
+  ----------------- --------------------------------------------------------------------------------------
+  ***shpId***       矢量唯一标识（唯一），**必填**
+
+  ***shpClr***      矢量面颜色（REColor 类型）
+
+  ***visible***     是否显示，默认显示
+
+  ***rgnList***     矢量区域集合，每个区域由点集合构成（至少三个点），**一个矢量表示可以由多个区域构成**
+  ----------------- --------------------------------------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'Shp_Grid\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_qxsy\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0, 1\],
+
+\[0, 0, 0\],
+
+\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+var shpInfo = new BlackHole3D.REShpInfo();
+
+shpInfo.shpId = \'Shp_0\';
+
+shpInfo.shpClr = new BlackHole3D.REColor(170, 105, 70, 140);
+
+shpInfo.visible = true;
+
+shpInfo.rgnList = \[
+
+\[
+
+\[-69.85302484155606, 20.386510118718547, 3.764273172007364\],
+
+\[-122.43431153103867, -59.49647718125139, 4.004770627464126\],
+
+\[-37.245500749537655, -146.35138573036215, 4.23099362891864\],
+
+\[40.94100224609096, -84.69546072291338, 10.837670699997801\],
+
+\],
+
+\];
+
+BlackHole3D.ShpEdit.setData(\[shpInfo\]);
+
+## getData {#getdata-5 .样式4}
+
+**功能：**
+
+获取当前场景矢量区域对象集合
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***shpIdList***   矢量标识集合，空数组代表所有
+
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型，（REShpInfo对象类型）
+
+  ----------------- --------------------------------------------------------------------------------------
+  ***shpId***       矢量唯一标识
+
+  ***shpClr***      矢量面颜色（REColor 类型）
+
+  ***visible***     是否显示
+
+  ***rgnList***     矢量区域集合，每个区域由点集合构成（至少三个点），**一个矢量表示可以由多个区域构成**
+  ----------------- --------------------------------------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.getData(\[\'Shp_0\'\]);
+
+## delData {#deldata-5 .样式4}
+
+**功能：**
+
+根据标识删除指定矢量区域
+
+**参数：**
+
+  ----------------- ----------------------------------------------------------
+  ***shpIdList***   矢量标识集合，空数组代表删除所有
+
+  ----------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.delData(\[\'Shp_0\'\]);
+
+## getAllShpId {#getallshpid .样式4}
+
+**功能：**
+
+获取所有矢量标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，所有矢量标识
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.getAllShpId();
+
+## getErrorDrawShpIds {#geterrordrawshpids .样式4}
+
+**功能：**
+
+获取错误绘制的矢量区域的标识集合
+
+**注：监听事件REAddShpRgnCheck获取到失败标识之后此接口才可以作用**
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，当前添加的区域绘制错误的标识集合
+
+**调用示例：**
+
+document.addEventListener(\"REAddShpRgnCheck\", REAddShpRgnCheck);
+
+function REAddShpRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.ShpEdit.getErrorDrawShpIds();
+
+}
+
+}
+
+## 编辑
+
+## startShpEditState {#startshpeditstate .样式4}
+
+**功能：**
+
+进入矢量编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.startShpEditState();
+
+## endShpEditState {#endshpeditstate .样式4}
+
+**功能：**
+
+退出矢量编辑状态
+
+**注：会触发监听事件REEditShpFinish相应**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.endShpEditState();
+
+## startAddShpState {#startaddshpstate .样式4}
+
+**功能：**
+
+进入矢量添加状态
+
+**注：暂时不支持单个标识包含多个区域的功能，点添加会触发构面合规检测的监听事件REAddShpRgnCheck**
+
+**参数：**
+
+  ------------- ----------------------------------------------------------
+  ***shpId***   矢量唯一标识
+
+  ------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.startAddShpState(\'Shp_0\');
+
+// 添加构面合规检测事件
+
+document.addEventListener(\'REAddShpRgnCheck\', REAddShpRgnCheck);
+
+function REAddShpRgnCheck(e) {
+
+if (!e.detail.succeed) {
+
+let errorIdList = BlackHole3D.ShpEdit.getErrorDrawShpIds();
+
+}
+
+}
+
+## endAddShpState {#endaddshpstate .样式4}
+
+**功能：**
+
+退出矢量添加状态
+
+**注：鼠标右键操作或接口调用，结束添加状态会触发添加完成回调，回调名称REAddShpRgnFinish**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.endAddShpState();
+
+## getCurShpId {#getcurshpid .样式4}
+
+**功能：**
+
+获取当前编辑的矢量标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+字符串类型，当前编辑的矢量标识
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.getCurShpId();
+
+## startClipShpState {#startclipshpstate .样式4}
+
+**功能：**
+
+进入矢量切割状态
+
+**注：两点连线构成切割线对矢量面进行切割，切割暂不允许多层区域切割，即单个矢量id含有多个区域的数据，多区域矢量切割无效，每次切割都会触发回调事件
+REShpAddClipFace**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.startClipShpState();
+
+## endClipShpState {#endclipshpstate .样式4}
+
+**功能：**
+
+退出矢量切割状态
+
+**注：鼠标右键操作或接口调用，结束添加状态会触发添加完成回调，回调名称REShpClipFinish**
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.endClipShpState();
+
+## 渲染效果
+
+## setVisible {#setvisible-6 .样式4}
+
+**功能：**
+
+设置矢量的可见性
+
+**参数：**
+
+  --------------- ----------------------------------------------------------
+  ***shpId***     矢量标识
+
+  ***visible***   是否可见
+  --------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.setVisible(\'Shp_0\', false);
+
+## getVisible {#getvisible-4 .样式4}
+
+**功能：**
+
+获取矢量的可见性
+
+**参数：**
+
+  ------------- ----------------------------------------------------------
+  ***shpId***   矢量标识
+
+  ------------- ----------------------------------------------------------
+
+**返回值：**
+
+布尔类型，可见返回true；不可见返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.getVisible(\'Shp_0\');
+
+## setShpClr {#setshpclr-1 .样式4}
+
+**功能：**
+
+设置矢量区域颜色
+
+**参数：**
+
+  -------------- ----------------------------------------------------------
+  ***shpId***    矢量标识
+
+  ***shpClr***   矢量颜色（REColor类型）
+  -------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.setShpClr(\'Shp_0\', new BlackHole3D.REColor(255, 0,
+255, 128));
+
+## getShpClr {#getshpclr .样式4}
+
+**功能：**
+
+获取矢量区域颜色
+
+**参数：**
+
+  ------------- ----------------------------------------------------------
+  ***shpId***   矢量标识
+
+  ------------- ----------------------------------------------------------
+
+**返回值：**
+
+对象类型（REColor对象类型）
+
+  -------------- ----------------------------------------------------
+  ***red***      红色
+
+  ***green***    绿色
+
+  ***blue***     蓝色
+
+  ***alpha***    透明度
+  -------------- ----------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.getShpClr(\'Shp_0\');
+
+## setShpClipClrPool {#setshpclipclrpool .样式4}
+
+**功能：**
+
+设置矢量区域切割随机颜色的可用颜色池
+
+**注：如果设置了颜色池，随机颜色只会在颜色池内随机，如果不设置则颜色随机**
+
+**参数：**
+
+  --------------------- ----------------------------------------------------------
+  ***randomClrList***   随机颜色集合（REColor类型）
+
+  --------------------- ----------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.setShpClipClrPool(\[
+
+new BlackHole3D.REColor(255, 0, 0, 128),
+
+new BlackHole3D.REColor(0, 255, 0, 128),
+
+new BlackHole3D.REColor(0, 0, 255, 128),
+
+\]);
+
+## getShpClipClrPool {#getshpclipclrpool .样式4}
+
+**功能：**
+
+获取矢量区域切割随机颜色的可用颜色池
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，颜色对象集合
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.getShpClipClrPool();
+
+## delShpClipClrPool {#delshpclipclrpool .样式4}
+
+**功能：**
+
+删除矢量区域切割随机颜色的可用颜色池
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.delShpClipClrPool();
+
+## 相机
+
+## setCamToData {#setcamtodata-3 .样式4}
+
+**功能：**
+
+根据矢量标识定位到矢量区域
+
+**参数：**
+
+  ---- ----------------- -------------------------------------------------------
+   1   ***shpIdList***   矢量标识集合，空数组无效
+
+  ---- ----------------- -------------------------------------------------------
+
+**返回值：**
+
+布尔值，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.ShpEdit.setCamToData(\[\'Shp_0\'\]);
+
+# 投射（Projection）
+
+## 加载
+
+## setData {#setdata-7 .样式4}
+
+**功能：**
+
+设置投射对象集合
+
+**参数：**
+
+  -------------------------- -------------------------------------------------------
+  ***projectionInfoList***   投射信息集合 （REProjectionInfo 类型）
+
+  -------------------------- -------------------------------------------------------
+
+**REProjectionInfo模型解析：**
+
+  ----------------------- --------------------------------------------------------
+  ***projectionId***      投射标识
+
+  ***camPos***            投射相机的位置信息（三元素数组）
+
+  ***type***              投射模式 0：正交投影 1：透视投影
+
+  ***planeNormal***       投射平面法向量（三元素数组）
+
+  ***planeRight***        投射平面右方向（三元素数组）
+
+  ***planeNearDis***      近平面相对相机位置的距离
+
+  ***planeFarDis***       远平面相对相机位置的距离
+
+  ***planeFarRectMin***   近平面范围最小值（二元素数组），**仅正交投影模式有效**
+
+  ***planeFarRectMax***   近平面范围最大值（二元素数组），**仅正交投影模式有效**
+
+  ***aspectRatio***       宽高比，默认（16.0 / 9.0），**仅透视投影模式有效**
+
+  ***fieldAngle***        视场角，默认（60°），**仅透视投影模式有效**
+
+  ***texPath***           投射纹理路径，空字符串默认全白纹理
+
+  ***texType***           纹理类型 0：大资源图片纹理（占用更多的显存，效果好）
+                          1：小资源图片纹理（占用较小的显存，效果一般）
+                          2：视频纹理
+
+  ***texClrMult***        纹理的颜色乘积（REColor 类型）
+
+  ***minUV***             对应的纹理UV坐标区域最小值（二元素数组），取值范围
+                          \[0.0, 1.0\]
+
+  ***maxUV***             对应的纹理UV坐标区域最大值（二元素数组），取值范围
+                          \[0.0, 1.0\]
+  ----------------------- --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+// 加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'投射编辑\',
+
+resourcesAddress:
+
+\'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a1fe27477c3c51efab582a414dcb777\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList);
+
+// 添加投射效果
+
+// 由于投射界面是一个弧形界面，需要分割多块投射区域进行合并展示
+
+const proj_01 = new BlackHole3D.REProjectionInfo();
+
+proj_01.projectionId = \'proj_01\';
+
+proj_01.camPos = \[23.20177, 10.869312, 135.732378\];
+
+proj_01.type = 0;
+
+proj_01.planeNormal = BlackHole3D.Math.getDirection(proj_01.camPos,
+\[25.149, 13.136, 135.467\]); // 获取相机点到目标点的方向向量
+
+proj_01.planeRight =
+BlackHole3D.Math.getVectorCross(proj_01.planeNormal, \[0.0, 0.0,
+-1.0\]); // 获取平面向量的垂直向量
+
+proj_01.planeNearDis = 1.0;
+
+proj_01.planeFarDis = 100.0;
+
+proj_01.planeFarRectMin = \[-87.0, -10.8\];
+
+proj_01.planeFarRectMax = \[75.0, 9.8\];
+
+proj_01.texPath =
+\'https://demo.bjblackhole.com/BlackHole3.0/assets/projection.png\';
+
+proj_01.texType = 0;
+
+proj_01.texClrMult = new BlackHole3D.REColor(255, 255, 255, 112);
+
+proj_01.minUV = \[0.0, 0.0\];
+
+proj_01.maxUV = \[0.999084, 0.142857\];
+
+const proj_02 = new BlackHole3D.REProjectionInfo();
+
+proj_02.projectionId = \'proj_02\';
+
+proj_02.camPos = \[-37.546, 79.474, 136.427\];
+
+proj_02.type = 0;
+
+proj_02.planeNormal = BlackHole3D.Math.getDirection(proj_02.camPos,
+\[-34.546, 79.474, 136.427\]); // 获取相机点到目标点的方向向量
+
+proj_02.planeRight =
+BlackHole3D.Math.getVectorCross(proj_02.planeNormal, \[0.0, 0.0,
+-1.0\]); // 获取平面向量的垂直向量
+
+proj_02.planeNearDis = 1.0;
+
+proj_02.planeFarDis = 100.0;
+
+proj_02.planeFarRectMin = \[-30.0, -10\];
+
+proj_02.planeFarRectMax = \[6.24, -3.2\];
+
+proj_02.texPath =
+\'https://demo.bjblackhole.com/BlackHole3.0/assets/projection.png\';
+
+proj_02.texType = 0;
+
+proj_02.texClrMult = new BlackHole3D.REColor(255, 255, 255, 112);
+
+proj_02.minUV = \[0.05, 0.142857\];
+
+proj_02.maxUV = \[0.35, 0.190476\];
+
+const proj_03 = new BlackHole3D.REProjectionInfo();
+
+proj_03.projectionId = \'proj_03\';
+
+proj_03.camPos = \[-37.546, 79.474, 136.427\];
+
+proj_03.type = 0;
+
+proj_03.planeNormal = BlackHole3D.Math.getDirection(proj_03.camPos,
+\[-34.546, 79.474, 136.427\]); // 获取相机点到目标点的方向向量
+
+proj_03.planeRight =
+BlackHole3D.Math.getVectorCross(proj_03.planeNormal, \[0.0, 0.0,
+-1.0\]); // 获取平面向量的垂直向量
+
+proj_03.planeNearDis = 1.0;
+
+proj_03.planeFarDis = 100.0;
+
+proj_03.planeFarRectMin = \[-30.0, -3.1\];
+
+proj_03.planeFarRectMax = \[5.48, 1.5\];
+
+proj_03.texPath =
+\'https://demo.bjblackhole.com/BlackHole3.0/assets/projection.png\';
+
+proj_03.texType = 0;
+
+proj_03.texClrMult = new BlackHole3D.REColor(255, 255, 255, 112);
+
+proj_03.minUV = \[0.05, 0.201157\];
+
+proj_03.maxUV = \[0.35, 0.229813\];
+
+const proj_04 = new BlackHole3D.REProjectionInfo();
+
+proj_04.projectionId = \'proj_04\';
+
+proj_04.camPos = \[-37.546, 79.474, 136.427\];
+
+proj_04.type = 0;
+
+proj_04.planeNormal = BlackHole3D.Math.getDirection(proj_04.camPos,
+\[-34.546, 79.474, 136.427\]); // 获取相机点到目标点的方向向量
+
+proj_04.planeRight =
+BlackHole3D.Math.getVectorCross(proj_04.planeNormal, \[0.0, 0.0,
+-1.0\]); // 获取平面向量的垂直向量
+
+proj_04.planeNearDis = 1.0;
+
+proj_04.planeFarDis = 100.0;
+
+proj_04.planeFarRectMin = \[-30.0, 1.7\];
+
+proj_04.planeFarRectMax = \[4.9, 10.2\];
+
+proj_04.texPath =
+\'https://demo.bjblackhole.com/BlackHole3.0/assets/projection.png\';
+
+proj_04.texType = 0;
+
+proj_04.texClrMult = new BlackHole3D.REColor(255, 255, 255, 112);
+
+proj_04.minUV = \[0.05, 0.229813\];
+
+proj_04.maxUV = \[0.348474, 0.285714\];
+
+projectionInfoList.push(proj_01, proj_02, proj_03, proj_04);
+
+BlackHole3D.Projection.setData(projectionInfoList);
+
+// 设置不接受投射效果的构件
+
+BlackHole3D.Projection.setProjectionMask(
+
+\'投射编辑\',
+
+\[
+
+2052, 886, 1842, 419, 453, 659, 835, 1744, 1838, 2308, 2040, 293, 92,
+124, 235, 284, 319, 353, 31, 431, 47, 241, 369, 1099, 371, 373, 377,
+
+296, 2224, 1123, 2335, 2319, 362, 660, 1223, 274, 278, 347,
+
+\],
+
+false
+
+);
+
+## getData {#getdata-6 .样式4}
+
+**功能：**
+
+获取当前场景投射对象集合
+
+**参数：**
+
+  ------------------------ --------------------------------------------------------
+  ***projectionIdList***   投射标识集合，空数组代表所有
+
+  ------------------------ --------------------------------------------------------
+
+**返回值：**
+
+数组类型，（REProjectionInfo 类型）
+
+  ----------------------- --------------------------------------------------------
+  ***projectionId***      投射标识
+
+  ***camPos***            投射相机的位置信息（三元素数组）
+
+  ***type***              投射模式 0：正交投影 1：透视投影
+
+  ***planeNormal***       投射平面法向量（三元素数组）
+
+  ***planeRight***        投射平面右方向（三元素数组）
+
+  ***planeNearDis***      近平面相对相机位置的距离
+
+  ***planeFarDis***       远平面相对相机位置的距离
+
+  ***planeFarRectMin***   近平面范围最小值（二元素数组），**仅正交投影模式有效**
+
+  ***planeFarRectMax***   近平面范围最大值（二元素数组），**仅正交投影模式有效**
+
+  ***aspectRatio***       宽高比，默认（16.0 / 9.0），**仅透视投影模式有效**
+
+  ***fieldAngle***        视场角，默认（60°），**仅透视投影模式有效**
+
+  ***texPath***           投射纹理路径，空字符串默认全白纹理
+
+  ***texType***           纹理类型 0：大资源图片纹理（占用更多的显存，效果好）
+                          1：小资源图片纹理（占用较小的显存，效果一般）
+                          2：视频纹理
+
+  ***texClrMult***        纹理的颜色乘积（REColor 类型）
+
+  ***minUV***             对应的纹理UV坐标区域最小值（二元素数组），取值范围
+                          \[0.0, 1.0\]
+
+  ***maxUV***             对应的纹理UV坐标区域最大值（二元素数组），取值范围
+                          \[0.0, 1.0\]
+  ----------------------- --------------------------------------------------------
+
+**调用示例：**
+
+BlackHole3D.Projection.getData(\[\'proj_01\'\]);
+
+## delData {#deldata-6 .样式4}
+
+**功能：**
+
+根据标识删除指定投射
+
+**参数：**
+
+  ------------------------ --------------------------------------------------------
+  ***projectionIdList***   投射标识集合，空数组代表所有
+
+  ------------------------ --------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+BlackHole3D.Projection.delData(\[\'proj_01\'\]);
+
+## getAllProjectionId {#getallprojectionid .样式4}
+
+**功能：**
+
+获取所有投射标识
+
+**参数：**
+
+无
+
+**返回值：**
+
+数组类型，所有投射标识
+
+**调用示例：**
+
+BlackHole3D.Projection.getAllProjectionId();
+
+## 编辑
+
+## startEditState {#starteditstate-3 .样式4}
+
+**功能：**
+
+进入投射编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Projection.startEditState();
+
+## endEditState {#endeditstate-3 .样式4}
+
+**功能：**
+
+退出投射编辑状态
+
+**参数：**
+
+无
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Projection.endEditState();
+
+## 渲染效果
+
+## setShowState {#setshowstate-3 .样式4}
+
+**功能：**
+
+设置指定投射显示状态
+
+**注：要在进入投射编辑状态之后有效, 只能改变当前已有的投射对象**
+
+**参数：**
+
+  ------------------------ ---------------------------------------------------------
+  ***projectionIdList***   投射标识集合，空数组代表所有
+
+  ***showGeom***           是否显示矢量数据
+  ------------------------ ---------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Projection.startEditState();
+
+BlackHole3D.Projection.setShowState(\[\'proj_01\'\], false);
+
+## getIdsByShowState {#getidsbyshowstate-3 .样式4}
+
+**功能：**
+
+获取指定投射状态的所有标识集合
+
+**注：要在进入投射编辑状态之后有效**
+
+**参数：**
+
+  ---------------- ---------------------------------------------------------
+  ***showGeom***   是否是矢量数据状态
+
+  ---------------- ---------------------------------------------------------
+
+**返回值：**
+
+数组类型，对应类型的标识集合
+
+**调用示例：**
+
+BlackHole3D.Projection.startEditState();
+
+BlackHole3D.Projection.getIdsByShowState(false);
+
+## setVisible {#setvisible-7 .样式4}
+
+**功能：**
+
+设置投射的可见性
+
+**参数：**
+
+  ------------------------ --------------------------------------------------------
+  ***projectionIdList***   投射标识集合，空数组代表所有
+
+  ***visible***            是否可见
+  ------------------------ --------------------------------------------------------
+
+**返回值：**
+
+布尔类型，成功返回true；失败返回false
+
+**调用示例：**
+
+BlackHole3D.Projection.setVisible(\'proj_01\', false);
+
+## getProjectionIdByVisible {#getprojectionidbyvisible .样式4}
+
+**功能：**
+
+获取指定效果的投射标识集合
+
+**参数：**
+
+  --------------- ----------------------------------------------------------
+  ***visible***   矢量标识
+
+  --------------- ----------------------------------------------------------
+
+**返回值：**
+
+数组类型，所有投射标识
+
+**调用示例：**
+
+BlackHole3D.Projection.getProjectionIdByVisible(true);
+
+# 数学计算（Math）
+
+## getLineInfo {#getlineinfo .样式4}
+
+**功能：**
+
+获取有序点序列构成线的信息
+
+**注：只有曲线才会返回曲线点序列**
+
+**参数：**
+
+  ----------------- -------------------------------------------------------
+  ***pointList***   点序列
+
+  ***curveType***   曲线类型 0: 折线, 1: Bezier曲线, 2: Hermite曲线
+  ----------------- -------------------------------------------------------
+
+**返回值：**
+
+对象类型（Object对象类型）
+
+  ----------------- --------------------------------------------------
+  ***dist***        距离
+
+  ***curveList***   曲线点序列
+  ----------------- --------------------------------------------------
+
+**调用示例：**
+
+//加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_zhongyidong\',
+
+resourcesAddress:
+\'https://realbim.bjblackhole.cn:8009/default.aspx?dir=url_res02&path=res_zhongyidong\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+//获取曲线距离和曲线点序列
+
+var lineInfo = BlackHole3D.Math.getLineInfo(
+
+\[
+
+\[124.06982047856799, 35.744739520619966, -2.5700663089192375\],
+
+\[123.56645064259118, 13.855649641996347, -0.14999774880065786\],
+
+\[155.40368591313933, 8.047275073321252, -0.00005796918402722895\],
+
+\[148.29991129820053, 32.39154592835177, -1.6499970332393445\],
+
+\],
+
+1
+
+);
+
+//使用矢量线构件曲线
+
+var lineShpInfo = new BlackHole3D.RELineShpInfo();
+
+lineShpInfo.shpName = \'lineShp001\';
+
+lineShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+lineShpInfo.potList = lineInfo.curveList;
+
+BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+
+## getCustomFaceExpand {#getcustomfaceexpand .样式4}
+
+**功能：**
+
+获取自定义面扩展后的点序列
+
+**注：只有点序列能构成面才有效**
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***pointList***    点序列
+
+  ***expandDist***   扩展距离
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+数组类型，点序列集合
+
+**调用示例：**
+
+BlackHole3D.Math.getCustomFaceExpand(
+
+\[
+
+\[-9314.860862986332, -27112.03471123623, 9.411189648869993\],
+
+\[-9337.188124078495, -27173.92809165721, 3.932267708357756\],
+
+\[-9247.59047454576, -27207.30592460984, 3.855979224221983\],
+
+\[-9240.06160686371, -27127.25152162163, 4.0829049680037315\],
+
+\],
+
+10.0
+
+);
+
+## calcHeightRangeOfSection {#calcheightrangeofsection .样式4}
+
+**功能：**
+
+根据封闭几何数据，获取当前范围中高程的最大和最小值
+
+**注：计算需要耗时，数据结果通过回调事件 RECalcHeightRangeFinish 获取**
+
+**参数：**
+
+  ----------------- -------------------------------------------------------
+  ***pointList***   点序列
+
+  ----------------- -------------------------------------------------------
+
+**返回值：**
+
+无
+
+**调用示例：**
+
+//加载模型
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_jifang\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 添加矢量显示
+
+var lineShpInfo = new BlackHole3D.RELineShpInfo();
+
+lineShpInfo.shpName = \'lineShp001\';
+
+lineShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 0, 255);
+
+lineShpInfo.potList = \[
+
+\[6.227121134933107, 38.49759681979205, 10.0\],
+
+\[15.673681520664596, 30.40853935105649, 10.0\],
+
+\[7.762497127372644, 29.259962160590483, 10.0\],
+
+\];
+
+lineShpInfo.fillState = 1;
+
+lineShpInfo.fillClr = new BlackHole3D.REColor(255, 255, 255, 128);
+
+BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+
+// 添加监听事件
+
+document.addEventListener(\'RECalcHeightRangeFinish\',
+RECalcHeightRangeFinish);
+
+function RECalcHeightRangeFinish(e) {
+
+console.log(\'Listen RECalcHeightRangeFinish! \', e.detail);
+
+}
+
+// 计算区域范围最大最小高程
+
+BlackHole3D.Math.calcHeightRangeOfSection(
+
+\[
+
+\[6.227121134933107, 38.49759681979205, 10.0\],
+
+\[15.673681520664596, 30.40853935105649, 10.0\],
+
+\[7.762497127372644, 29.259962160590483, 10.0\],
+
+\]
+
+);
+
+## getAABBSpatialRelation {#getaabbspatialrelation .样式4}
+
+**功能：**
+
+获取两个轴对齐包围盒（AABB）的空间关系
+
+**注：参照对象的包围盒数据需保证有效性**
+
+**参数：**
+
+  --------------------- ------------------------------------------------------
+  ***referenceAABB***   参照轴对齐包围盒
+                        \[\[minx,miny,minz\],\[maxx,maxy,maxz\]\]
+
+  ***targetAABB***      目标轴对齐包围盒
+                        \[\[minx,miny,minz\],\[maxx,maxy,maxz\]\]
+  --------------------- ------------------------------------------------------
+
+**返回值：**
+
+空间关系枚举值： -2: 参照包围盒数据错误（格式/数值非法）； -1:
+目标包围盒数据错误（格式/数值非法）； 0:
+目标包围盒完全包含于参照包围盒内部； 1: 两个包围盒相交（部分重叠）； 2:
+两个包围盒相离（无交集）
+
+**调用示例：**
+
+// 加载数据
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_jifang\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+},
+
+{
+
+dataSetId: \'res_jifang2\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+useTransInfo: true,
+
+transInfo: \[
+
+\[1, 1, 1\],
+
+\[0, 0, 0, 1\],
+
+\[0.0, 0.0, 10.0\],
+
+\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 获取扁平式AABB包围盒数据
+
+const res1_flatAABB = BlackHole3D.BIM.getTotalBV(\"res_jifang\");
+
+const res2_flatAABB = BlackHole3D.BIM.getTotalBV(\"res_jifang2\");
+
+// 获取双数组式AABB包围盒数据
+
+const res1_doubleArrAABB =
+BlackHole3D.Tool.convertAABBFlatToDoubleArr(res1_flatAABB);
+
+const res2_doubleArrAABB =
+BlackHole3D.Tool.convertAABBFlatToDoubleArr(res2_flatAABB);
+
+// 获取两个轴对齐包围盒（AABB）的空间关系
+
+BlackHole3D.Math.getAABBSpatialRelation(res1_doubleArrAABB,
+res2_doubleArrAABB);
+
+## getAABBToPtListRelation {#getaabbtoptlistrelation .样式4}
+
+**功能：**
+
+获取点序列相对于轴对齐包围盒（AABB）的空间关系
+
+**注：参照对象的包围盒数据需保证有效性**
+
+**参数：**
+
+  --------------------- ------------------------------------------------------
+  ***referenceAABB***   参照轴对齐包围盒
+                        \[\[minx,miny,minz\],\[maxx,maxy,maxz\]\]
+
+  ***targetPtList***    目标对象点序列 \[\[x,y,z\],\...\]
+  --------------------- ------------------------------------------------------
+
+**返回值：**
+
+空间关系枚举值： -1: 参照包围盒数据错误（格式/数值非法）；0:
+所有目标点均在参照包围盒内部；1:
+部分目标点在包围盒内、部分在外（相交）；2:
+所有目标点均在参照包围盒外部（相离）
+
+**调用示例：**
+
+// 加载数据
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_jifang\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 获取扁平式AABB包围盒数据
+
+const res1_flatAABB = BlackHole3D.BIM.getTotalBV(\"res_jifang\");
+
+// 获取双数组式AABB包围盒数据
+
+const res1_doubleArrAABB =
+BlackHole3D.Tool.convertAABBFlatToDoubleArr(res1_flatAABB);
+
+// 点序列
+
+const ptList = \[
+
+\[13.28, 56.24, 1.87\],
+
+\[17.23, 49.49, 0.0\],
+
+\[10.88, 45.77, -1.4\],
+
+\];
+
+// 获取点序列相对于轴对齐包围盒（AABB）的空间关系
+
+BlackHole3D.Math.getAABBToPtListRelation(res1_doubleArrAABB, ptList);
+
+## getPtListSpatialRelation {#getptlistspatialrelation .样式4}
+
+**功能：**
+
+获取两个点序列的空间关系（基于点序列构面后的相交判断）
+
+**注：参照对象的包围盒数据需保证有效性**
+
+**参数：**
+
+  ----------------------- ------------------------------------------------------
+  ***referencePtList***   参照对象点序列 \[\[x,y,z\],\...\]
+
+  ***targetPtList***      目标对象点序列 \[\[x,y,z\],\...\]
+  ----------------------- ------------------------------------------------------
+
+**返回值：**
+
+空间关系枚举值： -1: 参照点序列数据错误（构面失败）；0:
+两个点序列对应的几何对象相交；2: 两个点序列对应的几何对象相离（无交集）
+
+**调用示例：**
+
+// 加载数据
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'res_jifang\',
+
+resourcesAddress:
+\'https://demo.bjblackhole.com/default.aspx?dir=url_res03&path=res_jifang\',
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+// 点序列
+
+const ptList1 = \[
+
+\[13.28, 56.24, 1.87\],
+
+\[17.23, 49.49, 0.0\],
+
+\[10.88, 45.77, -1.4\],
+
+\];
+
+const ptList2 = \[
+
+\[16.43, 59.98, 0.0\],
+
+\[11.93, 24.44, 5.36\],
+
+\[11.21, 49.10, 0.0\],
+
+\];
+
+// 获取两个点序列的空间关系（基于点序列构面后的相交判断）
+
+BlackHole3D.Math.getPtListSpatialRelation(ptList1, ptList2);
+
+## getPtListAABB {#getptlistaabb .样式4}
+
+**功能：**
+
+获取点序列的轴对齐包围盒（AABB）
+
+**参数：**
+
+  -------------- -------------------------------------------------------
+  ***ptList***   点序列 \[\[x,y,z\],\...\]
+
+  -------------- -------------------------------------------------------
+
+**返回值：**
+
+轴对齐包围盒 \[\[minx,miny,minz\],\[maxx,maxy,maxz\]\]
+
+**调用示例：**
+
+// 点序列
+
+const ptList = \[
+
+\[13.28, 56.24, 1.87\],
+
+\[17.23, 49.49, 0.0\],
+
+\[10.88, 45.77, -1.4\],
+
+\];
+
+// 获取点序列的轴对齐包围盒（AABB）
+
+BlackHole3D.Math.getPtListAABB(ptList);
+
+## isPtInTriangle {#isptintriangle .样式4}
+
+**功能：**
+
+判断三维点是否在三角形面（A-B-C）内部/面上
+
+**参数：**
+
+  ------------ -------------------------------------------------------
+  ***ptP***    待判断点 \[x,y,z\]
+
+  ***ptA***    三角形顶点A \[x,y,z\]
+
+  ***ptB***    三角形顶点B \[x,y,z\]
+
+  ***ptC***    三角形顶点C \[x,y,z\]
+  ------------ -------------------------------------------------------
+
+**返回值：**
+
+true: 点在三角形内部/面上；false: 点在三角形外部
+
+**调用示例：**
+
+// 判断点、三角形点
+
+const ptP = \[16.43, 59.98, 0.0\];
+
+const ptA = \[13.28, 56.24, 1.87\];
+
+const ptB = \[17.23, 49.49, 0.0\];
+
+const ptC = \[10.88, 45.77, -1.4\];
+
+// 判断三维点是否在三角形面（A-B-C）内部/面上
+
+BlackHole3D.Math.isPtInTriangle(ptP, ptA, ptB, ptC);
+
+## isPtInPolygonCylindricalRegion {#isptinpolygoncylindricalregion .样式4}
+
+**功能：**
+
+判断三维点是否在多边形的柱形空间内部
+
+**注：多边形所在平面垂直延伸，上下无穷**
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***targetPt***     待检测三维点 \[x,y,z\]
+
+  ***polyPtList***   多边形顶点序列 \[\[x,y,z\],\...\]
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+true: 点在多边形柱形空间内部；false: 点在外部
+
+**调用示例：**
+
+// 判断点、多边形点
+
+const targetPt = \[16.43, 59.98, 0.0\];
+
+const polyPtList = \[
+
+\[13.28, 56.24, 1.87\],
+
+\[17.23, 49.49, 0.0\],
+
+\[10.88, 45.77, -1.4\],
+
+\];
+
+// 判断三维点是否在多边形的柱形空间内部
+
+BlackHole3D.Math.isPtInPolygonCylindricalRegion(targetPt, polyPtList);
+
+## getPtToPolyEdgeShortestIntersect {#getpttopolyedgeshortestintersect .样式4}
+
+**功能：**
+
+获取指定点到多边形边界的最短距离对应的交点坐标
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***sourcePt***     源点 \[x,y,z\]
+
+  ***polyPtList***   多边形顶点序列 \[\[x,y,z\],\...\]
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+最短距离交点坐标 \[x,y,z\]；无交点返回\[\]
+
+**调用示例：**
+
+// 判断点、多边形点
+
+const targetPt = \[16.43, 59.98, 0.0\];
+
+const polyPtList = \[
+
+\[13.28, 56.24, 1.87\],
+
+\[17.23, 49.49, 0.0\],
+
+\[10.88, 45.77, -1.4\],
+
+\];
+
+// 获取指定点到多边形边界的最短距离对应的交点坐标
+
+BlackHole3D.Math.getPtToPolyEdgeShortestIntersect(targetPt, polyPtList);
+
+## getVectorCross {#getvectorcross .样式4}
+
+**功能：**
+
+获取两个向量叉乘
+
+**参数：**
+
+  --------------- -------------------------------------------------------
+  ***vector1***   向量1
+
+  ***vector2***   向量2
+  --------------- -------------------------------------------------------
+
+**返回值：**
+
+数组类型，返回三元素数组向量值
+
+**调用示例：**
+
+// 获取两个点的方向向量
+
+let planeNormal = BlackHole3D.Math.getDirection(\[23.20177, 10.869312,
+135.732378\], \[25.149, 13.136, 135.467\]);
+
+// 获取垂直两点方向向量的垂直向量
+
+BlackHole3D.Math.getVectorCross(planeNormal, \[0.0, 0.0, -1.0\]);
+
+## getDirection {#getdirection .样式4}
+
+**功能：**
+
+从点from 指向 点to 的单位方向向量
+
+**参数：**
+
+  ------------ -------------------------------------------------------
+  ***from***   起点 \[x,y,z\]
+
+  ***to***     终点 \[x,y,z\]
+  ------------ -------------------------------------------------------
+
+**返回值：**
+
+数组类型，单位方向向量（长度=1）
+
+**调用示例：**
+
+// 获取两个点的方向向量
+
+let planeNormal = BlackHole3D.Math.getDirection(\[23.20177, 10.869312,
+135.732378\], \[25.149, 13.136, 135.467\]);
+
+## getPtListTran {#getptlisttran .样式4}
+
+**功能：**
+
+获取两组顶点间对应转换的仿射变换信息
+
+**注：用于两个数据集做对应的仿射变换操作，实现两个数据集的对齐效果**
+
+**参数：**
+
+  ------------------ -------------------------------------------------------
+  ***fromPtList***   原始顶点序列 \[\[x,y,z\],\...\]，限制三个点坐标
+
+  ***toPtList***     目标顶点序列 \[\[x,y,z\],\...\]，限制三个点坐标
+  ------------------ -------------------------------------------------------
+
+**返回值：**
+
+对象类型（对象类型）
+
+  ---- -------------- ---------------------------------------------------
+   1   ***scale***    缩放
+
+   2   ***rotate***   旋转
+
+   3   ***offset***   平移
+  ---- -------------- ---------------------------------------------------
+
+**调用示例：**
+
+// 计算需要调整的数据集的仿射变换信息
+
+// 需要调整的数据集的点信息
+
+const fromPtList = \[
+
+\[233.5011543, 150.0500784, 0.0\],
+
+\[230.7263021, 159.3029588, 0.0\],
+
+\[249.2512199, 164.8584082, 0.0\],
+
+\];
+
+// 目标方位数据集的点信息
+
+const toPtList = \[
+
+\[-0.275, 0.325, 6.5\],
+
+\[-0.275, 9.928, 6.5\],
+
+\[19.045, 9.928, 6.5\],
+
+\];const tranInfo = BlackHole3D.Math.getPtListTran(fromPtList,
+toPtList);
+
+// 加载数据集
+
+var dataSetList = \[
+
+{
+
+dataSetId: \'目标数据集\',
+
+resourcesAddress:
+\'http://192.168.31.16:8088/blackHole3D/EngineRes/RequestEngineRes?dir=res&path=3a2006e9091b5f644776763eb86e91ec\',
+
+},
+
+{
+
+dataSetId: \'想要调整的护具及\',
+
+resourcesAddress:
+\'http://192.168.31.16:8088/blackHole3D/EngineRes/RequestEngineRes?dir=res&path=3a2008514104fe25ee8638e7f1e58229\',
+
+useTransInfo: true,
+
+transInfo: \[tranInfo.scale, tranInfo.rotate, tranInfo.offset\],
+
+},
+
+\];
+
+BlackHole3D.Model.loadDataSet(dataSetList, true);
+
+# 问题汇总 {#问题汇总 .样式3}
+
+## 显示
+
+1、Canvas所在div有滚动条的情况，鼠标中间按压移动会导致滚动穿透冒泡
+
+**解决办法：**
+
+document.addEventListener(\"mousedown\", mousedown);//鼠标中键按压监听
+
+function mousedown(e) {
+
+//button：键类型 0：左键，1：中键，2：右键
+
+if (e.button == 1) {
+
+e.preventDefault();//取消事件的默认动作
+
+return false;
+
+}
+
+}
+
+2、为什么360加载的白屏时间长
+
+**分析回答：**
+
+因为360加载的是图片，图片资源下载需要一定的时间，取决于图片质量大小、网速等因素。
+
+## 接口调用
+
+1、只想设置构件颜色，不想改变已经设置好的透明度
+
+**解决办法：**
+
+//改变指定数据集的指定构件颜色（透明 == -1 代表只改变颜色不改变透明度）
+
+var elemAttr = new BlackHole3D.REElemAttr();
+
+elemAttr.dataSetId = \"dataSet01\";
+
+elemAttr.elemIdList = \[1062,1014\];
+
+elemAttr.elemClr = new BlackHole3D.REColor(255,255,0,-1);
+
+BlackHole3D.BIM.setElemAttr(elemAttr);
+
+2、有些数据量大需要遍历不想使用构造函数的方式创建
+
+**解决办法：**
+
+以添加标签举例，可以使用构造函数的方式创建，也可以使用json的方式创建
+
+//json方式 （构造函数方式在接口示例中）
+
+var tagInfoList = \[
+
+{
+
+\"tagName\": \"tag01\",
+
+\"pos\": \[-151, -95, 67\],
+
+\"infoList\": \[{
+
+\"picPath\":
+\"https://demo.bjblackhole.com/demopage/examplesImgs/shandian.png\",
+
+\"text\": \"测试文字\"
+
+}, {
+
+\"picPath\":
+\"https://demo.bjblackhole.com/demopage/examplesImgs/greenpot.png\",
+
+\"text\": \"tag002测试文字\"
+
+}
+
+\]
+
+}, {
+
+\"tagName\": \"tag012\",
+
+\"pos\": \[-246, 18, 16\],
+
+\"infoList\": \[{
+
+\"picPath\":
+\"https://demo.bjblackhole.com/demopage/examplesImgs/greenpot.png\",
+
+\"text\": \"测试文字\"
+
+}
+
+\]
+
+}
+
+\];
+
+BlackHole3D.Tag.addTags(tagInfoList);
+
+3、为什么我选择了很多构件，点击构件取消了全部的选择/无法单击取消单个构件
+
+**解决办法：**
+
+设置选择集属性中有probeMask字段，当值为0时，无法点击选择集中的构件，如果需要有点击操作的话，probeMask字段要赋值为1。
+
+4.  为什么Ctrl框选元素利用监听回调获取构件id列表为空
+
+**分析回答：**
+
+因为框选监听回调实时生效，但数据是需要通过WebAssembly转义，造成顺序的先后性。
+
+**解决办法：**
+
+//添加Ctrl框选完成监听事件
+
+document.addEventListener(\"RESystemFrameSel\", RESystemFrameSel);
+
+function RESystemFrameSel(e) {
+
+//延时处理，0毫秒的延迟依旧会影响回调顺序
+
+setTimeout(() =\> {
+
+console.log(BlackHole3D.BIM.getSelElemIDs());
+
+}, 0);
+
+}
+
+5.  为什么REColor的alpha设置为1没有展示
+
+**分析回答：**
+
+因为最小的显示数值为2，当alpha小于2时，作用和alpha=0相同
+
+6.  为什么锚点设置后，缩放场景锚点会和场景偏移
+
+**分析回答：**
+
+因为图片本身有像素，这个像素不会随场景的拉伸而变化
+
+**解决办法：**
+
+图片定位点默认锚点的左下方texFocus:\[0,0\]，当需要锚点定位在某个点，并且不会随缩放场景偏移，需要将锚点图片定位点放在锚点的中心下方，也就是texFocus:\[锚点大小的一半,0\]。
+
+7.  如何在编辑模式，主动的高亮数据集
+
+**分析回答：**
+
+因为编辑模式是采用的鼠标交互模式，需要用户鼠标点触进行数据集的选择，如果需要主动的接口层面进行，需要组合行为，并且自定维护模式状态。
+
+**解决办法：**
+
+BlackHole3D.Edit.startEdit();
+
+BlackHole3D.Edit.openAffineTransEditWnd();
+
+setTimeout(() =\> {
+
+BlackHole3D.BIM.setSelMode(0);
+
+BlackHole3D.BIM.addToSelDataSet(\"dataSet01\");
+
+}, 50);
+
+（1）首先进入编辑状态，打开编辑控制面板
+
+（2）设置选择模式，当前引擎只支持数据集级别的编辑
+
+（3）将目标数据集添加到选择集
+
+（4）注意要将设置模式和添加选择集的才做放在延时重处理，目的是避免浏览器更新规则的线程不同步的问题
+
+（5）要注意setSelMode接口自动拾取是在鼠标点选的情况，如果用户自主行为，需要自行维护这个模式，在点选之前调整，点选结束设置回来
+
+# 更新日志 {#更新日志 .样式3}
+
+## 2026 {#section .样式4}
+
+## 2026-04 {#section-1 .样式4}
+
+## V3.2.0.3690 {#v3.2.0.3690 .样式4}
+
+更新时间：2026.04.17
+
+1.  **优化了**场景加载CAD矢量的相机效果
+
+2.  **修复了**Math.getPtListTran计算角度旋转时法线不正确的异常
+
+## V3.2.0.3669 {#v3.2.0.3669 .样式4}
+
+更新时间：2026.04.02
+
+1.  单构件（Entity）**新增接口**：setShadowPrefer
+
+2.  **修复了**水面颜色不透明度参数设置异常的问题
+
+3.  **修复了**贴底测量功能在大坐标下测量不准确的问题
+
+4.  **优化了**CAD一系列特殊类型和属性，如文字、线条、填充等效果
+
+5.  360全景（Panorama）**新增接口**：setCamLocateToRotate
+
+6.  **监听事件新增**：REPanLocateCam
+
+7.  **修复了**相机定位小构件后看不到构件的问题
+
+8.  **优化了**地形影响和矢量一起加载时总包围盒的计算方式
+
+9.  **修复了**多项目单构件批量选择位置编辑，显示效果和实际操作不准确的问题
+
+10. **修复了**单体化后绑定已经偏移的项目，定位出现异常的问题
+
+11. CAD（CAD）**新增接口**：getLayoutLodRange、setCurShowLodRange、getCurShowLodRange
+
+12. 数学计算（Math）**新增接口**：getVectorCross、getDirection、getPtListTran
+
+## 2026-03 {#section-2 .样式4}
+
+## V3.2.0.3624 {#v3.2.0.3624 .样式4}
+
+更新时间：2026.03.05
+
+13. **新增模块矢量编辑（ShpEdit）、新增单体化（Monomer）、新挤出（Extrude）**
+
+14. **水面、拍平、挖洞、挖坑功能优化重构，低版本功能使用需要进行更新调整**
+
+15. 矢量编辑（ShpEdit）**新增接口**：setData、getData、getAllShpId、delData、startShpEditState、endShpEditState、startAddShpState、endAddShpState、getCurShpId、startClipShpState、endClipShpState、setVisible、getVisible、setShpClr、getShpClr、setShpClipClrPool、getShpClipClrPool、delShpClipClrPool、setCamToData
+
+16. 单体化（Monomer）**新增接口**：setData、getData、delData、getAllMonomerId、setVisible、getVisible、startEditState、endEditState、startAddMonomerState、endAddMonomerState、getCurMonomerId、setEditApplyDataSetId、getEditApplyDataSetId、setDefaultClr、getDefaultClr、setClr、getClr、setDefaultEditMinMaxHeight、getDefaultEditMinMaxHeight、setEditAutoCalcMinMaxHeight、getEditAutoCalcMinMaxHeight、setMinMaxHeight、getMinMaxHeight、setExpandDist、getExpandDist、addToSel、delFromSel、getAllCurSel、setSelAttr、getSelAttr、setMultiSel、getMultiSel、setCanProbe、getCanProbe、setHighlightAttr、getHighlightAttr、setCamToData、getErrorDrawMonomerIds
+
+17. 挤出（Extrude）**新增接口**：setData、getData、delData、getCurExtrudeId、getAllExtrudeId、setDataSetScope、getDataSetScope、addExtrudeFaceTex、delAllExtrudeFaceTex、startEditState、endEditState、startAddExtrudeState、endAddExtrudeState、setExtrudeTexId、getExtrudeTexId、setDepthLimitRange、getDepthLimitRange、setShowType、getShowType、setVisible、getVisible、setCamToData、getErrorDrawExtrudeIds、setShowState、getIdsByShowState
+
+18. **监听事件新增回调**：REAddWaterRgnCheck、REAddWaterRgnFinish、REEditExtrudeFinish、REAddExtrudeRgnCheck、REAddExtrudeRgnFinish、REEditMonomerFinish、REAddMonomerRgnCheck、REAddMonomerRgnFinish、REEditShpFinish、REAddShpRgnCheck、REAddShpRgnFinish、REShpAddClipFace、REShpClipFinish
+
+19. **挖洞（Excavate）模块移除功能变更为挤出（Extrude）模块，并移除接口**：1、addExcavateFaceTex，功能由Extrude.addExtrudeFaceTex代替、2、clearAllExcavateFaceTex，功能由Extrude.delAllExtrudeFaceTex代替、3、createExcavateObj，功能由Extrude.setData代替、4、delExcavateObj，功能由Extrude.delData代替、5、setExcavateType，功能由Extrude.setShowType代替、6、getExcavateType，功能由Extrude.getShowType代替、7、setExcavateEffect，功能由Extrude.setDataSetScope代替、8、getExcavateEffect，功能由Extrude.getDataSetScope代替、9、locateToexcavateObj，功能由Extrude.setCamToData代替
+
+20. **瓦片（Grid）模块移除倾斜摄影单体化，功能变更为单体化（Monomer）模块，并移除接口**：1、setMonomerElemData，功能由
+    Monomer.setData 代替、2、addToSelMonomerElemIDs，功能由
+    Monomer.addToSel 代替、3、removeFromSelMonomerElemIDs，功能由
+    Monomer.delFromSel 代替、4、getSelMonomerElemIDs，功能由
+    Monomer.getAllCurSel 代替、5、setSelMonomerElemClr，功能由
+    Monomer.setSelAttr 代替、6、setMonomerElemHideClr，功能由
+    Monomer.setDefaultClr 代替、7、setMonomerElemSelEnable，功能由
+    Monomer.setCanProbe 代替、8、setMonomerElemVisible，功能由
+    Monomer.setVisible 代替、9、delMonomerElem，功能由 Monomer.delData
+    代替
+
+21. **瓦片（Grid）模块移除倾斜摄影拍平，功能变更为挤出（Extrude）模块，并移除接口**：1、setDataSetFlatRegion，功能由
+    Extrude.setData 代替、2、setFlatGolRegion，功能由 Extrude.setData
+    代替、3、removeFlatRegion，功能由 Extrude.delData
+    代替、4、resetFlatRegion，功能由 Extrude.delData
+    代替、5、setFlatRegionEffective，功能由 Extrude.setVisible
+    代替、6、getFlatRegionEffective，功能由 Extrude.getVisible
+    代替、7、clearLocalFlatRegion，功能由 Extrude.delData
+    代替、8、setLocalFlatRegionEffective，功能由 Extrude.setVisible
+    代替、9、getLocalFlatRegionEffective，功能由 Extrude.getVisible 代替
+
+22. **水面（Water）模块重构，并新增接口：**setData、getCurWaterName、getAllWaterName、startEditState、endEditState、startAddWaterState、endAddWaterState、setVisible、getVisible、setClr、getClr、setBlendDist、getBlendDist、setDefaultAttr、getErrorDrawWaterIds、getExpandDist、setExpandDist、getDepthBias、setDepthBias、getVisDist、setVisDist、setShowState、getIdsByShowState
+
+23. **水面（Water）模块重构，并移除接口**：1、loadData，功能由Water.setData代替，2、getData，功能由Water.getData代替，3、delAllData，功能由Water.delData代替，4、setCamToData，功能由Water.setCamToData代替，5、delData，功能由Water.delData代替
+
+24. **修复了**点云选中消失的异常
+
+## 2026-01 {#section-3 .样式4}
+
+## V3.2.0.3587 {#v3.2.0.3587 .样式4}
+
+更新时间：2026.01.30
+
+25. **新增监听事件**：RESystemKeyDown、RESystemSel
+
+26. 鼠标探测（Probe）**新增接口**：getCurSelInfo
+
+27. **优化了**设置剖切数据效果，受相机方位影响的问题
+
+## V3.2.0.3559 {#v3.2.0.3559 .样式4}
+
+更新时间：2026.01.09
+
+1.  小地图（MiniMap）**新增接口**：setCurViewportRange
+
+2.  **新增监听事件**：RECADSwitchLayoutFinished
+
+## 2025 {#section-4 .样式4}
+
+## 2025-12 {#section-5 .样式4}
+
+## V3.2.0.3547 {#v3.2.0.3547 .样式4}
+
+更新时间：2025.12.26
+
+1.  地形（Terrain）**新增接口**：setGolTerrShpAncTextVisLodRange、getGolTerrShpAncTextVisLodRange、setGolTerrShpLineTextVisLodRange、getGolTerrShpLineTextVisLodRange
+
+2.  几何图形（Geometry）**调整接口**：addPolylineShp增加字段，实现投影贴地材质纹理效果
+
+## V3.2.0.3528 {#v3.2.0.3528 .样式4}
+
+更新时间：2025.12.12
+
+1.  **修复了**选中标记闪烁的问题
+
+2.  **修复了**部分模型资源刷新相关的问题
+
+3.  **调整了**接口：Edit.startEdit的返回值
+
+4.  引擎模块**新增接口**：getCurInteractState
+
+5.  几何图形（Geometry）**新增接口**：setCustomShpPresetVisDist
+
+## V3.2.0.3516 {#v3.2.0.3516 .样式4}
+
+更新时间：2025.12.05
+
+1.  公共模块（Common）**新增接口**：setShpOITLev、getShpOITLev
+
+2.  公共模块（Common）**调整接口**：setSceOITLev、getSceOITLev的参数使用
+
+3.  **修复了**地形矢量锚点添加显示异常的问题
+
+4.  **修复了**地形影像坐标变换的缓存信息数组过小的问题
+
+5.  数学计算（Math）**新增接口**：getAABBSpatialRelation、getAABBToPtListRelation、getPtListSpatialRelation、getPtListAABB、isPtInTriangle、isPtInPolygonCylindricalRegion、getPtToPolyEdgeShortestIntersect
+
+6.  **修复了**含有坐标系的非常规模型，定位构件，位置偏移异常的问题
+
+7.  **增加了选中标记的效果**
+
+8.  BIM（BIM）**新增接口**：setSelMarkClr、getSelMarkClr
+
+## 2025-11 {#section-6 .样式4}
+
+## V3.2.0.3487 {#v3.2.0.3487 .样式4}
+
+更新时间：2025.11.21
+
+1.  **新增模块数学计算（Math）**
+
+2.  数学计算（Math）**新增接口**：getLineInfo、getCustomFaceExpand、calcHeightRangeOfSection
+
+3.  监听事件**新增接口**：RECalcHeightRangeFinish
+
+4.  相机（Camera）**新增接口**：setCamLocateToBoundByDir
+
+5.  CAD（CAD）**新增接口**：getElemBV、setBimCadMapPoints、getBimToCadCamDir、getBimToCadPoint、getCadToBimPoint、getCadToBimBV、getBimToCadBV
+
+6.  **修复了**删除单构件导致内存崩溃的异常
+
+7.  **优化了**自定义矢量线构面检测的效果
+
+## V3.2.0.3468 {#v3.2.0.3468 .样式4}
+
+更新时间：2025.11.12
+
+1.  公共模块（Common）**新增接口**：setMaxTexGroupAtlasSize、getMaxTexGroupAtlasSize
+
+2.  锚点（Anchor）**新增接口**：setCustomMaxTexSize、getCustomMaxTexSize
+
+3.  **修复了**在添加世界坐标系的条件下测量数据异常的问题
+
+4.  BIM（BIM）**新增接口**：setDiffCoef
+
+5.  瓦片（Grid）**新增接口**：setDiffCoef
+
+## V3.2.0.3463 {#v3.2.0.3463 .样式4}
+
+更新时间：2025.11.10
+
+1.  **优化了**地形矢量数据不同角度查看的效果
+
+2.  **优化了**WMS数据的渲染效果
+
+## V3.2.0.3453 {#v3.2.0.3453 .样式4}
+
+更新时间：2025.11.03
+
+1.  相机（Camera）**新增接口**：setCamAlignTerrainPage、getCamAlignTerrainPage
+
+2.  **优化了**相机在地形影像上的操作效果
+
+3.  **优化了**CAD文字显示效果
+
+4.  **修复了**某些数据集卸载后造成渲染出现白色背景的异常问题
+
+## 2025-10 {#section-7 .样式4}
+
+## V3.2.0.3433 {#v3.2.0.3433 .样式4}
+
+更新时间：2025.10.29
+
+1.  坐标（Coordinate）**新增接口**：getTransCoords
+
+2.  **优化了**车流模拟的渲染效果
+
+## V3.2.0.3427 {#v3.2.0.3427 .样式4}
+
+更新时间：2025.10.27
+
+1.  几何图形（Geometry）**新增接口**：setCamToShpList、setShpVisible、getShpVisible
+
+2.  地形（Terrain）**新增接口**：setUnitLayerClr、getUnitLayerClr、addTerrShpAnc、getAllTerrShpAnc、delTerrShpAnc、setCamToAnc、setTerrShpAncVisible、getTerrShpAncVisible、addTerrShpLine、delTerrShpLine、setCamToTerrShpLine、setTerrShpLineVisible、getTerrShpLineVisible
+
+3.  **优化了**地形数据相机缩放效果
+
+## V3.2.0.3396 {#v3.2.0.3396 .样式4}
+
+更新时间：2025.10.15
+
+1.  地形（Terrain）**新增接口**：setUnitMinVirPxlH、getUnitMinVirPxlH、setTerrProjectMode、getTerrProjectMode
+
+## V3.2.0.3388 {#v3.2.0.3388 .样式4}
+
+更新时间：2025.10.11
+
+1.  瓦片（Grid）**新增接口**：getValidState
+
+2.  公共模块（Common）**新增接口**：setShpCoverDottedEnable、getShpCoverDottedEnable
+
+## 2025-09 {#section-8 .样式4}
+
+## V3.2.0.3384 {#v3.2.0.3384 .样式4}
+
+更新时间：2025.09.30
+
+1.  **修复了**UI面板剖切按钮的状态和接口调用不匹配的异常问题
+
+## V3.2.0.3379 {#v3.2.0.3379 .样式4}
+
+更新时间：2025.09.25
+
+1.  剖切（Clip）**新增接口**：setClipBoxHoverClrInfo、getClipBoxHoverClrInfo
+
+## V3.2.0.3376 {#v3.2.0.3376 .样式4}
+
+更新时间：2025.09.25
+
+1.  图形显示（Graphics）**新增接口**：setLocalLanguage、getLocalLanguage，**实现中英语言切换**
+
+## V3.2.0.3362 {#v3.2.0.3362 .样式4}
+
+更新时间：2025.09.19
+
+1.  **优化了**锚点、标签元素被不透明物体遮挡情况下的显示效果
+
+2.  监听事件**调整**：RECADSelElement 事件增加点击空白区域回调
+
+3.  监听事件**新增**：RECADCommentDrawFinish，实现CAD添加标注完成事件回调
+
+## V3.2.0.3334 {#v3.2.0.3334 .样式4}
+
+更新时间：2025.09.09
+
+1.  **修复了**单构件路径动画失败的异常问题
+
+## V3.2.0.3323 {#v3.2.0.3323 .样式4}
+
+更新时间：2025.09.04
+
+1.  锚点（Anchor）接口：addAnc**新增字段**，实现锚点文字背景圆角和边距效果
+
+2.  几何图形（Geometry）接口：addPolyFenceShp**新增字段**，实现自定义纹理效果
+
+3.  动画（Animation）接口：addAnimAreaBuffer**新增字段**，实现投影到地形和倾斜摄影效果
+
+4.  测量（Measure）接口：addGroupData**调整调用模式**，允许在非测量模式下绘制自定义测量矢量
+
+5.  **优化了**拾取点精度问题
+
+6.  **优化了**获取地形不透明度数值异常的问题
+
+## 2025-08 {#section-9 .样式4}
+
+## V3.2.0.3303 {#v3.2.0.3303 .样式4}
+
+更新时间：2025.08.27
+
+1.  **修复了**单构件路径动画播放过程单构件消失的问题
+
+2.  **修复了**单构件路径动画播放过程单构件抖动旋转的问题
+
+3.  **优化了**CAD部分文字显示异常的问题
+
+## V3.2.0.3292 {#v3.2.0.3292 .样式4}
+
+更新时间：2025.08.18
+
+1.  CAD**增加**用户坐标系支持
+
+## V3.2.0.3287 {#v3.2.0.3287 .样式4}
+
+更新时间：2025.08.12
+
+1.  **新增第三人称漫游功能**
+
+2.  相机（Camera）**移除接口**：setCamFollowElem、getCamFollowElem、cancelCamFollowElem
+
+3.  **功能调整**：setCamFollowElem**替换为**setCamTPPElem和setTPPGradeAbility、getCamFollowElem**替换为**getCamTPPElem和getTPPGradeAbility、cancelCamFollowElem**替换为**delTPP
+
+4.  相机（Camera）**新增接口**：createTpp、delTPP、setTPPSportAnimName、getTPPSportAnimName、setTPPIdleAnimName、getTPPIdleAnimName、setTPPGradeAbility、getTPPGradeAbility、setTPPSphereCollider、getTPPSphereCollider、getCamTPPElem、setCamTPPElem、getIsTPP
+
+5.  单构件（Entity）**新增接口**：getAnimCtlGroupNames、setAnimCtlByGroup、setAnimPosByGroup、getAnimPosByGroup
+
+6.  锚点（Anchor）**调整接口**：addAnc、addAnimAnc **新增**
+    textBackPadding 属性，设置字体背景内容边距
+
+## 2025-07 {#section-10 .样式4}
+
+## V3.2.0.3250 {#v3.2.0.3250 .样式4}
+
+更新时间：2025.07.22
+
+1.  相机（Camera）**新增接口**：setCamFollowElem、getCamFollowElem、cancelCamFollowElem
+
+2.  **新增了**第三人称漫游功能（相机跟随效果）
+
+3.  **优化了**框选范围不精确的问题
+
+4.  **优化了**部分单构件显示闪烁的异常
+
+5.  **优化了**单构件运动时的阴影效果
+
+6.  **解决了**项目改变仿射变换后造成自定义范围获取数据异常的问题
+
+## 2025-06 {#section-11 .样式4}
+
+## V3.2.0.3220 {#v3.2.0.3220 .样式4}
+
+更新时间：2025.06.26
+
+1.  **修复了**BIM（BIM）：getAxisGridRegElem、getPolyFenceRegElem接口数据获取异常的问题
+
+2.  **优化了**Crtl框选回调事件RESystemFrameSel的触发时机
+
+3.  **优化了**大批量构件相关的一次性设置操作的调用
+
+4.  电子围栏（Fence）**新增接口**：getPotInAnyFence
+
+## V3.2.0.3207 {#v3.2.0.3207 .样式4}
+
+更新时间：2025.06.20
+
+1.  BIM（BIM）**调整接口**：setElemAttr**新增字段**useNewAlpha、useNewClr、useNewEmis、useNewSmoothMetal，增加自定义设置各项属性的功能
+
+2.  **修复了**单构件路径动画添加两点线段的路径动画异常的问题
+
+## V3.2.0.3200 {#v3.2.0.3200 .样式4}
+
+更新时间：2025.06.12
+
+1.  **修复了**加载时天空盒颜色异常闪烁的问题
+
+2.  **优化了**CAD特殊符号的支持
+
+3.  **修复了**360和CAD单独加载不显示的异常问题
+
+## 2025-05 {#section-12 .样式4}
+
+## V3.2.0.3178 {#v3.2.0.3178 .样式4}
+
+更新时间：2025.05.29
+
+1.  **修复了**加载玩360全景再加载模型天空盒异常的问题
+
+2.  **优化了**填挖方计算方式，支持地形数据的计算
+
+3.  **修复了**测量接口调用异常问题
+
+4.  **修复了**测量贴地线渲染异常问题
+
+## V3.2.0.3165 {#v3.2.0.3165 .样式4}
+
+更新时间：2025.05.16
+
+1.  相机（Camera）**新增接口**：exitCamLocating
+
+2.  几何图形（Geometry）**调整接口**：addPolylineShp**新增字段**projSce实现矢量线（面）贴地投影功能
+
+3.  几何图形（Geometry）**新增接口**：setGroupShpProjSce
+
+4.  **新增单构件轨迹动画、脚本动画功能**
+
+5.  **新增粒子效果功能**
+
+6.  单构件（Entity）**新增接口**：getSelfAnimNameList、setAnimPlayModeSingle、setTrackAnim、addAnimScript、delAnimScript、setAnimScriptPlayState、setAnimScriptActive、setAnimScriptStop、getAnimTimeLen
+
+7.  粒子效果（Particle）**新增接口**：setWeatherSysTex、createWeatherSys、getWeatherSysInfo、getAllWeatherSysIds、delWeatherSys、setTransmitSysTex、getAllTransmitSysIds、delTransmitSys、createTransmitSysPos、getTransmitSysInfoPos、createTransmitSysRect、getTransmitSysInfoRect、addTexGroup、getTexGroupIds、delTexGroup、delAllTexGroup
+
+8.  相机（Camera）**新增接口**：getCurNorthAngleXOY
+
+9.  **新增监听事件**：REMeasureFinish
+
+## V3.2.0.3150 {#v3.2.0.3150 .样式4}
+
+更新时间：2025.05.12
+
+1.  **新增限高分析功能**
+
+2.  三维分析（Analysis3D）新增接口：setHeightLimitInfo、getHeightLimitInfo、delHeightLimit、setHeightLimitClr、getHeightLimitClr
+
+3.  **修复了**测量状态下使用贴地投影模式，角度测量异常的问题
+
+## V3.2.0.3148 {#v3.2.0.3148 .样式4}
+
+更新时间：2025.05.09
+
+1.  测量（Measure）**调整接口**：**移除**setSingleStyleState、getSingleStyleState
+
+2.  测量（Measure）**调整接口**：测量类型调整数值和扩充测量功能
+
+3.  相机（Camera）**新增接口**：setCamBelowTerrain、getCamBelowTerrain、setCamLockRotate、getCamLockRotate、getConvRotateQ2D、getConvRotateD2Q
+
+4.  **新增可视域分析、通视分析功能**
+
+5.  三维分析（Analysis3D）**新增接口**：setViewRegionFovCam、setViewRegionAttrs、addSightLineViewer、getSightLineAllViewerId、getSightLineViewerPos、delSightLineViewer、delSightLineAllViewer、addSightLineTarget、getSightLineAllTargetId、getSightLineTargetPos、getSightLineTargetOccPos、delSightLineTarget、delSightLineAllTarget、setSightLineAttrs
+
+6.  **修复了**新版谷歌浏览器在Mac系统下遥感影像显示异常的问题
+
+7.  **修复了**静态阴影图容易产生自阴影的问题
+
+8.  **修复了**大范围WGS84地形影像转换
+
+9.  地形（Terrain）**新增接口**：registerPathFunc、unRegisterPathFunc、unRegisterAllPathFunc
+
+## 2025-04 {#section-13 .样式4}
+
+## V3.2.0.3078 {#v3.2.0.3078 .样式4}
+
+**更新时间：2025.04.14**
+
+1.  **新增三维分析（Analysis3D）模块**
+
+2.  三维分析（Analysis3D）**新增接口**：setSkylineClr、getSkylineClr
+
+3.  **解决了**球模式下谷歌浏览器加载异常的问题
+
+4.  动画（Animation）**调整接口**：setShapeAnimStyle参数scaleAndOffset调整缩放系数默认为1.0，调整前为0.0
+
+5.  模型加载（Model）**调整接口**：loadDataSet中参数wmsInfo的使用
+
+## 2025-03 {#section-14 .样式4}
+
+## V3.2.0.3054 {#v3.2.0.3054 .样式4}
+
+**更新时间：2025.03.28**
+
+1.  **优化了**CAD部分锚点文字显示不正常问题
+
+2.  **优化了**局部矢量抗锯齿效果
+
+3.  **修复了**项目切换时资源对象无法及时释放的问题
+
+4.  **新增了**对WMS地形服务的支持
+
+5.  模型加载（Model）**调整接口**：loadDataSet 增加字段
+    useWMS、wmsInfo，用于加载 WMS 资源服务
+
+## V3.2.0.3000 {#v3.2.0.3000 .样式4}
+
+**更新时间：2025.03.06**
+
+1.  **新增了**控制点配准的位置编辑功能
+
+2.  **优化调整了**位置编辑功能的使用和界面操作逻辑
+
+3.  模型编辑（Edit）**调整接口**：startEdit 新增参数字段
+
+4.  模型编辑（Edit）**新增接口**：getEditState
+
+5.  模型编辑（Edit）**移除接口**：openAffineTransEditWnd、closeAffineTransEditWnd、setExtendBtnVisible
+
+6.  监听事件**新增**：REEditControlPosMatchFinish
+
+7.  UI工具栏测量模块**新增功能**面间距、面夹角测量
+
+8.  监听事件**移除**：REEditAffineTransWndClose
+
+9.  图形显示（Graphics）新增接口：getTabItemVisable、setTabItemVisable
+
+10. **修复了**BIM模型GIS坐标变换后包围盒计算错误的问题
+
+## 2025-02 {#section-15 .样式4}
+
+## V3.2.0.2964 {#v3.2.0.2964 .样式4}
+
+**更新时间：2025.02.21**
+
+1.  剖切（Clip）**新增接口**：setClipBoxClr、getClipBoxClr、setClipPlaneClr、getClipPlaneClr
+
+2.  **优化了**CAD渲染效果
+
+3.  **解决了**设置数据集偏移和坐标系标识时出现坐标异常的情况
+
+## V3.2.0.2947 {#v3.2.0.2947 .样式4}
+
+**更新时间：2025.02.14**
+
+1.  **优化了**UI工具栏图标的显示效果
+
+## V3.2.0.2943 {#v3.2.0.2943 .样式4}
+
+**更新时间：2025.02.08**
+
+1.  **修复了**删除自定义坐标系再添加相同标识的坐标系无效的问题
+
+## 2025-01 {#section-16 .样式4}
+
+## V3.2.0.2936 {#v3.2.0.2936 .样式4}
+
+**更新时间：2025.01.21**
+
+1.  **修复了**倾斜摄影资源无法设置属性的问题
+
+2.  **优化了**UI面板的资源显示
+
+3.  **优化了**测量数值经度问题
+
+## V3.2.0.2926 {#v3.2.0.2926 .样式4}
+
+**更新时间：2025.01.14**
+
+1.  **优化了**对新版地形处理工具处理的数据在操作透明度上的有限支持
+
+2.  地形（Terrain）**新增接口**：setUnitLayerAlpha、getUnitLayerAlpha、setTerrInstAlpha、getTerrInstAlpha
+
+3.  **修复了**部分构件使用相机定位无效的问题
+
+4.  **优化了**单构件渲染效果
+
+## V3.2.0.2920 {#v3.2.0.2920 .样式4}
+
+**更新时间：2025.01.09**
+
+1.  **优化了**部分移动端机型H5无法加载的问题
+
+2.  公共模块（Common）**调整接口**：addGolFont增加参数antiAliasing
+
+3.  **修复了**新增的字体设置粗细无效的问题
+
+4.  鼠标探测（Probe）**调整接口**：getCurProbeRet**新增**字段elemType、dataSetIdList及相关注释，getCurCombProbeRet接口**新增**字段dataSetIdList及相关注释
+
+5.  **修复了**进入测量模式出现异常的问题
+
+## 2024 {#section-17 .样式4}
+
+## 2024-12 {#section-18 .样式4}
+
+## V3.2.0.2904 {#v3.2.0.2904 .样式4}
+
+**更新时间：2024.12.16**
+
+1.  **修复了**关闭UI工具栏导致位置编辑窗口关闭的异常情况
+
+2.  **修复了**H5在部分iPad设备中无法加载的问题
+
+3.  **修复了**通过UI工具栏隐藏构件，框选依然能够获取选择集列表的异常情况
+
+## V3.2.0.2901 {#v3.2.0.2901 .样式4}
+
+更新时间：2024.12.10
+
+1.  **修复了**系统工具中的剖切盒异常出现的问题
+
+## V3.2.0.2897 {#v3.2.0.2897 .样式4}
+
+更新时间：2024.12.09
+
+1.  优化了规则路径动画的贴图效果
+
+2.  几何图形（Geometry）**调整接口**：addPotShp 新增
+    useWorldDir、worldRightDir、worldUpDir字段，用于设置二维平面在三维场景下的效果
+
+## V3.2.0.2890 {#v3.2.0.2890 .样式4}
+
+更新时间：2024.12.03
+
+1.  坐标（Coordinate）**新增接口**：registerWorldPos、unRegisterWorldPos、unRegisterAllWorldPos
+
+2.  监听事件：**新增回调**：REWorldPosChange
+
+3.  **修复了**CAD模块中锚点接口文档错误使用的问题
+
+4.  **修复了**CAD线条、三角面显示的部分异常情况
+
+5.  **修复了**CAD布局相关使用的异常情况
+
+6.  **修复了**改变窗口大小导致闪屏的问题
+
+7.  **修复了**隐藏全部构件操作时，部分构件没有隐藏的问题
+
+8.  动画（Animation）**调整接口**：addAnimAreaBuffer 参数 texLength
+    移除，新增参数 policy 设置拐点模式
+
+9.  **修复了**【Gizmo】当场景和模型设置了坐标系后，旋转编辑模型飞出很远的问题
+
+10. 引擎模块**新增接口**：setScreenVirRotate、getScreenVirRotate
+
+## 2024-11 {#section-19 .样式4}
+
+## V3.1.0.2828 {#v3.1.0.2828 .样式4}
+
+1.  更新时间：2024.11.08
+
+2.  天空盒（SkyBox）**新增接口**：setBackImgEnable、getBackImgEnable、setBackImgPath、getBackImgPath、setBackImgFillMode、getBackImgFillMode
+
+3.  动画（Animation）**调整接口**：setShapeAnimStyle 增加透明度设置功能
+
+4.  相机（Camera）**调整接口**：setCamLocateToBound
+    增加入参，设置深度和锁定视角
+
+## V3.1.0.2816 {#v3.1.0.2816 .样式4}
+
+1.  更新时间：2024.11.01
+
+2.  测量（Measure）**新增接口**：getGroupDataByType、getGroupDataByID
+
+3.  测量（Measure）**调整接口**：addGroupData 允许添加测量集合
+
+4.  **修复了**在MiniIO模式下，CAD二次加载出现异常的情况
+
+## 2024-10 {#section-20 .样式4}
+
+## V3.1.0.2806 {#v3.1.0.2806 .样式4}
+
+1.  更新时间：2024.10.30
+
+2.  公共模块（Common）新增接口：setSceLightAttenu、getSceLightAttenu、setSceAOInfo、getSceAOInfo
+
+3.  **修复了**设置数据集坐标偏移无效的问题
+
+## V3.1.0.2803 {#v3.1.0.2803 .样式4}
+
+1.  更新时间：2024.10.25
+
+2.  CAD（CAD）**新增接口**：addAreaComment、delAreaComment、setCamLocateToAreaComment
+
+3.  H5版本**支持球面模式**的加载
+
+4.  **优化了**H5版本UI面板的样式和操作逻辑
+
+5.  **修复了**CAD部分情况下显示异常的问题
+
+6.  **修复了**在模型自身有坐标系的情况下编辑位置导致模型异常的问题
+
+## V3.1.0.2769 {#v3.1.0.2769 .样式4}
+
+1.  更新时间：2024.10.12
+
+2.  **优化了**H5版本UI面板样式及功能
+
+3.  **修复了**Mac平台下Firefox浏览器加载地形显示异常闪烁的问题
+
+4.  相机（Camera）**新增接口**：getQuatByAxis、getAxisByQuat
+
+5.  **修复了**CAD在H5模式下不可缩放的问题
+
+6.  **优化了**CAD部分文字不显示的问题
+
+## 2024-09 {#section-21 .样式4}
+
+## V3.1.0.2748 {#v3.1.0.2748 .样式4}
+
+1.  更新时间：2024.09.14
+
+2.  **修复了**面板剖切操作异常的问题
+
+3.  **修复了**某些情况下CAD加载崩溃的问题
+
+4.  **修复了**位置测量精度和面板设置中测量精度不一致的问题
+
+5.  坐标（Coordinate）**新增接口**：setCurrSelGeoCoord
+
+## V3.1.0.2744 {#v3.1.0.2744 .样式4}
+
+6.  更新时间：2024.09.12
+
+7.  **优化了**地形模型的渲染效果
+
+8.  **修复了**CAD图元图层获取错误的问题
+
+9.  **优化了**CAD图元显示效果异常的问题
+
+## 2024-08 {#section-22 .样式4}
+
+## V3.1.0.2736 {#v3.1.0.2736 .样式4}
+
+1.  更新时间：2024.08.30
+
+2.  **修复了**某些天地图资源无法进行挖洞操作的问题
+
+3.  修复了正交和透视相机模式切换，隐藏状态的viewcube被重置的问题
+
+4.  调整了H5WebSDK的默认渲染模式，打开了阴影光照等渲染效果，性能消耗会有所增加，需要请自行关闭
+
+5.  修复了部分CAD因线条异常无法加载的问题
+
+6.  修复了H5WebSDK在部分苹果设备浏览器查看下无法进行手势操作的问题
+
+7.  优化了部分CAD显示效果
+
+## V3.1.0.2723 {#v3.1.0.2723 .样式4}
+
+1.  更新时间：2024.08.19
+
+2.  **修复了**MAC平台下鼠标滚轮操作异常的问题
+
+3.  **修复了**某些情况下UI工具栏测量状态下无法操作的问题
+
+4.  **修复了**部分情况MAC平台Safar浏览器的瓦片数据显示异常的问题
+
+5.  **修复了**通过setElemsCanProbe接口设置构件是否探测的情况导致阴影显示异常，以及设置过后鼠标左键平移操作异常的问题
+
+6.  CAD（CAD）**新增接口**：getAllLayoutId、getCurLayoutId、getDefaultLayoutId、setCurShowLayout
+
+7.  CAD（CAD）**调整接口**：addAnc、getAnc、addShpAnc、getShpAnc、getDefaultViewportRange、getCurViewportRange、setCurViewportRange
+    **增加layoutId参数**，根据不同布局调整效果
+
+## V3.1.0.2706 {#v3.1.0.2706 .样式4}
+
+1.  更新时间：2024.08.09
+
+2.  **修复了**CAD部分字体的显示错误问题
+
+3.  **优化了**加载模型和卸载模型之间切换操作的缓存清除机制
+
+4.  **优化了**系统UI面板操作的交互逻辑
+
+## V3.1.0.2695 {#v3.1.0.2695 .样式4}
+
+1.  更新时间：2024.08.01
+
+2.  **修复了**在左右分屏的情况下，HDR平均亮度计算没有保持左右两屏统一显示的异常状况
+
+3.  图形显示（Graphics）**新增接口**：setViewCubeArea、getViewCubeArea
+
+4.  **修复了**位置编辑窗口设置位置变换信息的缩放只有单轴缩放的异常
+
+## 2024-07 {#section-23 .样式4}
+
+## V3.1.0.2679 {#v3.1.0.2679 .样式4}
+
+1.  更新时间：2024.07.26
+
+2.  **修复了**由于MAC平台没有遵循WebGL std140
+    常数缓冲区内存布局规范，所导致的MAC浏览器下地形渲染不正常的问题
+
+3.  **修复了**模型加载时法线没有应用正北夹角的问题
+
+4.  修复了CAD MiniIO资源索引文件释放异常的问题
+
+## V3.1.0.2655 {#v3.1.0.2655 .样式4}
+
+1.  更新时间：2024.07.19
+
+2.  **优化了**CAD二维图纸的渲染效果
+
+3.  **修复了**卸载所有数据集没有回调的问题
+
+## V3.1.0.2633 {#v3.1.0.2633 .样式4}
+
+1.  更新时间：2024.07.10
+
+2.  BIM（BIM）接口：setSelElemsClr设置颜色时使用当前权重
+
+3.  **修复了**BIM（BIM）接口：getSelElemsBlendAttr获取子网掩码参数异常的问题
+
+4.  瓦片（Grid）**新增接口**：setMonomerElemSelEnable、setMonomerElemVisible、delMonomerElem、
+
+5.  瓦片（Grid）**移除接口**：setShowMonomerElemData、setHideMonomerElemData
+
+6.  CAD（CAD）**新增接口**：getDefaultViewportRange
+
+7.  **修复了**在部分情况下添加多个倾斜摄影单体化区域会造成重叠的问题
+
+## V3.1.0.2624 {#v3.1.0.2624 .样式4}
+
+1.  更新时间：2024.07.08
+
+2.  **修复了**H5版本在适配Uniapp的H5+版本云打包的异常问题
+
+## 2024-06 {#section-24 .样式4}
+
+## V3.1.0.2596 {#v3.1.0.2596 .样式4}
+
+1.  更新时间：2024.06.26
+
+2.  **新增**灯光（Light）模块
+
+3.  灯光（Light）**新增**接口：addSpotLights、getSpotLightInfo、getAllSpotLightIds、delSpotLights、delAllSpotLights
+
+4.  坐标系加入了EPSG:3857展开式过滤的功能
+
+5.  调整天空盒（SkyBox）接口setSkyInfo中字段sunDir的使用和注解，放开光源朝向自下向上的限制，主要作用在球面状态，普通场景使用自下向上光源会产生一片漆黑效果
+
+## V3.1.0.2588 {#v3.1.0.2588 .样式4}
+
+1.  更新时间：2024.06.21
+
+2.  **调整**模型加载（Model）接口：loadDataSet的参数terrImgShpAlone**改变成**groundDisplay
+
+## V3.1.0.2563 {#v3.1.0.2563 .样式4}
+
+1.  更新时间：2024.06.14
+
+2.  **修复了**锚点同名不同组重复添加不更新的问题
+
+## V3.1.0.2551 {#v3.1.0.2551 .样式4}
+
+1.  更新时间：2024.06.11
+
+2.  **优化了**地形渲染模式切换时临时纹理没有释放的问题
+
+3.  **修复了**地形渲染切换渲染模式是有可能瞬间跳白底的问题
+
+4.  **修复了**部分情况地形渲染切换失败的问题
+
+## V3.1.0.2548 {#v3.1.0.2548 .样式4}
+
+1.  更新时间：2024.06.07
+
+2.  **优化了**CAD使用上的部分问题
+
+## V3.1.0.2539 {#v3.1.0.2539 .样式4}
+
+1.  更新时间：2024.06.06
+
+2.  **修复了**360不调用回调的异常
+
+3.  **修复了**编辑状态下，地形矢量无法选中的问题
+
+4.  **修复了**大坐标情况下，单构件模型抖动的问题
+
+5.  **修复了**浏览器缩放窗口会出现黑屏闪烁的问题
+
+6.  **优化了**CAD的文字编码、缩放比例等
+
+7.  **优化了**对CAD大文件的支持
+
+8.  地形（Terrain）**新增接口**：getDataSetTerrId、getTerrSubAllDataSetId
+
+9.  **修复了**标高无法删除的问题
+
+10. **修复了**地形矢量在伪球面模式下无法相机定位的问题
+
+## 2024-05 {#section-25 .样式4}
+
+## V3.1.0.2514 {#v3.1.0.2514 .样式4}
+
+1.  更新时间：2024.05.31
+
+2.  **优化了**地形默认全球影像的展示
+
+3.  **修复了**cad矢量模型定位问题
+
+4.  模型编辑（Edit）**新增接口**：setDataSetEditEnable、getDataSetEditEnable
+
+5.  **修复了**viewcube在部分情况下操作异常的问题
+
+## V3.1.0.2503 {#v3.1.0.2503 .样式4}
+
+1.  更新时间：2024.05.28
+
+2.  **支持**单独矢量模型在伪球面模式下显示
+
+3.  地形（Terrain）**新增接口**：setUnitShpHole、getUnitShpHole
+
+## V3.1.0.2499 {#v3.1.0.2499 .样式4}
+
+1.  更新时间：2024.05.25
+
+2.  **新增地形（Terrain）模块**
+
+3.  地形（Terrain）**新增接口**：getUnitImgShpAlone、setUnitLayerlev、getUnitLayerlev、setUnitActive、getUnitActive、setUnitShpStyleName、getUnitShpStyleName、setUnitOmitParent、getUnitOmitParent、setUnitLODLevRange、getUnitLODLevRange、getAllUnitNames、getUnitBV、getAllShpStyleNames、setShpStyle、getShpStyle、delShpStyle、delAllShpStyle
+
+4.  **移除**CAD（CAD）中的接口：loadCadShp
+
+5.  模型加载（Model）接口：**loadDataSet调整**，**增加参数**，将版本2381之后的CAD.loadCadShp接口**功能合并**到加载模型Model.loadDataSet接口中，**增加地形矢量模型的加载**
+
+6.  **监听事件新增**：RELODLevelChange，监听地形系统矢量LOD分级改变事件
+
+7.  **更新名称**，栅格名称变更为瓦片，Grid类名不做改变
+
+## V3.1.0.2488 {#v3.1.0.2488 .样式4}
+
+1.  更新时间：2024.05.20
+
+2.  公共模块（Common）**新增接口**：setFakeSphMode、getFakeSphMode
+
+## V3.1.0.2478 {#v3.1.0.2478 .样式4}
+
+1.  更新时间：2024.05.11
+
+2.  CAD（CAD）**新增接口**：setBgClr、getElemsSearchText
+
+3.  修复了在没有传递构件id集合的特定情况下，获取所有构件数据异常的问题
+
+4.  修复了2414版本之后对dwg格式的cad文件直接加载的异常问题
+
+## V3.1.0.2464 {#v3.1.0.2464 .样式4}
+
+1.  更新时间：2024.05.08
+
+2.  相机（Camera）**调整接口**：setCamLocateToElem、setCamLocateToDataSet
+    增加自定义视角类型
+
+3.  **优化**setCamFixCenterPos接口功能
+
+4.  **修复**某些情况下工具条隔离、隐藏、重置功能切换出现崩溃的问题
+
+## V3.1.0.2459 {#v3.1.0.2459 .样式4}
+
+1.  更新时间：2024.05.07
+
+2.  引擎模块**新增接口**：setCamModeOnLeftBtnDown、getCamModeOnLeftBtnDown、setCamModeOnRightBtnDown、getCamModeOnRightBtnDown、setCamFixCenterPos、getCamFixCenterPosEnable
+
+3.  公共模块（Common）**新增接口**：setSceCustomBV、getSceCustomBV
+
+4.  **修复**viewCube操作定位模型部分超出范围的被工具条遮挡的问题
+
+## 2024-04 {#section-26 .样式4}
+
+## V3.1.0.2455 {#v3.1.0.2455 .样式4}
+
+1.  更新时间：2024.04.28
+
+2.  修复了特定情况下addUrlExtParam接口异常的情况
+
+## V3.1.0.2434 {#v3.1.0.2434 .样式4}
+
+1.  更新时间：2024.04.12
+
+2.  修复了全局挖洞和全局拍平互斥的问题
+
+## 2024-03 {#section-27 .样式4}
+
+## V3.1.0.2414 {#v3.1.0.2414 .样式4}
+
+1.  更新时间：2024.03.28
+
+2.  引擎模块**新增接口**：setOperationMode、getOperationMode、setCamModeOnMidBtnDown、getCamModeOnMidBtnDown、setCtrlSelectedMode、getCtrlSelectedMode
+
+## V3.1.0.2394 {#v3.1.0.2394 .样式4}
+
+1.  更新时间：2024.03.15
+
+2.  **优化了**部分CAD显示异常的问题
+
+## V3.1.0.2381 {#v3.1.0.2381 .样式4}
+
+1.  更新时间：2024.03.08
+
+2.  引擎模块**新增接口**：addUrlExtHeader、delAllURLExtHeaders
+
+3.  修复了SDK部分参数异常的情况
+
+4.  CAD（CAD）**新增接口**：loadCadShp
+
+5.  公共模块（Common）**新增接口**：getSceBV
+
+6.  相机（Camera）**新增接口**：getCamLocByGISCoord、getGISCoordByCamLoc
+
+## 2024-01 {#section-28 .样式4}
+
+## V3.1.0.2356 {#v3.1.0.2356 .样式4}
+
+1.  更新时间：2024.01.29
+
+2.  优化了地形裙带效果
+
+## V3.1.0.2351 {#v3.1.0.2351 .样式4}
+
+1.  更新时间：2024.01.19
+
+2.  优化了透明模型的显示效果
+
+## V3.1.0.2344 {#v3.1.0.2344 .样式4}
+
+1.  更新时间：2024.01.12
+
+2.  图形显示（Graphics）**新增接口**：getSysUIColorStyle
+
+3.  挖洞（Excavate）**新增接口**：setExcavateEffect、getExcavateEffect
+
+4.  栅格（Grid）**新增接口**：setTerrSkirtAmp、getTerrSkirtAmp
+
+## V3.1.0.2331 {#v3.1.0.2331 .样式4}
+
+1.  更新时间：2024.01.05
+
+2.  几何图形（Geometry）**新增接口**：addPolyVolumeShp、addPolyVolumeShpHor
+
+3.  修复REElemSelRegFinish监听事件回调异常的问题
+
+## 2023 {#section-29 .样式4}
+
+## 2023-12 {#section-30 .样式4}
+
+## V3.1.0.2323 {#v3.1.0.2323 .样式4}
+
+1.  更新时间：2023.12.29
+
+2.  优化了局部拍平接口setDataSetFlatRegion的使用，在项目进行了偏移后，依然可以按照项目获取的坐标进行区域填充，而不是需要转换成偏移之前得坐标
+
+3.  修复了CAD标注接口，设置椭圆类型失效的问题
+
+## V3.1.0.2309 {#v3.1.0.2309 .样式4}
+
+1.  更新时间：2023.12.22
+
+2.  优化部分渲染显示
+
+## V3.1.0.2303 {#v3.1.0.2303 .样式4}
+
+1.  更新时间：2023.12.15
+
+2.  优化了锚点文字显示的区域
+
+## V3.1.0.2298 {#v3.1.0.2298 .样式4}
+
+1.  更新时间：2023.12.08
+
+2.  **修改**了加载minio服务资源发布的cad,360资源时，请求index.xml的路径
+
+3.  **修复**了模型空间块包围盒无效导致崩溃的问题
+
+## 2023-11 {#section-31 .样式4}
+
+## V3.1.0.2281 {#v3.1.0.2281 .样式4}
+
+1.  更新时间：2023.11.29
+
+2.  鼠标探测（Probe）**新增接口**：setCustomProbeExecute
+
+3.  **修复了**地形项目的包围盒计算问题
+
+4.  **修复**测试快捷键宏异常问题
+
+5.  **优化了**地形裙带的显示
+
+## V3.1.0.2273 {#v3.1.0.2273 .样式4}
+
+1.  更新时间：2023.11.28
+
+2.  **修复了**锚点无法正常显示的问题
+
+## V3.1.0.2270 {#v3.1.0.2270 .样式4}
+
+1.  更新时间：2023.11.24
+
+2.  **解决了**单构件添加动画模式后无法删除的问题
+
+3.  **优化了**单构件包围盒展示的更新问题
+
+4.  **优化了**对地形资源生成时的图片边缘处理
+
+5.  相机（Camera）**新增**接口：setCamLocateToBound
+
+6.  **增加**了对多层影像叠加资源包的支持
+
+7.  **调整**了单构件动画的阴影方式
+
+8.  **修复**了CAD加载单位无效的问题
+
+9.  **CAD新增接口**：unloadCAD
+
+10. **修复**了某个全局骨骼层级清空后该层级的骨骼分类统计信息不正确的问题
+
+11. **修复**了大坐标时编辑Gizmo抖动的问题
+
+12. **修复**了轴心选择按钮对退出编辑行为的状态影响
+
+## V3.1.0.2226 {#v3.1.0.2226 .样式4}
+
+1.  更新时间：2023.11.10
+
+2.  单构件（Entity）接口**新增**：setBVShpVisiable、setBVShpStyle、setBVShpRange
+
+3.  新增监听事件：REAddEntityFinish
+
+4.  优化了与场景遮挡的矢量抗锯齿效果
+
+### 2023-10
+
+## V3.1.0.2214 {#v3.1.0.2214 .样式4}
+
+1.  更新时间：2023.10.27
+
+2.  单构件（Entity）接口调整：**删除**getXMLEntitys、setXMLEntitys
+
+3.  栅格（Grid）接口调整：**删除**setDataSetVisible、getDataSetVisible
+
+4.  引擎模块接口**新增**：addUrlExtParam、delAllURLExtParams
+
+5.  单构件（Entity）**新增**接口：getTransInfo、setTransInfo
+
+6.  系统UI工具栏**增加**类型控制，setSysUIWgtVisible接口增加类型PanelBtn_FocusBoxSel
+
+7.  修复部分单构件模型包围盒出现异常的问题
+
+8.  模型编辑（Edit）**新增**接口：setExtendBtnVisible
+
+## V3.1.0.2187 {#v3.1.0.2187 .样式4}
+
+1.  更新时间：2023.10.13
+
+2.  增加了对简单渲染模型中的近似的原色保真支持
+
+3.  修复了MiniIO资源下CAD加载无效的问题
+
+### 2023-09
+
+## V3.1.0.2174 {#v3.1.0.2174 .样式4}
+
+1.  更新时间：2023.09.27
+
+2.  新增CAD（CAD）接口：getCurAllLayer、setLayerVisible、setCamLocateToAllElem、getCurViewportRange、setCurViewportRange、startCommentDraw、endCommentDraw、saveCurCommentDraw、cancelCurCommentDraw、setDrawingCommentStyle、setTextCommentText、setCommentLineWidth、setCommentColor、setCommentTextSize、startMeasurementDraw、endMeasurementDraw、saveCurMeasurementDraw、cancelCurMeasurementDraw、delAllMeasurementDraw、setMeasurementStyle、getLengthMeasurementInfo
+
+3.  新增监听事件：RECADMeasurementDrawFinish
+
+4.  修复了REElemSelRegFinish监听返回异常的问题
+
+## V3.1.0.2158 {#v3.1.0.2158 .样式4}
+
+1.  更新时间：2023.09.22
+
+2.  单构件（Entity）调整：删除setCurType、createAnEntity、setAnimPlayMode接口;
+    以下接口名称调整：getEidtMode-\>getEditMode、enterEidtMode-\>enterEditMode、exitEidtMode-\>exitEditMode
+
+3.  新增单构件（Entity）接口：addEntities、getEntitys、delEntities、getXMLEntitys、setXMLEntitys、setMultiAddEntity、setAnimPlayMode、setMouseAddEntity
+
+4.  新增监听事件：REExitEntityEditMode
+
+5.  名称功能分类调整：Edit.setEditNodeLevel调整为BIM.setSelMode、Edit.getEditNodeLevel调整为BIM.getSelMode、Edit.addDataSetToSel调整为BIM.addToSelDataSet
+
+6.  模型编辑（Edit）调整：删除setEditNodeLevel、getEditNodeLevel、addDataSetToSel接口;
+    startEdit接口增加返回参数
+
+7.  新增BIM（BIM）接口：getSelDataSetIDs、addToSelDataSet、delFromSelDateSets、delAllSelDateSets、setSelMode、getSelMode
+
+8.  名称调整：挤压-\>挖洞、Extrude-\>Excavate、extrude-\>excavate
+
+## V3.1.0.2139 {#v3.1.0.2139 .样式4}
+
+1.  更新时间：2023.09.08
+
+2.  增加CAD（CAD）的接口：getElemAttrs、getAttrElemIds
+
+3.  增加挤压（Extrude）的接口：addExtrudeFaceTex、clearAllExtrudeFaceTex、createExtrudeObj、delExtrudeObj、setExtrudeType、getExtrudeType、locateToExtrudeObj
+
+4.  解决全景图因为远裁面问题导致不显示的问题
+
+5.  解决了超大范围场景下相机闪烁的问题
+
+6.  修复了部分CAD场景加载错误的问题
+
+### 2023-08
+
+## V3.1.0.2122 {#v3.1.0.2122 .样式4}
+
+1.  更新时间：2023.08.30
+
+2.  修复了栅格数据拍平接口setFlatGolRegion在部分情况下无效的问题
+
+3.  增加了对chrome浏览器对天地图资源的支持
+
+4.  修复了单构件显示包围盒不正确的问题
+
+## V3.1.0.2108 {#v3.1.0.2108 .样式4}
+
+1.  更新时间：2023.08.16
+
+2.  优化了相机的使用，在距离模型过近的情况下，相机穿透的问题
+
+3.  增加单构件（Entity）的接口：getEidtMode、enterEidtMode、exitEidtMode、getAllTypeNames、setCurType、createAnEntity、setAnimPlayMode
+
+4.  优化了系统工具栏中框选放大功能
+
+5.  解决了部分连续管道生成失败的问题，生成中心线回调增加返回信息
+
+6.  优化了部分WMTS类型的资源地址过长时渲染无效的问题
+
+## V3.1.0.2102 {#v3.1.0.2102 .样式4}
+
+1.  更新时间：2023.08.11
+
+2.  优化了对dwg文件支持包括（优化文字显示，处理属性缺失，增加自定义线型，优化尺寸标注显示，优化块引用加载，优化dwg加载速度等）
+
+3.  优化了轴网裁剪获取构件的适用性，对部分轴网进行了支持
+
+4.  修复正交相机设置无效的问题
+
+### 2023-07
+
+## V3.1.0.2088 {#v3.1.0.2088 .样式4}
+
+1.  更新时间：2023.07.28
+
+2.  优化了系统工具栏（框选）相机功能
+
+## V3.1.0.2087 {#v3.1.0.2087 .样式4}
+
+1.  更新时间：2023.07.21
+
+2.  调整几何图形（Geometry）的接口：添加按钮的默认悬浮文字颜色和系统颜色保持统一
+
+3.  优化了360切换延迟问题、调整切换效果
+
+4.  新增系统工具栏功能：增加框选相机定位功能(Ctrl框选)
+
+5.  调整了连续管道选择图片样式
+
+## V3.1.0.2066 {#v3.1.0.2066 .样式4}
+
+1.  更新时间：2023.07.07
+
+2.  增加锚点（Anchor）的接口：setCamToGroupAnc
+
+3.  调整BIM（BIM）接口：getElemAttr的返回参数，增加返回信息
+
+4.  调整几何图形（Geometry）的接口：addPotShp、addPolylineShp、addPolyFenceShp这几个接口增加矢量组字段
+
+5.  增加几何图形（Geometry）的接口：setCamToGroupShp、delGroupShp、getAllGroupName、setGroupShpVisible、getGroupShpVisible、setGroupShpCanOverlap、getGroupShpCanOverlap、setGroupShpVisDist、getGroupShpVisDist、setGroupShpAutoScaleDist、getGroupShpAutoScaleDist
+
+6.  增加360全景（Panorama）的接口：setCamAutoForward
+
+7.  增加监听事件：REPanCamAutoForwardFinish
+
+8.  增加天空盒（SkyBox）的接口：resetSkyInfo
+
+9.  增加BIM（BIM）的接口：setElemUVVisible
+
+### 2023-06
+
+## V3.1.0.2046 {#v3.1.0.2046 .样式4}
+
+1.  更新时间：2023.06.30
+
+2.  修复引擎初始化完成调用Coordinate.getTransGeoCoords接口获取数据异常的问题
+
+3.  新增字段，锚点（Anchor）接口：addAnc新增textBackMode字段
+
+4.  修复了动画（Animation）接口：addAnimAreaBuffer在某些极限情况下动画异常的问题
+
+5.  增加测量（Measure）的接口：getAssistLineVisible、setAssistLineVisible
+
+6.  增加管道（Pipe）的接口：addContPipe、delContPipe、getAllContPipeId、getContPipeElemIDs、setContPipeTex、getContPipeTex、setContPipeClr、getContPipeClr、setShowContPipe、setGenContPipeCenterLine、setCurContPipe、getCurContPipe、saveCurContPipe、resetCurContPipe、removeCurContPipeSubElem、getCurContPipeAllElemIDs、setCurContPipeClr、getCurContPipeClr、startEditContPipeMode、endEditContPipeMode、getContPipeMode、getContPipeInfoXMLStr、setContPipeInfoXMLStr
+
+7.  增加监听事件：REAddContPipeSuccessEvent、REGenPipeCenterLineProgress
+
+8.  增加BIM（BIM）的接口：getElemTransform
+
+9.  增加栅格（Grid）的接口：getDataSetTrans
+
+10. 增加图形显示（Graphics）的接口：resetSysOptStateAndUI
+
+## V3.1.0.2024 {#v3.1.0.2024 .样式4}
+
+1.  更新时间：2023.06.09
+
+2.  增加鼠标探测（Probe）的接口：setProbeMode、getProbeMode
+
+3.  修复聚合锚点设置文字居中属性无效的问题
+
+4.  增加鼠标栅格（Grid）的接口：setValidState
+
+5.  调整资源文件加载方式，取消了引擎模块接口：initEngineSys的commonUrl的资源地址加载，如果需要预加载模型，可以增加RealBIMWeb.preload.js文件，提升场景模型的初始化渲染速度
+
+6.  修复面积测量模式下投影面积类型设置无效的问题
+
+7.  调整了位置编辑窗口的样式
+
+8.  修复UI 工具条在窗口尺寸改变的情况会下会出现增加问题
+
+9.  调整相机（Camera）接口：setCamLocateToElem、setCamLocateToDataSet，增加locType字段用于在相机对准元素是设置相机的视角，默认当前相机视角
+
+## V3.1.0.2003 {#v3.1.0.2003 .样式4}
+
+1.  更新时间：2023.06.02
+
+2.  增加鼠标探测（Probe）的接口：setProbeMode、getProbeMode
+
+3.  修复聚合锚点设置文字居中属性无效的问题
+
+4.  增加相机（Camera）的接口：getFreeCamMoveSpeed、setFreeCamMoveSpeed
+
+### 2023-05
+
+## V3.1.0.1998 {#v3.1.0.1998 .样式4}
+
+1.  更新时间：2023.05.29
+
+2.  修复系统UI界面初始化不在屏幕中间的问题
+
+## V3.1.0.1995 {#v3.1.0.1995 .样式4}
+
+1.  更新时间：2023.05.26
+
+2.  修复剖切（Clip）接口：getClipState获取数据错误的问题
+
+3.  增加几何图形（Geometry）接口：addPolylineShp的textPos字段增加类型
+
+4.  修复标签（Tag）接口：getTagVisDist获取数据异常的问题
+
+5.  修复锚点（Anchor）接口：getAncVisDist获取数据异常的问题
+
+6.  修复小地图加载图片异常的问题
+
+7.  调整（Model）的接口：loadDataSet的字段originCRS改为engineOrigin
+
+8.  修复了开启位置编辑选中构件出现图标的异常问题
+
+9.  修复了栅格数据加载不同两份出现渲染一样的问题
+
+10. 修复获取选择集数据出现超大构件id的问题
+
+## V3.1.0.1978 {#v3.1.0.1978 .样式4}
+
+1.  更新时间：2023.05.16
+
+2.  增加模型加载（Model）的接口：loadDataSet增加字段（dividePrior、originCRS）
+
+3.  监听事件增加：REElevationUpdateFinish、REAxisGridUpdateFinish
+
+4.  修复水面接口调用异常的问题
+
+5.  修复了部分地形转换后无法加载的问题
+
+## V3.1.0.1970 {#v3.1.0.1970 .样式4}
+
+1.  更新时间：2023.05.12
+
+2.  增加坐标（Coordinate）的接口：getValueDispPrecision、setValueDispPrecision
+
+3.  修复了系统UI面板设置坐标精度功能无效的问题
+
+4.  增加相机（Camera）的接口：resetCamLocate
+
+5.  增加图形显示（Graphics）的接口：setPreLoadPicPath
+
+6.  调整BIM（BIM）的接口：setElemAlpha开放可以设置所有数据集
+
+7.  增加动画（Animation）的接口：addAnimCylinder
+
+8.  调整动画（Animation）的接口：addAnimAreaBuffer
+    增加字段用于设置UV纹理长度
+
+## V3.1.0.1951 {#v3.1.0.1951 .样式4}
+
+1.  更新时间：2023.05.06
+
+2.  修复1892之后的版本水面无法加载的异常
+
+3.  修复切换暗色主题，测量模块的坡度显示文字颜色异常的问题
+
+4.  调整自定义天空盒设置，光照方向Z方向不能为正值，即不能从下向上照射
+
+5.  修复添加水面时模型渲染反射异常的问题
+
+6.  增加CAD（CAD）的接口：addFillElem、delFillElem
+
+7.  增加动画（Animation）的接口：addAnimAreaBuffer
+
+### 2023-04
+
+## V3.1.0.1942 {#v3.1.0.1942 .样式4}
+
+1.  更新时间：2023.04.26
+
+2.  增加剖切（Clip）接口：getBoxClipTransType、setBoxClipTransType、setReverseShowClipRgn、setClipBrowseStyle、setClipEditStyle、resetClip、getClipBrowseState、setLocateToClipPlane、getClipOptState、getSingleClipCreateType、setSingleClipCreateType、setBoxClip、setDataSetBoxClip
+
+3.  增加测量（Measure）接口：setValueDispPrecision、getValueDispPrecision、setSlopeVisible、getMeasureType、setMeasureType、getSingleStyleState、setSingleStyleState、getLengthDataShowType、setLengthDataShowType、getAreaDataShowType、setAreaDataShowType、startMeasureState、endMeasureState、cancelCurPotOpt、getCurState、addGroupData、delGroupData、delTypeData
+
+4.  废弃移除接口：setElemVisible、getElemVisible
+
+5.  调整剖切（Clip）接口：setClipAxisGrid-\>getAxisGridRegElem从剖切（Clip）调整为BIM（BIM）并调整对应的回调监听函数名称
+
+6.  增加BIM（BIM）接口：getPolyFenceRegElem
+
+7.  增加监听回调接口：REElemSelRegFinish
+
+8.  修复了延迟加载模型导致进度回调监听发出两次成功信息的问题
+
+## V3.1.0.1934 {#v3.1.0.1934 .样式4}
+
+1.  更新时间：2023.04.19
+
+2.  增加BIM（BIM）的接口：setElemUVAnimAttr
+
+3.  增加了MiniIO模式下，CAD和360资源对路径索引文件的支持
+
+## V3.1.0.1931 {#v3.1.0.1931 .样式4}
+
+1.  更新时间：2023.04.18
+
+2.  增加轴网（AxisGrid）的接口：delAllData
+
+3.  优化相机朝向四元组和方向向量之间的转换
+
+4.  支持轴网多个点位的添加
+
+5.  增加BIM（BIM）的接口：setBorderLineNorLight、getBorderLineNorLight
+
+6.  解决MiniIO项目路径索引文件失效的问题
+
+## V3.1.0.1921 {#v3.1.0.1921 .样式4}
+
+1.  更新时间：2023.04.14
+
+2.  优化CAD文字、坐标、解析dwg速度等
+
+3.  增加移动端剖切操作的基础上进行测量的功能
+
+## V3.1.0.1918 {#v3.1.0.1918 .样式4}
+
+1.  更新时间：2023.04.12
+
+2.  增加公共模块（Common）的接口：getShadowInfo、setShadowInfo
+
+3.  增加图形显示（Graphics）的接口：setSysPanelUIDockArea、createSysPanelBtn、setBtnActiveState、getBtnActiveState、getSysPanelAllChildIds、addSysPanelChildWidget、removeSysPanelWidget、createSysPanelImage、getImagePicPath、setImagePicPath、getBtnStatePicPath、setBtnStatePicPath、delWidget、setSysPanelBtnClrStyle
+
+4.  增加栅格（Grid）的接口：resetDataSetClr
+
+5.  增加模型加载（Model）的接口：getAllDataSetReady、getDataSetReady
+
+6.  修复360相机设置无效的问题
+
+7.  修复相机接口：setCamPreferFPS调用无效的问题
+
+8.  增加相机（Camera）的接口：getCamForcedInitLoc、setCamForcedInitLoc
+
+9.  增加BIM（BIM）的接口：setMaxSmooth、getMaxSmooth
+
+10. 调整场景实时反射默认为关闭
+
+11. 增加标高（Elevation）的接口：setOverlap、getOverlap、delAllData
+
+### 2023-03
+
+## V3.1.0.1892 {#v3.1.0.1892 .样式4}
+
+1.  更新时间：2023.03.22
+
+2.  修复了设置选择集颜色，位置编辑时栅格类型模型颜色异常问题
+
+## V3.1.0.1891 {#v3.1.0.1891 .样式4}
+
+1.  更新时间：2023.03.21
+
+2.  增加公共模块（Common）的接口：getCurRenderStateData、setCurRenderStateData
+
+3.  增加图形显示（Graphics）的接口：resetInitialState
+
+4.  修复相机（Camera）接口：setCamLocateTo 运动速度设置无效的问题
+
+5.  修复相机（Camera）接口：setCamLocateDefault调用无效问题
+
+## V3.1.0.1888 {#v3.1.0.1888 .样式4}
+
+1.  更新时间：2023.03.20
+
+2.  调整了模块层次，增加动画（Animation）模块，原BIM.动画与特效接口，修改了部分接口名称，涉及接口：**addAnimationWall-\>addAnimWall**、**addAnimationPlane-\>addAnimPlane**、**addAnimationSpheres-\>addAnimSpheres**、**addAnimationPolygons-\>addAnimPolygons**、**addAnimationPolygonWalls-\>addAnimPolygonWalls**
+
+3.  增加栅格（Grid）的接口：getSurplusID、getData、setDataIntoClip、setData、endClip、getClipState、setSingleClip、setClipSpecifyHeight、setLocateToClipElem、setClipAxisGrid
+
+4.  增加小地图（MiniMap）的接口：getVisible、setVisible、setBackClr、setShowRangeRefresh、loadCAD、loadImage、getRegion、setRegion、getMaxRegion、setMaxRegion、getMinRegion、setMinRegion、setIconStyle、setCamLocateTo、getConvertCamTransInfo、setConvertCamTransInfo、setCamTransInfo、getCamTransInfo、setCADGroupShpAncScale、addCADShpAnc、getCADShpAncNum、getAllCADShpAnc、getCADShpAnc、getAllCADShpAncGroupIDs、getCADGroupShpAnc、delAllCADShpAnc、delCADShpAnc、delCADGroupShpAnc
+
+5.  修改小地图监听回调名称：**RealBIMLoadMinMapCAD-\>REMiniMapLoadCAD**、**RealBIMSelCADMinMapShpAnchor-\>REMiniMapCADSelShpAnchor**
+
+## V3.1.0.1880 {#v3.1.0.1880 .样式4}
+
+1.  更新时间：2023.03.16
+
+2.  增加标注（Mark）的接口：startAdd、setText、getCurData、endAdd、showData
+
+3.  添加有限元加载完成监听事件：RELoadFEMFinish
+
+4.  增加有限元（FEM）的接口：loadData、removeData、getAllScalarParamName、setActiveScalar、setCLUT
+
+5.  增加轴网（AxisGrid）的接口：setData、getAllGroupNames、getGuid、delData、setClr、setProbeEnable、setVisible、setOverlap、getOverlap
+
+6.  增加BIM接口：setSelElemsBlendAttr、getSelElemsBlendAttr
+    设置选择集的混合属性
+
+7.  修改BIM.动画与特效接口：setShapeAnimStyle的入参模型
+
+8.  增加标高（Elevation）的接口：setData、getAllGroupNames、getGuid、delData、setClr、setProbeEnable、setVisible、getData
+
+9.  增加测量（Measure）的接口：startShowFenceMinDis、endShowFenceMinDis、drawHoriDisLine、clearHoriDisLine、drawDisLine、clearDisLine、setLineClr、setTextStyle、resetDefaultStyle
+
+10. 增加电子围栏（Fence）的接口：startFenceEdit、addFence、endAddFence、endFenceEdit、setPicStyle、getAllPotInfo、getFenceName、delFencePot、delFence、delAllFence、addFenceByPot
+
+11. 增加引擎模块接口：getScreenSnapshot屏幕快照
+
+## V3.1.0.1873 {#v3.1.0.1873 .样式4}
+
+1.  更新时间：2023.03.13
+
+2.  增加倾斜摄影拍平接口：setFlatRegionEffective、getFlatRegionEffective、clearLocalFlatRegion、setLocalFlatRegionEffective、getLocalFlatRegionEffective
+
+3.  增加倾斜摄影单体化接口：setMonomerElemData、setShowMonomerElemData、setHideMonomerElemData、addToSelMonomerElemIDs、removeFromSelMonomerElemIDs、getSelMonomerElemIDs、setSelMonomerElemClr、setMonomerElemHideClr
+
+4.  增加360全景（Panorama）接口：setCamLocateToDestPos、getCamLocate、getCurShpProbeRet、getTexPos、addAnc、getAllAncName、delAnc
+
+5.  增加水面（Water）接口：loadData、getData、delData、delAllData、setCamToData
+
+6.  增加引擎模块接口：getCamRevLR、setCamRevLR、getEscKeyExitOpEnable、setEscKeyExitOpEnable
+
+7.  增加相机模块的碰撞检测接口：setCamCollideState、getCamCollideState
+
+8.  增加相机模块的重力模拟接口：setCamGravityState、getCamGravityState、setCamGravityHeight、getCamGravityHeight
+
+9.  调整了栅格（Grid）接口：setGroupAlpha-\>setDataSetAlpha、getGroupAlpha-\>getDataSetAlpha、setGroupDepthBias-\>setDataSetDepthBias的名称
+
+10. 增加栅格（Grid）的渲染设置接口：refreshDataSet、setDataSetClr、setDataSetVisible、getDataSetVisible、setDataSetTrans、getDataSetBV
+
+11. 增加CAD的接口：setCamLocateToElem、selElem、addAnc、getAnc、getAncNum、getAllAnc、delAnc、delAllAnc、addShpAnc、getShpAnc、getShpAncNum、getAllShpAnc、delShpAnc、delAllShpAnc、getAllShpAncGroupIDs、getGroupShpAnc、delGroupShpAnc、setGroupShpAncScale
+
+## V3.1.0.1870 {#v3.1.0.1870 .样式4}
+
+1.  更新时间：2023.03.06
+
+2.  调整了接口：setFixDataSetCam的接口名称为setFixCurCam
+
+3.  调整了接口：getGolFont的返回参数，去除了部分参数
+
+## V3.1.0.1857 {#v3.1.0.1857 .样式4}
+
+1.  更新时间：2023.03.03
+
+2.  调整了接口：refreshAllDataSet的调用层级，从BIM层级变更为Model层级
+
+## V3.1.0.1852 {#v3.1.0.1852 .样式4}
+
+1.  更新时间：2023.03.02
+
+2.  调整了构件属性接口的使用，将setElemClr、setElemBlendAttr接口整合为**setElemAttr**，调整传参方式，改用对象，各字段为选填字段
+
+3.  调整了构件属性接口的使用，将resetElemBlendAttr、resetElemAttr接口整合为**resetElemAttr**，字段不变，功能整合
+
+4.  调整了构件属性接口的使用，将getElemClr名称调整为**getElemAttr**，不改变使用方式
+
+5.  构件属性接口：setElemAlpha新增字段alphaWeight（权重），用于在模型中有透明元素时，可以只用权重辅助进行显示和隐藏
+
+### 2023-02
+
+## V3.1.0.1848 {#v3.1.0.1848 .样式4}
+
+1.  更新时间：2023.02.28
+
+2.  调整了接口：getElemTotalBV、getTotalBV的层级，从坐标层级调整到BIM.构件属性层级
+
+3.  调整了接口名称：setClipPlanesBlendContourLineClr-\>setClipPlanesContourLineClr、getClipPlanesBlendContourLineClr-\>getClipPlanesContourLineClr
+
+4.  调整了接口：setClipPlanesContourLineClr的入参字段名称blendClr-\>lineClr
+
+## V3.1.0.1845 {#v3.1.0.1845 .样式4}
+
+1.  更新时间：2023.02.23
+
+2.  更新了WebSDK 3.0 版本

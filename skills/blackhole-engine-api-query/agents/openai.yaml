@@ -1,0 +1,4 @@
+interface:
+  display_name: "BlackHole Engine API Query"
+  short_description: "Search BlackHole Engine API docs from output.md."
+  default_prompt: "Use $blackhole-engine-api-query to look up a BlackHole Engine API method and return usage details."
