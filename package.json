@@ -1,0 +1,32 @@
+{
+  "name": "bubblesplant-skills",
+  "version": "0.0.1",
+  "description": "AI agent skills maintained by bubblesplant.",
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "files": [
+    "skills/**",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "agent-skills",
+    "blackhole-engine",
+    "blackhole3d",
+    "bim",
+    "gis"
+  ],
+  "author": "bubblesplant",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bubblesplant/skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bubblesplant/skills/issues"
+  },
+  "homepage": "https://github.com/bubblesplant/skills#readme"
+}
