@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import json
 import re
 import sys
 from dataclasses import dataclass
@@ -18,6 +19,18 @@ class Section:
     content: str
 
 
+@dataclass(frozen=True)
+class Reference:
+    sdk_version: str
+    release_date: str
+    file: str
+    status: str
+
+
+def default_manifest_path() -> Path:
+    return Path(__file__).resolve().parents[1] / "references" / "manifest.json"
+
+
 def clean_heading(raw: str) -> str:
     raw = re.sub(r"\s*\{#.*?\}\s*$", "", raw).strip()
     raw = raw.strip("#").strip()
@@ -26,6 +39,100 @@ def clean_heading(raw: str) -> str:
 
 def canon(value: str) -> str:
     return re.sub(r"[\s`*_#{}\[\]()/\\:：,，.;。'\"]+", "", value).lower()
+
+
+def sdk_key(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+
+def load_manifest(manifest_path: Path) -> dict[str, object]:
+    try:
+        return json.loads(manifest_path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ValueError(f"Manifest not found: {manifest_path}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid manifest JSON: {manifest_path}: {exc}") from exc
+
+
+def manifest_references(manifest: dict[str, object]) -> list[Reference]:
+    raw_references = manifest.get("references")
+    if not isinstance(raw_references, list):
+        raise ValueError("Manifest must contain a references array.")
+
+    references: list[Reference] = []
+    for raw_reference in raw_references:
+        if not isinstance(raw_reference, dict):
+            continue
+        sdk_version = str(raw_reference.get("sdkVersion", "")).strip()
+        file = str(raw_reference.get("file", "")).strip()
+        if not sdk_version or not file:
+            continue
+        references.append(
+            Reference(
+                sdk_version=sdk_version,
+                release_date=str(raw_reference.get("releaseDate", "")).strip(),
+                file=file,
+                status=str(raw_reference.get("status", "")).strip(),
+            )
+        )
+
+    if not references:
+        raise ValueError("Manifest does not contain any valid SDK references.")
+    return references
+
+
+def default_sdk_version(manifest: dict[str, object], references: list[Reference]) -> str:
+    default = str(manifest.get("defaultSdkVersion", "")).strip()
+    if default:
+        return default
+    for reference in references:
+        if reference.status == "default":
+            return reference.sdk_version
+    return references[-1].sdk_version
+
+
+def resolve_reference(
+    manifest_path: Path,
+    requested_sdk: str | None,
+) -> tuple[Path, Reference]:
+    manifest = load_manifest(manifest_path)
+    references = manifest_references(manifest)
+
+    if requested_sdk is None or requested_sdk.lower() in {"latest", "default"}:
+        target_sdk = default_sdk_version(manifest, references)
+    else:
+        target_sdk = requested_sdk
+
+    target_key = sdk_key(target_sdk)
+    for reference in references:
+        reference_key = sdk_key(reference.sdk_version)
+        if reference_key == target_key or reference_key.endswith(target_key):
+            return manifest_path.parent / reference.file, reference
+
+    available = ", ".join(reference.sdk_version for reference in references)
+    raise ValueError(f"SDK not found: {target_sdk}. Available SDKs: {available}")
+
+
+def print_sdk_list(manifest_path: Path) -> None:
+    manifest = load_manifest(manifest_path)
+    references = manifest_references(manifest)
+    default_sdk = default_sdk_version(manifest, references)
+    compatibility_policy = manifest.get("compatibilityPolicy")
+
+    print("Available SDK references:")
+    for reference in references:
+        marker = " (default)" if reference.sdk_version == default_sdk else ""
+        release = f"  {reference.release_date}" if reference.release_date else ""
+        print(f"- {reference.sdk_version}{release}  {reference.file}{marker}")
+    if isinstance(compatibility_policy, dict):
+        api_compatibility = compatibility_policy.get("apiCompatibility")
+        default_lookup = compatibility_policy.get("defaultLookup")
+        if api_compatibility or default_lookup:
+            print("")
+        if api_compatibility:
+            print(f"API compatibility: {api_compatibility}")
+        if default_lookup:
+            print(f"Default lookup: {default_lookup}")
 
 
 def load_sections(doc_path: Path) -> list[Section]:
@@ -160,12 +267,20 @@ def print_titles(matches: list[tuple[int, Section]], doc_path: Path) -> None:
         print(f"{score:3d}  {doc_path}:{section.line_no}  {path}")
 
 
-def print_sections(matches: list[tuple[int, Section]], doc_path: Path, max_chars: int) -> None:
+def print_sections(
+    matches: list[tuple[int, Section]],
+    doc_path: Path,
+    max_chars: int,
+    reference: Reference | None,
+) -> None:
     for index, (score, section) in enumerate(matches, start=1):
         path = " > ".join(section.path)
         if index > 1:
             print("\n" + "=" * 80 + "\n")
         print(f"# Match {index} (score {score})")
+        if reference:
+            release = f" ({reference.release_date})" if reference.release_date else ""
+            print(f"SDK: {reference.sdk_version}{release}")
         print(f"Source: {doc_path}:{section.line_no}")
         print(f"Path: {path}\n")
         print(truncate(section.content, max_chars))
@@ -180,12 +295,22 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Search BlackHole Engine API sections from the bundled Markdown reference."
     )
-    parser.add_argument("query", nargs="+", help="API name, module name, event name, or keywords")
+    parser.add_argument("query", nargs="*", help="API name, module name, event name, or keywords")
+    parser.add_argument(
+        "--sdk",
+        help="SDK version to search, such as SDK_V3.2.0.3690. Use latest/default for the manifest default.",
+    )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=default_manifest_path(),
+        help="Path to the SDK reference manifest.",
+    )
+    parser.add_argument("--list-sdks", action="store_true", help="List bundled SDK references.")
     parser.add_argument(
         "--doc",
         type=Path,
-        default=Path(__file__).resolve().parents[1] / "references" / "blackhole-engine-api.md",
-        help="Path to the API Markdown document.",
+        help="Override the manifest and search a specific API Markdown document.",
     )
     parser.add_argument("--exact", action="store_true", help="Only match exact normalized titles.")
     parser.add_argument("--titles", action="store_true", help="Print matching section titles only.")
@@ -193,12 +318,31 @@ def main() -> int:
     parser.add_argument("--max-chars", type=int, default=8000, help="Maximum characters per section.")
     args = parser.parse_args()
 
-    query = " ".join(args.query).strip()
-    if not args.doc.exists():
-        print(f"Document not found: {args.doc}", file=sys.stderr)
+    try:
+        if args.list_sdks:
+            print_sdk_list(args.manifest)
+            return 0
+
+        if not args.query:
+            parser.error("query is required unless --list-sdks is used")
+        if args.doc and args.sdk:
+            parser.error("--sdk cannot be used with --doc")
+
+        reference: Reference | None = None
+        if args.doc:
+            doc_path = args.doc
+        else:
+            doc_path, reference = resolve_reference(args.manifest, args.sdk)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
         return 2
 
-    sections = load_sections(args.doc)
+    query = " ".join(args.query).strip()
+    if not doc_path.exists():
+        print(f"Document not found: {doc_path}", file=sys.stderr)
+        return 2
+
+    sections = load_sections(doc_path)
     matches = find_matches(sections, query, args.exact, args.max_matches)
     if not matches:
         print(f"No matches for: {query}")
@@ -210,9 +354,9 @@ def main() -> int:
         return 1
 
     if args.titles:
-        print_titles(matches, args.doc)
+        print_titles(matches, doc_path)
     else:
-        print_sections(matches, args.doc, args.max_chars)
+        print_sections(matches, doc_path, args.max_chars, reference)
     return 0
 
 

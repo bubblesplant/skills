@@ -1,0 +1,33 @@
+{
+  "name": "BlackHole Engine SDK",
+  "defaultSdkVersion": "SDK_V3.2.0.3690",
+  "referenceFormat": "markdown",
+  "compatibilityPolicy": {
+    "apiCompatibility": "mostly-backward-compatible",
+    "defaultLookup": "defaultSdkVersion",
+    "whenNoSdkSpecified": "Use the manifest default SDK reference. This should usually point to the latest bundled SDK snapshot.",
+    "compatibilityNote": "Project guidance indicates most BlackHole Engine APIs are backward-compatible across SDK updates, but version-sensitive behavior should still be checked against the user's SDK when known.",
+    "versionSensitiveTopics": [
+      "removed APIs",
+      "deprecated APIs",
+      "parameter changes",
+      "return value changes",
+      "event names",
+      "initialization behavior",
+      "breaking changes",
+      "release notes"
+    ]
+  },
+  "references": [
+    {
+      "sdkVersion": "SDK_V3.2.0.3690",
+      "releaseDate": "2026-04-17",
+      "file": "blackhole-engine-api.SDK_V3.2.0.3690.md",
+      "status": "default"
+    }
+  ],
+  "notes": [
+    "Each reference entry is a local snapshot for one SDK release.",
+    "When adding a new SDK reference, append it to references and update defaultSdkVersion only when it should become the default lookup target."
+  ]
+}
