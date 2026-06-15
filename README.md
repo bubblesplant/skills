@@ -31,6 +31,12 @@ Learn more about the skills CLI at [vercel-labs/skills](https://github.com/verce
 
 Each skill is self-contained under `skills/<skill-name>`. A skill may include its own references, assets, or helper tools without changing the rest of this collection.
 
+### Frontend Skills
+
+| Name | Description |
+| --- | --- |
+| [create-bubbles](./skills/create-bubbles) | Create frontend apps with the `create-bubbles` CLI. Guides the user through Vue, React, Taro, NextJS, Electron, and monorepo template choices, explains the main differences, then scaffolds the confirmed template. |
+
 ### Documentation Skills
 
 | Name | Description |

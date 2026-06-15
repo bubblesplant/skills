@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Bubbles"
+  short_description: "Create frontend apps with create-bubbles templates."
+  default_prompt: "Use $create-bubbles to help me choose a template, then scaffold and finish the frontend app."
