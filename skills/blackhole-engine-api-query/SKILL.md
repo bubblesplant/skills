@@ -13,9 +13,9 @@ The bundled references are managed by `references/manifest.json`.
 
 Current default:
 
-- SDK: `BlackHole Engine SDK_V3.2.0.3690`
-- Release date: `2026-04-17`
-- Reference: `references/blackhole-engine-api.SDK_V3.2.0.3690.md`
+- SDK: `BlackHole Engine SDK_V3.2.0.3757`
+- Release date: `2026-05-22`
+- Reference: `references/blackhole-engine-api.SDK_V3.2.0.3757.md`
 
 ## Compatibility Policy
 
@@ -33,7 +33,7 @@ Prefer the query script before loading the full reference:
 
 ```bash
 python scripts/query_api.py loadDataSet
-python scripts/query_api.py loadDataSet --sdk SDK_V3.2.0.3690
+python scripts/query_api.py loadDataSet --sdk SDK_V3.2.0.3757
 python scripts/query_api.py loadDataSet --sdk latest
 python scripts/query_api.py --list-sdks
 python scripts/query_api.py "Model loadDataSet" --max-chars 12000
@@ -69,6 +69,7 @@ For concepts that are not exact API names, search keywords:
 python scripts/query_api.py getTransGeoCoords
 python scripts/query_api.py RESystemMouseMove
 python scripts/query_api.py loadDataSet --sdk 3.2.0.3690
+python scripts/query_api.py setLogDepthEnable --sdk 3.2.0.3757
 ```
 
 Use `rg -n` directly against the selected Markdown reference only when the script output is not enough.

@@ -1,6 +1,6 @@
 {
   "name": "BlackHole Engine SDK",
-  "defaultSdkVersion": "SDK_V3.2.0.3690",
+  "defaultSdkVersion": "SDK_V3.2.0.3757",
   "referenceFormat": "markdown",
   "compatibilityPolicy": {
     "apiCompatibility": "mostly-backward-compatible",
@@ -23,6 +23,12 @@
       "sdkVersion": "SDK_V3.2.0.3690",
       "releaseDate": "2026-04-17",
       "file": "blackhole-engine-api.SDK_V3.2.0.3690.md",
+      "status": "previous"
+    },
+    {
+      "sdkVersion": "SDK_V3.2.0.3757",
+      "releaseDate": "2026-05-22",
+      "file": "blackhole-engine-api.SDK_V3.2.0.3757.md",
       "status": "default"
     }
   ],
