@@ -109,6 +109,16 @@ def resolve_reference(
         if reference_key == target_key or reference_key.endswith(target_key):
             return manifest_path.parent / reference.file, reference
 
+    default_sdk = default_sdk_version(manifest, references)
+    for reference in references:
+        if reference.sdk_version == default_sdk:
+            print(
+                f"SDK not bundled: {target_sdk}. Using latest API reference "
+                f"{reference.sdk_version}; check upgrade notes for SDK-specific errors.",
+                file=sys.stderr,
+            )
+            return manifest_path.parent / reference.file, reference
+
     available = ", ".join(reference.sdk_version for reference in references)
     raise ValueError(f"SDK not found: {target_sdk}. Available SDKs: {available}")
 
@@ -118,21 +128,34 @@ def print_sdk_list(manifest_path: Path) -> None:
     references = manifest_references(manifest)
     default_sdk = default_sdk_version(manifest, references)
     compatibility_policy = manifest.get("compatibilityPolicy")
+    upgrade_notes = manifest.get("upgradeNotes")
 
-    print("Available SDK references:")
+    print("Available API reference:")
     for reference in references:
         marker = " (default)" if reference.sdk_version == default_sdk else ""
         release = f"  {reference.release_date}" if reference.release_date else ""
         print(f"- {reference.sdk_version}{release}  {reference.file}{marker}")
+    if isinstance(upgrade_notes, dict) and upgrade_notes.get("file"):
+        print(f"- upgrade notes: {upgrade_notes['file']}")
+        if upgrade_notes.get("sourceApi"):
+            print(f"- upgrade notes API: {upgrade_notes['sourceApi']}")
+        if upgrade_notes.get("refreshScript"):
+            print(f"- refresh script: {upgrade_notes['refreshScript']}")
     if isinstance(compatibility_policy, dict):
         api_compatibility = compatibility_policy.get("apiCompatibility")
         default_lookup = compatibility_policy.get("defaultLookup")
+        older_sdk = compatibility_policy.get("whenOlderSdkSpecified")
+        sdk_error = compatibility_policy.get("whenSdkErrorOrUpgradeIssue")
         if api_compatibility or default_lookup:
             print("")
         if api_compatibility:
             print(f"API compatibility: {api_compatibility}")
         if default_lookup:
             print(f"Default lookup: {default_lookup}")
+        if older_sdk:
+            print(f"Older SDK lookup: {older_sdk}")
+        if sdk_error:
+            print(f"SDK error handling: {sdk_error}")
 
 
 def load_sections(doc_path: Path) -> list[Section]:
@@ -298,7 +321,7 @@ def main() -> int:
     parser.add_argument("query", nargs="*", help="API name, module name, event name, or keywords")
     parser.add_argument(
         "--sdk",
-        help="SDK version to search, such as SDK_V3.2.0.3690. Use latest/default for the manifest default.",
+        help="SDK version hint. API docs are maintained as latest-only; older SDK values fall back to the manifest default.",
     )
     parser.add_argument(
         "--manifest",

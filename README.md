@@ -36,12 +36,13 @@ Each skill is self-contained under `skills/<skill-name>`. A skill may include it
 | Name | Description |
 | --- | --- |
 | [create-bubbles](./skills/create-bubbles) | Create frontend apps with the `create-bubbles` CLI. Guides the user through Vue, React, Taro, NextJS, Electron, and monorepo template choices, explains the main differences, then scaffolds the confirmed template. |
+| [website-replica](./skills/website-replica) | Replica workflow for existing websites and interactive pages. Uses a staged process: confirm scope, inspect original states with Playwright, output state dependencies and data flow, wait for user confirmation, then implement and compare screenshots until states match. |
 
 ### Documentation Skills
 
 | Name | Description |
 | --- | --- |
-| [blackhole-engine-api-query](./skills/blackhole-engine-api-query) | Search locally bundled, versioned BlackHole Engine Plus / BlackHole3D JavaScript API docs. Current default: `SDK_V3.2.0.3690` (`2026-04-17`). |
+| [blackhole-engine-api-query](./skills/blackhole-engine-api-query) | Search the latest bundled BlackHole Engine Plus / BlackHole3D JavaScript API docs, guide model resource URL discovery, and consult official SDK upgrade notes. Current API reference: `SDK_V3.2.0.3772` (`2026-06-12`). |
 
 ## FAQ
 
@@ -53,13 +54,13 @@ This repository stores reusable skills that AI assistants can load when they nee
 
 Any assistant or agent runtime that supports the Agent Skills directory format can use them. The skills are not tied to a specific AI product.
 
-### How are versioned references handled?
+### How are API references and upgrade notes handled?
 
-Versioning is handled inside each skill that needs it, not at the repository root.
+Reference maintenance is handled inside each skill that needs it, not at the repository root.
 
-For example, `blackhole-engine-api-query` stores its SDK version metadata and compatibility policy in `skills/blackhole-engine-api-query/references/manifest.json`, and keeps each API reference as a separate versioned Markdown file.
+For example, `blackhole-engine-api-query` stores its latest SDK metadata and compatibility policy in `skills/blackhole-engine-api-query/references/manifest.json`. It keeps one latest API Markdown reference and a generated `references/upgrade-notes.md` cache from the official update-note API.
 
-BlackHole Engine APIs are treated as mostly backward-compatible. If no SDK version is specified, the skill uses its manifest default reference. Version-sensitive topics, such as deprecated APIs, parameter changes, return values, events, initialization behavior, and release notes, should still be checked against the relevant SDK when possible.
+BlackHole Engine APIs are treated as backward-compatible. Ordinary API lookup uses the latest bundled reference. Version-sensitive topics, such as SDK errors, upgrade regressions, deprecated APIs, parameter changes, return values, events, initialization behavior, and release notes, should be checked against `upgrade-notes.md`; refresh it with `node scripts/refresh_upgrade_notes.mjs` from inside the skill when latest update details matter.
 
 ## License
 

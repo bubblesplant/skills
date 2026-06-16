@@ -1,4 +1,4 @@
 interface:
   display_name: "BlackHole Engine API Query"
-  short_description: "Search versioned BlackHole Engine API docs."
-  default_prompt: "Use $blackhole-engine-api-query to look up a BlackHole Engine API method for a bundled SDK version and return usage details."
+  short_description: "Search latest BlackHole Engine APIs, model URLs, and upgrade notes."
+  default_prompt: "Use $blackhole-engine-api-query to look up a BlackHole Engine API method from the latest bundled reference, guide model resource URL discovery when needed, and check upgrade notes when the user reports SDK errors or compatibility issues."
