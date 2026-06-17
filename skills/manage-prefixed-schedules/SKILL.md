@@ -1,105 +1,111 @@
 ---
 name: manage-prefixed-schedules
-description: "Manage scheduled reminders, notifications, and scheduled tasks that are constrained to an AI-owned namespace or prefix across Windows, macOS, and Linux. Use when the user asks to create, view, inspect, update, delete, or audit reminders, notifications, scheduled tasks, planned notifications, or reminder lists that belong to the AI-managed scope. Do not manage unrelated system tasks."
+description: "管理仅限 AI 自有命名空间或前缀的定时提醒、通知和计划通知记录，覆盖 Windows、macOS 和 Linux。用户要求创建、查看、检查、更新、删除或审计提醒、通知、计划通知、定时通知任务或提醒列表，且资源属于 AI 管理范围时使用。不要管理无关的系统任务。"
 ---
 
-# Manage Prefixed Scheduled Notifications
+# 管理带前缀的定时通知
 
-## Scope
+## 范围
 
-Use this skill only for scheduled reminders, notifications, and scheduled tasks that belong to the AI-owned namespace below.
+仅将此 skill 用于属于下方 AI 自有命名空间的定时提醒、通知、计划通知记录和定时任务。
 
-This skill defines boundaries and naming rules only. It does not provide exact command recipes. Choose the appropriate native scheduler, notification, and inspection mechanism for the current operating system.
+此 skill 定义边界、命名规则和通知行为；不固定某一个脚本或命令配方。根据当前 agent 环境和操作系统，选择合适的原生调度器、通知 API、应用自动化或检查机制。
 
-If this skill or adjacent metadata appears garbled when read, reread it as UTF-8 and confirm the content before acting.
+如果此 skill 或相邻元数据读取后出现乱码，请按 UTF-8 重新读取并确认内容后再执行。
 
-## Default Execution Rules
+## 默认执行规则
 
-- When the user asks for a reminder, notification, or planned notification and does not explicitly request the current Codex conversation, create an operating-system user-level scheduled task plus a real system notification by default. Do not substitute a Codex app heartbeat or a chat-only reminder.
-- Use a Codex app thread heartbeat only when the user explicitly asks for a current-conversation reminder, to continue this thread later, or for a heartbeat.
-- When the user asks for a notification, use the platform's native notification capability. If native notifications are unavailable, use a clearly visible local fallback notification and explain the fallback.
-- Before creating or updating a reminder, confirm the current date, time, and time zone. Parse formats such as `11.58` and `11:58` as local `HH:mm`. If the user omits the date and the time has not passed today, use today. If the time has already passed, ask whether they mean a catch-up run today, tomorrow, or another date.
-- During a create request, if in-scope reminders have not already been queried or listed in the current turn, inspect `AI-Reminders` / `AI-Reminder-*` resources for expired reminders. Expired means a one-time reminder whose scheduled time is in the past, or a scheduled task with no future run after its scheduled time has passed. If expired reminders exist, show them in a Markdown table and ask whether the user wants to delete them. Do not delete expired reminders without explicit user confirmation unless the user already asked for deletion.
-- If scheduler or notification access is blocked by permissions or sandboxing, request the required permission. Do not silently switch to a reminder mechanism that does not satisfy the user's request.
+- 用户要求提醒、通知或计划通知，且未明确要求在当前 Codex 对话中提醒时，默认创建用户级计划通知。计划项必须在指定时间产生真实可见的通知。不要用 Codex app heartbeat 或仅聊天内提醒替代。
+- 仅当用户明确要求当前对话稍后继续、当前线程提醒或 heartbeat 时，才使用 Codex app thread heartbeat。
+- 用户要求通知时，使用平台原生通知能力。原生通知不可用时，使用清晰可见的本地兜底通知，并说明所用兜底方式。
+- 创建或更新提醒前，确认当前日期、时间和时区。将 `11.58` 和 `11:58` 解析为本地 `HH:mm`。用户省略日期且该时间今天尚未过去时，使用今天；如果时间已经过去，询问用户是要今天补跑、明天，还是其他日期。
+- 创建提醒时，如果当前回合尚未查询或列出范围内提醒，先检查 `AI-Reminders` / `AI-Reminder-*` 资源中是否存在过期提醒。过期指一次性提醒的计划时间已在过去，或定时任务在计划时间过去后没有未来运行时间。若存在过期提醒，用 Markdown 表格展示，并询问用户是否删除。除非用户已明确要求删除，否则不要擅自删除过期提醒。
+- 如果调度器或通知访问被权限、沙箱或会话限制阻止，请请求所需权限。不要静默切换到无法满足用户请求的提醒机制。
 
-## Namespace
+## 命名空间
 
-Always use these names:
+始终使用这些名称：
 
-- Owner namespace: `AI-Reminders`
-- Resource prefix: `AI-Reminder-`
-- Generated ID format: `AI-Reminder-<stable-id>`
+- 所有者命名空间：`AI-Reminders`
+- 资源前缀：`AI-Reminder-`
+- 生成 ID 格式：`AI-Reminder-<stable-id>`
 
-When the platform supports scheduler folders, groups, labels, unit names, comments, descriptions, or metadata, use the owner namespace and resource prefix to mark resources.
+平台支持调度器文件夹、组、标签、单元名、注释、描述或元数据时，用所有者命名空间和资源前缀标记资源。
 
-Platform naming guidance:
+平台命名指导：
 
-- Windows: when available, use `AI-Reminders` as the scheduled task container namespace; task names must start with `AI-Reminder-`.
-- macOS: launch labels, file names, or scheduler metadata must start with `AI-Reminder-` or clearly include `AI-Reminders`.
-- Linux: user-level scheduler resources, unit names, job names, comments, or metadata must start with `AI-Reminder-` or clearly include `AI-Reminders`.
+- Windows：可用时，将 `AI-Reminders` 作为计划任务容器命名空间；任务名必须以 `AI-Reminder-` 开头。
+- macOS：launch label、文件名或调度器元数据必须以 `AI-Reminder-` 开头，或明确包含 `AI-Reminders`。
+- Linux：用户级调度器资源、unit 名、job 名、注释或元数据必须以 `AI-Reminder-` 开头，或明确包含 `AI-Reminders`。
 
-Windows implementation guidance:
+## 通知执行指导
 
-- PowerShell scripts launched by Task Scheduler must be parse-safe under Windows PowerShell 5.1. Prefer ASCII-only executable script text, or save UTF-8 with BOM if non-ASCII literals are unavoidable.
-- Do not put localized reminder text directly into a BOM-less `.ps1` file. Pass localized title/message text through task arguments or metadata instead.
-- Do not rely only on Windows toast notifications, because toast requests can fail or be invisible depending on AppUserModelID/session behavior. Include a clearly visible fallback such as a timed `WScript.Shell.Popup`, and write a small log file with success/failure details.
-- After creating or changing a Windows reminder script, run the exact script/action with a short harmless test or otherwise verify that it exits with code `0` before relying on the scheduled time.
-- Treat generated helper files such as the reminder `.ps1`, `.log`, and `.json` as owned adjacent artifacts for that reminder. Never treat platform binaries such as `powershell.exe`, `schtasks.exe`, shell interpreters, or shared runtime files as owned artifacts.
+- 优先使用当前 agent 环境、宿主应用、操作系统或自动化平台提供的一等通知能力。例如原生提醒/通知 API、带通知动作的用户级调度器、平台通知中心集成或可信应用自动化 hook。
+- Windows 上按以下顺序选择可见通知动作：
+  1. PowerShell：优先使用 `powershell.exe` 或已可用的 `pwsh.exe` 直接发送通知。可行时，将本地化标题/消息放在参数或元数据中，并将 backend 记录为 `powershell`。
+  2. 文件资源管理器：如果 PowerShell 在当前交互会话中无法产生可见通知，使用 `explorer.exe` / File Explorer 展示受控提醒产物，例如选中或打开生成的提醒文件、URL 或文件夹。将 backend 记录为 `explorer-fallback`。
+  3. 弹窗：如果文件资源管理器不可用或不可见，使用本地模态弹窗或宿主提供的对话框，确保用户仍能看到提醒。记录具体弹窗机制，并将 backend 记录为 `popup-fallback`。
+  除非 PowerShell 不可用、被阻止或已验证不适合当前计划动作，否则不要跳到资源管理器或弹窗兜底。
+- 当环境可以直接创建计划通知时，不要强制要求 `.ps1`、shell 脚本或辅助可执行文件。辅助文件只是实现细节，不是此 skill 的公开契约。
+- 平台要求可执行动作时，选择该环境中最小且可靠的通知动作，并写入元数据。动作可以是脚本、快捷指令、app intent、计划 job 动作、命令或平台特定通知资源。
+- 生成辅助脚本或小型辅助可执行文件时，确保它适配环境：避免依赖编码敏感的本地化字面量；可行时通过参数或元数据传递本地化标题/消息；若主要通知可能不可见，包含可见兜底通知；实际可行时写入简短成功/失败日志。
+- 创建或修改计划通知后，实际可行时验证通知动作。对于可执行动作，运行一次无害短测试，或以其他方式确认动作能成功完成，再依赖计划时间。
+- 将生成的通知辅助文件、元数据文件和日志文件视为该提醒的受控相邻产物。不要把 `powershell.exe`、`schtasks.exe`、shell 解释器、通知守护进程、app runtime 或共享运行时文件视为受控产物。
 
-## Safety Rules
+## 安全规则
 
-- Manage only resources that are clearly intended for scheduled reminders and clearly belong to this namespace or prefix.
-- Do not create, update, disable, enable, or delete unrelated scheduled task resources.
-- Do not operate on broad scheduler paths, all jobs, all startup items, vendor update tasks, security software tasks, browser update tasks, or operating-system-managed tasks.
-- Treat any resource without the `AI-Reminder-` prefix or `AI-Reminders` namespace as out of scope.
-- If the user asks to modify a task that does not clearly belong to this scope, explain that this skill only manages prefixed reminder resources.
-- Prefer user-level scheduled tasks rather than system-level tasks unless the user explicitly asks for system-level tasks and understands the permission implications.
-- Before destructive operations such as delete, overwrite, or disable, confirm the exact resource name or ID.
+- 仅管理明确用于定时提醒且明确属于此命名空间或前缀的资源。
+- 不要创建、更新、禁用、启用或删除无关的计划任务资源。
+- 不要操作宽泛的调度器路径、全部 jobs、全部启动项、厂商更新任务、安全软件任务、浏览器更新任务或操作系统托管任务。
+- 任何没有 `AI-Reminder-` 前缀或 `AI-Reminders` 命名空间的资源都视为范围外。
+- 用户要求修改不明确属于此范围的任务时，说明此 skill 只管理带前缀的提醒资源。
+- 除非用户明确要求系统级任务并理解权限影响，否则优先使用用户级计划任务。
+- 删除、覆盖、禁用等破坏性操作前，确认精确的资源名称或 ID。
 
-## Create, List, View, Update, Delete, Audit
+## 创建、列出、查看、更新、删除、审计
 
-Create:
+创建：
 
-- If the current turn has not already listed or queried in-scope reminders, check for expired owned reminders while creating the new one. The expired-reminder table should include at least: ID, title or purpose, scheduled time, last run, execution result, platform resource, and metadata status.
-- Generate a stable ID with the `AI-Reminder-` prefix.
-- Store enough information in the scheduled task resource or adjacent metadata for later lookup, including title, message, time, recurrence rule, user intent, generated helper script path, log path, and metadata path when those artifacts exist.
-- When the platform supports it, enable catch-up behavior for missed times so reminders can still run after restart.
-- After creation, verify that the underlying platform resource exists, then report the reminder ID, platform resource name, notification method, and scheduled time to the user.
+- 如果当前回合尚未列出或查询范围内提醒，创建新提醒时先检查过期的受控提醒。过期提醒表格至少包含：ID、标题或用途、计划时间、上次运行、执行结果、平台资源和元数据状态。
+- 生成带 `AI-Reminder-` 前缀的稳定 ID。
+- 在计划通知资源或相邻元数据中保存足够信息以便后续查询，包括标题、消息、时间、循环规则、用户意图、通知 backend、平台动作、元数据路径，以及存在时的辅助文件/日志路径。
+- 平台支持时，启用错过时间后的补跑行为，使重启后提醒仍可运行。
+- 创建后，验证底层平台资源存在，然后向用户报告提醒 ID、平台资源名称、通知方法/backend 和计划时间。
 
-List:
+列出：
 
-- Return only resources that match this namespace or prefix.
-- Include, where possible, ID, title or purpose, scheduled time, recurrence rule, enabled state, and underlying platform resource name.
-- When the user asks to view, list, or query planned notifications, return the result as a Markdown table. The table must include at least: ID, title or purpose, scheduled time, recurrence rule, state, next run, last run, platform resource, and notification method or execution result.
-- If no matching resources exist, return a clear no-results statement and do not list unrelated system tasks.
+- 仅返回匹配此命名空间或前缀的资源。
+- 可行时包含 ID、标题或用途、计划时间、循环规则、启用状态和底层平台资源名称。
+- 用户要求查看、列出或查询计划通知时，用 Markdown 表格返回结果。表格至少包含：ID、标题或用途、计划时间、循环规则、状态、下次运行、上次运行、平台资源和通知方法或执行结果。
+- 没有匹配资源时，清楚说明未找到结果，不要列出无关系统任务。
 
-View:
+查看：
 
-- Inspect only the specified prefixed resource.
-- If metadata and scheduler resources disagree, report the mismatch clearly.
-- For a single resource view, prefer a Markdown table for key fields, followed by any mismatch, permission limit, or execution failure details.
+- 仅检查指定的带前缀资源。
+- 元数据与调度器资源不一致时，明确报告差异。
+- 查看单个资源时，优先用 Markdown 表格展示关键字段，然后补充任何不一致、权限限制或执行失败详情。
 
-Update:
+更新：
 
-- Preserve the stable ID when possible.
-- Modify only matching prefixed resources and their owned metadata.
-- Recreate an owned resource only when in-place updates are unsafe or unsupported by the platform.
+- 可行时保留稳定 ID。
+- 仅修改匹配前缀的资源及其受控元数据。
+- 仅当原地更新不安全或平台不支持时，才重建受控资源。
 
-Delete:
+删除：
 
-- Delete only the exact prefixed resource specified by the user.
-- If owned adjacent artifacts exist for that exact resource, delete them as well. Owned adjacent artifacts include metadata files, generated helper scripts or small executables created specifically for that reminder, and that reminder's log files.
-- Before deleting adjacent artifacts, verify that each file is clearly owned by the exact reminder ID, either because its name starts with the exact ID or because trusted metadata for that exact ID points to it. Do not delete broad directories, wildcard matches outside the owned artifact set, shared helper programs, platform binaries, shell interpreters, or unrelated files.
-- Report both the deleted scheduler resource and the deleted adjacent artifacts.
-- Do not affect unrelated platform resources.
+- 仅删除用户指定的精确带前缀资源。
+- 如果该精确资源存在受控相邻产物，一并删除。受控相邻产物包括元数据文件、专为该提醒生成的通知辅助文件或小型辅助可执行文件，以及该提醒的日志文件。
+- 删除相邻产物前，确认每个产物都明确归属于该精确提醒 ID：要么文件名以该精确 ID 开头，要么可信元数据指向它。不要删除宽泛目录、受控产物集合之外的通配符匹配、共享 helper、平台二进制、shell 解释器、通知守护进程、app runtime 或无关文件。
+- 报告已删除的调度器资源和已删除的相邻产物。
+- 不要影响无关平台资源。
 
-Audit:
+审计：
 
-- Check for orphaned metadata or orphaned scheduled task resources only within the `AI-Reminders` namespace or `AI-Reminder-` prefix.
-- Provide repair suggestions or repair actions only for owned resources.
+- 仅在 `AI-Reminders` 命名空间或 `AI-Reminder-` 前缀内检查孤立元数据或孤立计划任务资源。
+- 仅为受控资源提供修复建议或修复操作。
 
-## User Communication
+## 用户沟通
 
-Reply in the user's language. When reporting a creation or change, include the reminder ID and the corresponding platform resource name. If the current environment cannot safely access the scheduler or notification system, explain the blocker and the required permission or session context.
+使用用户的语言回复。报告创建或变更时，包含提醒 ID 和对应的平台资源名称。如果当前环境无法安全访问调度器或通知系统，说明阻碍因素以及需要的权限或会话上下文。
 
-Query responses must use tables. Create, update, and delete responses may use short prose, but must still include the ID and platform resource name.
+查询响应必须使用表格。创建、更新和删除响应可以使用简短文字，但仍必须包含 ID 和平台资源名称。

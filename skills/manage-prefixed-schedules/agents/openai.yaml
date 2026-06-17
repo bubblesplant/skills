@@ -1,4 +1,4 @@
 interface:
-  display_name: "管理带前缀的计划任务"
-  short_description: "只管理 AI 自有前缀的定时提醒。"
+  display_name: "管理带前缀的计划提醒"
+  short_description: "只管理 AI 自有前缀范围内的定时提醒。"
   default_prompt: "使用 $manage-prefixed-schedules 创建、查看、更新或删除只属于 AI 前缀范围的定时提醒。"
