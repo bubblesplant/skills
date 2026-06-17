@@ -38,6 +38,12 @@ Each skill is self-contained under `skills/<skill-name>`. A skill may include it
 | [create-bubbles](./skills/create-bubbles) | Create frontend apps with the `create-bubbles` CLI. Guides the user through Vue, React, Taro, NextJS, Electron, and monorepo template choices, explains the main differences, then scaffolds the confirmed template. |
 | [website-replica](./skills/website-replica) | Replica workflow for existing websites and interactive pages. Uses a staged process: confirm scope, inspect original states with Playwright, output state dependencies and data flow, wait for user confirmation, then implement and compare screenshots until states match. |
 
+### Automation Skills
+
+| Name | Description |
+| --- | --- |
+| [manage-prefixed-schedules](./skills/manage-prefixed-schedules) | Manage AI-owned scheduled reminders, notifications, and scheduled jobs across Windows, macOS, and Linux by limiting operations to the `AI-Reminders` namespace and `AI-Reminder-` prefix. Defines safety boundaries, not command recipes. |
+
 ### Documentation Skills
 
 | Name | Description |
