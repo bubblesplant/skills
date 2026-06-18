@@ -1,4 +1,0 @@
-interface:
-  display_name: "网站复刻"
-  short_description: "按阶段侦察、分析并复刻交互网站。"
-  default_prompt: "使用 $website-replica 复刻这个网站，先完成侦察和状态依赖分析，等我确认后再写代码。"

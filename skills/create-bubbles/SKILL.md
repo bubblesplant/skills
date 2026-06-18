@@ -1,6 +1,6 @@
 ---
 name: create-bubbles
-description: Create, customize, and validate frontend projects with the create-bubbles CLI and BubblesJS templates. Use when Codex needs to scaffold a frontend app, ask the user to choose Vue/React/Taro/NextJS/Electron templates, explain template differences, add pages/components/routes/state, adapt an existing generated frontend, or update create-bubbles templates.
+description: Create, customize, and validate frontend projects with the create-bubbles CLI and BubblesJS templates. Use when an agent needs to scaffold a frontend app, ask the user to choose Vue/React/Taro/NextJS/Electron templates, explain template differences, add pages/components/routes/state, adapt an existing generated frontend, or update create-bubbles templates.
 ---
 
 # Create Bubbles
