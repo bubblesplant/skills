@@ -42,7 +42,7 @@ Each skill is self-contained under `skills/<skill-name>`. A skill may include it
 
 | Name | Description |
 | --- | --- |
-| [manage-prefixed-schedules](./skills/manage-prefixed-schedules) | Manage AI-owned scheduled reminders, notifications, and scheduled jobs across Windows, macOS, and Linux by limiting operations to the `AI-Reminders` namespace and `AI-Reminder-` prefix. Defines safety boundaries, not command recipes. |
+| [manage-prefixed-schedules](./skills/manage-prefixed-schedules) | **Testing only; installation is not recommended.** Manage AI-owned scheduled reminders, notifications, and scheduled jobs across Windows, macOS, and Linux by limiting operations to the `AI-Reminders` namespace and `AI-Reminder-` prefix. Defines safety boundaries, not command recipes. |
 
 ### Documentation Skills
 
