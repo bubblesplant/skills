@@ -64,6 +64,31 @@ description: 适用于用户要求复刻已有网站、还原页面交互、按�
 
 实现完成后不能直接结束，必须执行最终循环对比，直到状态依赖表里的所有可验证状态都一致。
 
+## 提醒计划分级
+
+需要提醒用户阶段完成、阻塞、等待确认、环境缺失、长时间任务状态或后台结果时，先把提醒计划分为“重要”和“不重要”。默认由 AI 自行判断；用户描述中出现“重要、紧急、必须、立刻、马上、关键、高优先级、别错过、一定提醒、阻塞、需要确认才能继续”等相近表达时，按重要处理。无法判断但会阻塞流程、影响安全、涉及不可逆操作或需要用户立即决策时，也按重要处理；普通进度、阶段性完成、可稍后查看的信息按不重要处理。
+
+重要提醒直接使用系统弹窗提醒，不要先走 toast。可用 PowerShell 的 MessageBox，例如：
+
+```powershell
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.MessageBox]::Show($Message, $Title, 'OK', 'Information') | Out-Null
+```
+
+不重要提醒优先使用 Windows toast；AppID 直接使用 PowerShell 已有的 AppUserModelID，例如 `Microsoft.Windows.PowerShell`，不要创建自定义 AppID、注册表项、开始菜单快捷方式或其他持久化入口。toast 失败、不可用、超时或系统禁用通知时，再降级为系统弹窗提醒。toast 可用 PowerShell 直接发送，例如：
+
+```powershell
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+$AppId = 'Microsoft.Windows.PowerShell'
+$Template = [Windows.UI.Notifications.ToastTemplateType]::ToastText02
+$Xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($Template)
+$TextNodes = $Xml.GetElementsByTagName('text')
+$TextNodes.Item(0).AppendChild($Xml.CreateTextNode($Title)) | Out-Null
+$TextNodes.Item(1).AppendChild($Xml.CreateTextNode($Message)) | Out-Null
+$Toast = [Windows.UI.Notifications.ToastNotification]::new($Xml)
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($AppId).Show($Toast)
+```
+
 ## 阻塞处理
 
 如果原站无法访问、页面需要登录/权限/二次验证、出现验证码/风控/403/429、关键资源或接口加载失败、`networkidle` 超时，或某个操作可能造成支付、删除、真实提交、发消息、改配置、退出登录等不可逆结果，必须暂停并询问用户下一步。
