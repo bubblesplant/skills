@@ -35,8 +35,14 @@ Each skill is self-contained under `skills/<skill-name>`. A skill may include it
 
 | Name | Description |
 | --- | --- |
-| [create-bubbles](./skills/create-bubbles) | Create frontend apps with the `create-bubbles` CLI. Guides the user through Vue, React, Taro, NextJS, Electron, and monorepo template choices, explains the main differences, then scaffolds the confirmed template. |
-| [website-replica](./skills/website-replica) | Replica workflow for existing websites and interactive pages. Uses a staged process: confirm scope, inspect original states with Playwright, output state dependencies and data flow, wait for user confirmation, then implement and compare screenshots until states match. |
+| [create-bubbles](./skills/create-bubbles) | Create frontend apps with the `create-bubbles` CLI. Guides the user through Vue, React, Taro, NextJS, Electron, and monorego template choices, explains the main differences, then scaffolds the confirmed template. |
+| [website-replica (experimental)](<./skills/website-replica(experimental)>) | **Experimental.** Replica workflow for existing websites and interactive pages. Uses a staged process: confirm scope, inspect original states with Playwright, output state dependencies and data flow, wait for user confirmation, then implement and compare screenshots until states match. |
+
+### Workflow Skills
+
+| Name | Description |
+| --- | --- |
+| [dev-team-orchestration](./skills/dev-team-orchestration) | Orchestrate a subagent team (PM → contract/architecture → frontend ‖ backend in parallel → integration → QA with Playwright → defect reflow) for full feature development from requirement to release. Forces human confirmation gates at the requirement, PRD, and contract stages; frontend and backend share one contract as the single source of truth. QA defaults to testing the built product with Playwright, and optionally inspects a reference site when the user provides a URL; it stops and asks the user on login walls, captchas, risk control, irreversible actions, or unreachable pages, never bypassing them. |
 
 ### Automation Skills
 
