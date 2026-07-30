@@ -141,6 +141,13 @@ function sdkVersion(record) {
   return title.startsWith("SDK_") ? title : `SDK_${title}`;
 }
 
+function apiReferenceFilename(record) {
+  const version = sdkVersion(record)
+    .replace(/^SDK_/i, "")
+    .replace(/^v/i, "v");
+  return `BlackHole Engine API_Web-${version}.md`;
+}
+
 function sortRecords(records) {
   return [...records].sort((a, b) => {
     const aOrder = Number.isFinite(Number(a.order)) ? Number(a.order) : 0;
@@ -168,7 +175,7 @@ function renderNotes(records, sourceUrl) {
     "",
     `- SDK: \`${sdkVersion(latest)}\``,
     `- Release date: \`${releaseDate(latest)}\``,
-    `- API reference: \`blackhole-engine-api.${sdkVersion(latest)}.md\``,
+    `- API reference: \`${apiReferenceFilename(latest)}\``,
     "",
     "## Upgrade Notes",
     "",

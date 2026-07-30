@@ -8,11 +8,30 @@ When a user reports an SDK error, upgrade regression, changed behavior, missing 
 
 ## Current Latest
 
-- SDK: `SDK_V3.2.0.3772`
-- Release date: `2026-06-12`
-- API reference: `blackhole-engine-api.SDK_V3.2.0.3772.md`
+- SDK: `SDK_V3.2.0.3808`
+- Release date: `2026-07-20`
+- API reference: `BlackHole Engine API_Web-v3.2.0.3808.md`
 
 ## Upgrade Notes
+
+### SDK_V3.2.0.3808 - 2026-07-20
+
+- Title: WebSDK 更新时间：2026.07.  20
+- SDK package: `Sources/2026_07_23_09_50_17_3a229ed7-6e23-a892-5548-c2760de6bc71_3a049d33-017c-c541-7c08-bc4bd5e7524a_BlackHole Engine SDK_v3.2.0.3808.zip`
+- API manual: `Sources/2026_07_23_09_50_12_3a229ed7-59f9-64d4-5a9d-5a3512a43f0b_3a049d33-017c-c541-7c08-bc4bd5e7524a_BlackHole Engine API_Web-v3.2.0.3808.docx`
+
+1.调整回调事件：REExitEntityEditMode改为REEditEntityFinish
+2.模型编辑（Edit）新增接口：setEditPlaneBtnState、getEditPlaneData
+3.监听事件RESystemMouseHover、RECustomProbeFinish新增返回参数
+
+### SDK_V3.2.0.3790 - 2026-07-07
+
+- Title: WebSDK 更新时间：2026.07.07
+- SDK package: `Sources/2026_07_07_10_14_07_3a224c87-7fd4-7cda-a7b7-94ba01420f1a_3a049d33-017c-c541-7c08-bc4bd5e7524a_BlackHole Engine SDK_v3.2.0.3790.zip`
+- API manual: `Sources/2026_07_07_10_14_01_3a224c87-6677-d944-50e4-69b16d8660a5_3a049d33-017c-c541-7c08-bc4bd5e7524a_BlackHole Engine API_Web-v3.2.0.3790.docx`
+
+1.引擎模块关于鼠标操作增加枚举类型，支持相机沿近裁面移动的效果
+2.优化了CAD默认视口相关的效果
 
 ### SDK_V3.2.0.3772 - 2026-06-12
 

@@ -1,6 +1,6 @@
 {
   "name": "BlackHole Engine SDK",
-  "defaultSdkVersion": "SDK_V3.2.0.3772",
+  "defaultSdkVersion": "SDK_V3.2.0.3808",
   "referenceFormat": "markdown",
   "maintenanceModel": "latest-api-reference-plus-upgrade-notes",
   "compatibilityPolicy": {
@@ -29,14 +29,15 @@
   },
   "references": [
     {
-      "sdkVersion": "SDK_V3.2.0.3772",
-      "releaseDate": "2026-06-12",
-      "file": "blackhole-engine-api.SDK_V3.2.0.3772.md",
+      "sdkVersion": "SDK_V3.2.0.3808",
+      "releaseDate": "2026-07-20",
+      "file": "BlackHole Engine API_Web-v3.2.0.3808.md",
       "status": "default"
     }
   ],
   "notes": [
     "Maintain only the latest API Markdown reference in references.",
+    "Preserve the official API manual filename style: BlackHole Engine API_Web-v<version>.md.",
     "When adding a newer SDK snapshot, replace the prior API reference entry and update defaultSdkVersion.",
     "Preserve SDK-specific upgrade, bug-fix, and compatibility notes in upgrade-notes.md instead of keeping full historical API docs.",
     "Refresh upgrade-notes.md from the official source API when recent/latest SDK updates matter."

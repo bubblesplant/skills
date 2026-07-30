@@ -13,9 +13,9 @@ The bundled references are managed by `references/manifest.json`.
 
 Current API reference:
 
-- SDK: `BlackHole Engine SDK_V3.2.0.3772`
-- Release date: `2026-06-12`
-- Reference: `references/blackhole-engine-api.SDK_V3.2.0.3772.md`
+- SDK: `BlackHole Engine SDK_V3.2.0.3808`
+- Release date: `2026-07-20`
+- Reference: `references/BlackHole Engine API_Web-v3.2.0.3808.md`
 - Upgrade notes: `references/upgrade-notes.md`
 - Upgrade notes API: `https://developer.bjblackhole.com/api/developercenter/Doc/DocItem/list/bydcid?dcid=3a0b9cac-880a-697b-9bf4-6328c4b94612`
 - Upgrade notes refresh script: `scripts/refresh_upgrade_notes.mjs`
@@ -25,6 +25,7 @@ Current API reference:
 Project guidance indicates BlackHole Engine APIs are backward-compatible across SDK updates.
 
 - Maintain only one latest API Markdown reference.
+- Preserve the official API manual filename style: `BlackHole Engine API_Web-v<version>.md`.
 - When the user does not specify an SDK version, use the latest API reference.
 - When the user specifies an older SDK version for ordinary API lookup, still use the latest API reference and briefly say the docs are maintained as latest-only because APIs are backward-compatible.
 - When the user asks about recent/latest updates, or reports an SDK error, upgrade issue, changed behavior, missing API, runtime exception, deprecation, parameter change, event-name issue, initialization issue, or breaking behavior, refresh `references/upgrade-notes.md` from the API when network is available, then read it before answering.
@@ -36,7 +37,7 @@ Prefer the query script before loading the full reference:
 
 ```bash
 python scripts/query_api.py loadDataSet
-python scripts/query_api.py loadDataSet --sdk SDK_V3.2.0.3772
+python scripts/query_api.py loadDataSet --sdk SDK_V3.2.0.3808
 python scripts/query_api.py loadDataSet --sdk latest
 python scripts/query_api.py --list-sdks
 python scripts/query_api.py "Model loadDataSet" --max-chars 12000
@@ -96,9 +97,9 @@ For concepts that are not exact API names, search keywords:
 ```bash
 python scripts/query_api.py getTransGeoCoords
 python scripts/query_api.py RESystemMouseMove
-python scripts/query_api.py setLogDepthEnable --sdk 3.2.0.3772
-python scripts/query_api.py setShpSelClr --sdk 3.2.0.3772
-rg -n "体剖切|Projection|setShpSelClr|SDK_V3.2.0.3772" references/upgrade-notes.md
+python scripts/query_api.py setEditPlaneBtnState --sdk 3.2.0.3808
+python scripts/query_api.py getEditPlaneData --sdk 3.2.0.3808
+rg -n "REExitEntityEditMode|REEditEntityFinish|RESystemMouseHover|RECustomProbeFinish|SDK_V3.2.0.3808" references/upgrade-notes.md
 ```
 
 Use `rg -n` directly against the selected Markdown reference only when the script output is not enough.

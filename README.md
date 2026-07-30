@@ -54,7 +54,7 @@ Each skill is self-contained under `skills/<skill-name>`. A skill may include it
 
 | Name | Description |
 | --- | --- |
-| [blackhole-engine-api-query](./skills/blackhole-engine-api-query) | Search the latest bundled BlackHole Engine Plus / BlackHole3D JavaScript API docs, guide model resource URL discovery, and consult official SDK upgrade notes. Current API reference: `SDK_V3.2.0.3772` (`2026-06-12`). |
+| [blackhole-engine-api-query](./skills/blackhole-engine-api-query) | Search the latest bundled BlackHole Engine Plus / BlackHole3D JavaScript API docs, guide model resource URL discovery, and consult official SDK upgrade notes. Current API reference: `SDK_V3.2.0.3808` (`2026-07-20`). |
 
 ## FAQ
 
