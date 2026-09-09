@@ -49,24 +49,26 @@ monorepo 在根目录放通用规则，在每个实际子包放本包的规则�
 
 ## 内置模板与放置位置
 
-只读取本次需要应用的模板。以下六份规则是内置默认规则，不包含任何后端专属规则或“回复后讲解后端知识点”的要求。
+只读取本次需要应用的模板。以下规则是内置默认规则，不包含任何后端专属规则或“回复后讲解后端知识点”的要求。
 
-| 用途           | 模板                                             | 目标位置                                 |
-| -------------- | ------------------------------------------------ | ---------------------------------------- |
-| 根入口         | [AGENTS.root.md](assets/AGENTS.root.md)          | 根 `AGENTS.md`                           |
-| 前端入口       | [AGENTS.frontend.md](assets/AGENTS.frontend.md)  | 前端包 `AGENTS.md`；单体前端则合入根入口 |
-| 其他包入口     | [AGENTS.package.md](assets/AGENTS.package.md)    | 没有前端规则的包 `AGENTS.md`             |
-| 通用代码设计   | [代码设计.md](assets/rules/common/代码设计.md)   | 根 `.agents/rules`                       |
-| 共用类型与方法 | [共享代码.md](assets/rules/common/共享代码.md)   | 根 `.agents/rules`                       |
-| 前端文件拆分   | [文件拆分.md](assets/rules/frontend/文件拆分.md) | 前端作用范围的 `.agents/rules`           |
-| 页面 API 归属  | [页面接口.md](assets/rules/frontend/页面接口.md) | 前端作用范围的 `.agents/rules`           |
-| 组件命名       | [组件命名.md](assets/rules/frontend/组件命名.md) | 前端作用范围的 `.agents/rules`           |
-| 弹窗封装       | [弹窗组件.md](assets/rules/frontend/弹窗组件.md) | 前端作用范围的 `.agents/rules`           |
+| 用途           | 模板                                                     | 目标位置                                 |
+| -------------- | -------------------------------------------------------- | ---------------------------------------- |
+| 根入口         | [AGENTS.root.md](assets/AGENTS.root.md)                  | 根 `AGENTS.md`                           |
+| 前端入口       | [AGENTS.frontend.md](assets/AGENTS.frontend.md)          | 前端包 `AGENTS.md`；单体前端则合入根入口 |
+| 其他包入口     | [AGENTS.package.md](assets/AGENTS.package.md)            | 没有前端规则的包 `AGENTS.md`             |
+| 通用代码设计   | [代码设计.md](assets/rules/common/代码设计.md)           | 根 `.agents/rules`                       |
+| 共用类型与方法 | [共享代码.md](assets/rules/common/共享代码.md)           | 根 `.agents/rules`                       |
+| 前端文件拆分   | [文件拆分.md](assets/rules/frontend/文件拆分.md)         | 前端作用范围的 `.agents/rules`           |
+| 页面 API 归属  | [页面接口.md](assets/rules/frontend/页面接口.md)         | 前端作用范围的 `.agents/rules`           |
+| 组件命名       | [组件命名.md](assets/rules/frontend/组件命名.md)         | 前端作用范围的 `.agents/rules`           |
+| 弹窗封装       | [弹窗组件.md](assets/rules/frontend/弹窗组件.md)         | 前端作用范围的 `.agents/rules`           |
+| React SVG 使用 | [ReactSVG使用.md](assets/rules/frontend/ReactSVG使用.md) | React Web 作用范围的 `.agents/rules`     |
 
 - 前端应用及 UI 组件包按实际职责应用前端模板。纯 UI 库没有页面时不添加页面接口规则；纯后端或工具包不添加前端规则。
+- React SVG 规则仅用于渲染 DOM 的 React Web 应用及 UI 组件包；Vue、React Native 和 Taro 小程序不套用。仅在匹配的作用范围内读取 `ReactSVG使用.md`，并向该范围的 `AGENTS.md` 按需表追加“新增、修改或使用 React SVG” → `[React SVG 使用](.agents/rules/ReactSVG使用.md)`，不将这一行加入通用前端入口模板。
 - 新项目没有代码线索时，使用用户说明的项目类型。无法判断时先建立通用规则，确有需要再询问缺失信息，不凭空创建前端包。
 - 后端已有规则保留在原有适用范围并纳入对应入口；不要从其他项目带入 `AppException`、`GlobalExceptionFilter`、错误码目录或特定测试命令。
-- 不为初始化规则创建业务代码、共享包实现或修改依赖配置。
+- 不为初始化规则创建业务代码、共享包实现或修改依赖配置；React SVG 规则初始化也不创建 `SvgIcon` 组件、不调整构建配置或生成类型声明。
 
 ## 路径适配与文件复制
 
@@ -80,6 +82,8 @@ monorepo 在根目录放通用规则，在每个实际子包放本包的规则�
 | `{{SHARED_RULE_LINK}}` | 从最终的 `文件拆分.md` 所在目录，到根目录实际共享代码规则文件的相对链接。单体通常为 `共享代码.md`；`apps/web` 包通常为 `../../../../.agents/rules/共享代码.md`。深层包须重新计算。 |
 
 模板中的目录是默认约定，既有项目路径和用户明确要求优先。如果目标项目已经分开组织类型或方法，修改条款描述以准确保留其组织方式。`config/index.ts`、`.tsx`、组件扩展名等示例也应匹配实际语言和框架，不要求项目引入 TypeScript 或 React。
+
+复制 React SVG 规则时，核对目标构建工具、现有 SVG 导入方式、`SvgIcon` 封装和图标目录，并适配规则中的默认路径与参数。Vite 和 Rsbuild 的转换插件不同；已有其他导入约定时沿用项目约定，不因初始化规则强制改用 `?react`。目标存在组件使用文档时，才按规则文件的最终位置添加相对链接；文档不存在时不生成该链接。
 
 每个入口以“适用条件 → 相对规则链接”配置按需加载。条件应指出具体任务，例如修改页面 API、调整组件命名、封装弹窗，或文件超过 300 行；不要把所有规则改成每次必读。单体前端将根入口和前端入口的条件合成一个表格。
 
