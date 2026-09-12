@@ -61,6 +61,7 @@ monorepo 新增的通用规则放根目录，本包专属规则放实际子包�
 | 组件命名       | [组件命名.md](assets/rules/frontend/组件命名.md)         | 前端作用范围的 `.agents/rules`           |
 | 弹窗封装       | [弹窗组件.md](assets/rules/frontend/弹窗组件.md)         | 前端作用范围的 `.agents/rules`           |
 | React SVG 使用 | [ReactSVG使用.md](assets/rules/frontend/ReactSVG使用.md) | React Web 作用范围的 `.agents/rules`     |
+| 表单回填样式   | [表单回填.md](assets/rules/frontend/表单回填.md)         | 前端作用范围的 `.agents/rules`           |
 
 - 前端应用及 UI 组件包按实际职责应用前端模板。纯 UI 库没有页面时不添加页面接口规则；纯后端或工具包不添加前端规则。
 - 同步页面接口规则时，一并同步后端接口定义的 TypeScript 类型与 JSDoc 要求，并将“新增、修改后端接口定义”合入对应的按需触发条件。具体要求保留在页面接口规则文件中，`AGENTS.md` 仅配置条件及规则链接。
