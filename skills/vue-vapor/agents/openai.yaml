@@ -1,0 +1,3 @@
+interface:
+  display_name: "Vue Vapor 开发"
+  short_description: "Vue 项目存在 Vapor 线索时加载，确认模式后按需读取规则"
