@@ -1,0 +1,3 @@
+interface:
+  display_name: "BubblesJS 国际化"
+  short_description: "接入 Vue、React 国际化，维护 JSON 词条并同步 Excel 翻译表"
