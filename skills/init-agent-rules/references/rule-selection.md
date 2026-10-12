@@ -43,6 +43,7 @@ monorepo 的通用规则放根目录，包专属规则放实际包内：
 | `frontend-component-reuse` | [组件复用](../assets/rules/frontend/组件复用.md) | [前端入口](../assets/AGENTS.frontend.md)中的“组件复用”行 | 前端应用、UI 组件包 | 无前端组件职责的包排除 | 当前前端范围 |
 | `frontend-component-name` | [组件命名](../assets/rules/frontend/组件命名.md) | [前端入口](../assets/AGENTS.frontend.md)中的“组件命名”行 | 前端应用、UI 组件包 | 无前端组件职责的包排除 | 当前前端范围 |
 | `frontend-dialog` | [弹窗组件](../assets/rules/frontend/弹窗组件.md) | [前端入口](../assets/AGENTS.frontend.md)中的“弹窗组件”行 | 前端应用、UI 组件包 | 纯后端或工具包排除 | 当前前端范围 |
+| `frontend-interaction-style` | [交互状态样式](../assets/rules/frontend/交互状态样式.md) | [前端入口](../assets/AGENTS.frontend.md)中的“交互状态样式”行 | Web 前端应用、渲染浏览器元素的 UI 组件包 | 纯后端、工具包及无浏览器样式职责的包排除 | 当前 Web 前端范围 |
 | `react-web-svg` | [React SVG 使用](../assets/rules/frontend/ReactSVG使用.md) | [React SVG 入口行](../assets/entries/frontend/ReactSVG使用.row.md) | 渲染 DOM 的 React Web 应用或 UI 包 | Vue、React Native、Taro 小程序排除 | 当前 React Web 范围 |
 | `react-manual-memo` | [React 手动记忆化](../assets/rules/frontend/React手动记忆化.md) | [React 手动记忆化入口行](../assets/entries/frontend/React手动记忆化.row.md) | React 应用或 React UI 包 | 仅 React Compiler 确认未启用时选择 | 当前 React 范围 |
 

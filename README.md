@@ -4,6 +4,19 @@ English | [简体中文](./README.zh-CN.md)
 
 A collection of reusable agent skills for frontend development, project AI rules, operating-system reminders, and BlackHole Engine API lookup.
 
+## Skills at a glance
+
+Click a skill name for details. Run the commands below from the target project's root directory; add `-g` to install globally.
+
+| Skill | Brief description | Project installation |
+| --- | --- | --- |
+| [create-bubbles](#create-bubbles) | Create, customize, and validate BubblesJS frontend projects. | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
+| [bubblesjs-i18n](#bubblesjs-i18n) | Integrate BubblesJS i18n and maintain JSON and Excel translation catalogs. | `pnpx skills add bubblesplant/skills --skill bubblesjs-i18n` |
+| [vue-vapor](#vue-vapor) | Develop, migrate, and troubleshoot Vue Vapor components. | `pnpx skills add bubblesplant/skills --skill vue-vapor` |
+| [init-agent-rules](#init-agent-rules) | Initialize and merge project `AGENTS.md` and `.agents/rules`. | `pnpx skills add bubblesplant/skills --skill init-agent-rules` |
+| [manage-prefixed-schedules](#manage-prefixed-schedules) | **Testing only; installation is not recommended.** Manage AI-owned operating-system reminders. | `pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules` |
+| [blackhole-engine-api-query](#blackhole-engine-api-query) | Query BlackHole3D APIs, model resource URLs, and SDK upgrade notes. | `pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query` |
+
 > [!IMPORTANT]
 > This repository bundles documentation-backed skills for AI agents. For production decisions, verify critical API behavior against the source documentation or runtime.
 
@@ -33,7 +46,7 @@ Installing all skills also includes the testing-only `manage-prefixed-schedules`
 
 Learn more about the skills CLI at [vercel-labs/skills](https://github.com/vercel-labs/skills).
 
-## Skills
+## Skill details
 
 The collection currently includes six skills. Each lives under `skills/<skill-name>` with a `SKILL.md` entry point and may include references, rule templates, agent metadata, or helper scripts. The links below open each skill's instructions.
 

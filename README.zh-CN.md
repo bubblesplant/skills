@@ -4,6 +4,19 @@
 
 一组可复用的 AI Agent 技能，涵盖前端开发、项目 AI 规则、操作系统定时提醒和 BlackHole Engine API 查询。
 
+## 技能总览
+
+点击技能名称查看详细说明。表中命令在目标项目根目录运行；追加 `-g` 可全局安装。
+
+| 技能 | 简要介绍 | 项目安装命令 |
+| --- | --- | --- |
+| [create-bubbles](#create-bubbles) | 创建、定制和验证 BubblesJS 前端项目。 | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
+| [bubblesjs-i18n](#bubblesjs-i18n) | 接入 BubblesJS 国际化，维护 JSON 和 Excel 翻译表。 | `pnpx skills add bubblesplant/skills --skill bubblesjs-i18n` |
+| [vue-vapor](#vue-vapor) | 开发、迁移和排查 Vue Vapor 组件。 | `pnpx skills add bubblesplant/skills --skill vue-vapor` |
+| [init-agent-rules](#init-agent-rules) | 初始化并合并项目 `AGENTS.md` 与 `.agents/rules`。 | `pnpx skills add bubblesplant/skills --skill init-agent-rules` |
+| [manage-prefixed-schedules](#manage-prefixed-schedules) | **测试中，不建议安装。** 管理 AI 自有的操作系统提醒。 | `pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules` |
+| [blackhole-engine-api-query](#blackhole-engine-api-query) | 查询 BlackHole3D API、模型资源 URL 和 SDK 升级说明。 | `pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query` |
+
 > [!IMPORTANT]
 > 本仓库提供以文档为依据的 AI Agent 技能。用于生产决策时，请通过原始文档或实际运行结果核实关键 API 行为。
 
@@ -31,7 +44,7 @@ pnpx skills add bubblesplant/skills --skill='*' -g
 
 更多 CLI 用法见 [vercel-labs/skills](https://github.com/vercel-labs/skills)。
 
-## 技能
+## 技能详解
 
 当前包含六个技能。每个技能位于 `skills/<skill-name>`，以 `SKILL.md` 为入口，并可附带参考文档、规则模板、Agent 元数据或辅助脚本。下方链接指向各技能的使用说明。
 
