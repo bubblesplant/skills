@@ -2,7 +2,7 @@
 
 本参考基于 BubblesJS i18n 本地源码快照：四个公开包版本 `0.0.2`，Git 提交 `d5deed3b859838e63a9542df9d42d8156fa53f5f`。仓库为 [bubblesplant/i18n](https://github.com/bubblesplant/i18n)。版本号来自本地 `package.json`，不表示已安装 npm 产物一定包含本地全部功能，尤其是 Excel 命令。操作前查看目标项目依赖版本与 `pnpm exec bubbles-i18n --help`，以实际支持的命令为准。
 
-报告规则于 `2026-10-12` 同步自本地 `C:/malei/stu/i18n` 工作区变更；其余基础 API 保留上述 `0.0.2` 快照来源。此报告规则更新描述本地工作区行为，不表示对应改动已发布到 npm。用于已安装包时，应核实该包实际支持的 `report` 默认值与配置类型。
+报告与 Excel 默认规则于 `2026-10-12` 同步自本地 `C:/malei/stu/i18n` 工作区变更；其余基础 API 保留上述 `0.0.2` 快照来源。这些默认规则描述本地工作区行为，不表示对应改动已发布到 npm。用于已安装包时，应核实该包实际支持的 `report`、`excel.file`、`excel.sheet` 默认值与配置类型。
 
 CLI 独立于运行时，只维护词条文件，不创建 Provider、切换语言或生成 `generated.ts`。以下假设项目使用 pnpm；其他包管理器使用项目已有的等价执行方式。
 
@@ -29,10 +29,6 @@ export default defineConfig({
         "zh-CN": "src/locales/zh-CN.json",
         "en-US": "src/locales/en-US.json",
       },
-      excel: {
-        file: "translations/web.xlsx",
-        sheet: "translations",
-      },
     },
   },
   // 默认写入 .bubbles-i18n/report.json；可选择以下一种覆盖方式：
@@ -43,11 +39,21 @@ export default defineConfig({
 
 - `projects`、每个项目的 `catalogs` 必须非空。JSON 必须是扁平字符串对象，例如 `{ "welcome": "你好，{name}！" }`；`menu.home` 也是一个完整字符串 key，不是嵌套对象。
 - `callNames` 默认 `["tr"]`。项目使用其他调用名时显式配置，例如 `["tr", "$t"]`，不要假定所有翻译函数自动识别。
-- `sync` / `check` 所选项目必须有非空 `include`；仅维护 Excel 的项目可省略它。Excel 命令所选项目必须有 `excel.file`，仅支持 `.xlsx`；sheet 默认 `translations`。
-- 未指定 `--project` 时选择全部项目，不自动跳过缺少当前用途配置的项目。混合项目配置应显式选范围。
+- `sync` / `check` 所选项目必须有非空 `include`；仅维护 Excel 的项目可省略它，仅配置 `catalogs`。
+- Excel 仅支持 `.xlsx`，默认文件为 `.bubbles-i18n/<项目名>.xlsx`，默认工作表为精确小写 `sheet1`。`excel` 整体省略或设为 `{}` 时采用这两个默认值；只配置 `sheet` 时使用默认文件，只配置 `file` 时使用默认工作表。显式配置的 `file` / `sheet` 保持自定义值。
+- 未指定 `--project` 时选择全部项目。混合了扫描与仅维护 Excel 的项目时，扫描命令应显式选择有 `include` 的项目；Excel 命令可使用各项目的默认配置。
 - 所有相对数据、glob 和报告路径基于配置文件所在目录。显式 `--config` 路径相对命令 cwd 解析。
 - 默认从 cwd 向上找配置，同目录顺序为 `i18n.config.ts`、`.mts`、`.js`、`.mjs`、`.cts`、`.cjs`。ESM 用 `export default`，CommonJS 用 `module.exports`。
 - 不同项目 / locale 不能共用同一个 JSON 路径，各项目 Excel 也必须独立。路径冲突对全部配置全局校验，不能用 `--project` 绕过。
+
+扫描与 Excel 命令加载配置时都会解析每个项目的独立 Excel 路径，例如 `web` 和 `admin` 默认分别使用 `.bubbles-i18n/web.xlsx` 与 `.bubbles-i18n/admin.xlsx`；特殊字符及 Windows 保留名会在文件名中安全编码。以下配置放入项目对象，可分别覆盖工作表、文件或两项：
+
+| 项目中的 Excel 配置                                                     | 文件（相对配置目录，以 `web` 项目为例） | 工作表   |
+| ----------------------------------------------------------------------- | --------------------------------------- | -------- |
+| 省略 `excel` 或 `excel: {}`                                             | `.bubbles-i18n/web.xlsx`                | `sheet1` |
+| `excel: { sheet: "review" }`（覆盖工作表）                              | `.bubbles-i18n/web.xlsx`                | `review` |
+| `excel: { file: "translations/web.xlsx" }`（覆盖文件）                  | `translations/web.xlsx`                 | `sheet1` |
+| `excel: { file: "translations/web.xlsx", sheet: "review" }`（覆盖两项） | `translations/web.xlsx`                 | `review` |
 
 ## 扫描与缺失 key
 
@@ -98,12 +104,12 @@ pnpm exec bubbles-i18n excel export --project web --dry-run
 pnpm exec bubbles-i18n excel export --project web
 ```
 
-首次导出可创建工作簿，新文件包含全部已配置语言的表头。已有文件必须包含指定 sheet 与所选语言表头，未选语言缺列不阻断操作。
+首次导出可创建工作簿，新文件包含全部已配置语言的表头；上述 `web` 项目默认输出 `.bubbles-i18n/web.xlsx`，工作表为 `sheet1`。已有文件必须包含指定 sheet 与所选语言表头，未选语言缺列不阻断操作。
 
-| key | zh-CN | en-US |
-| --- | --- | --- |
-| welcome | 你好，{name}！ | welcome |
-| menu.home | 首页 | Home |
+| key       | zh-CN          | en-US   |
+| --------- | -------------- | ------- |
+| welcome   | 你好，{name}！ | welcome |
+| menu.home | 首页           | Home    |
 
 译员将 `welcome` 英文改为 `Hello, {name}!` 后，普通导入会把它与 JSON 中的 `welcome` 比较，报告值冲突并返回 `1`。任务明确采用 Excel 译文时，预览后执行：
 
@@ -123,19 +129,36 @@ pnpm exec bubbles-i18n excel export --project web --force --prefer json
 
 冲突与新增规则：
 
-| 情况 | 行为 |
-| --- | --- |
-| 来源新增 key / 目标缺值 | 按命令方向补入目标，不属于值冲突 |
-| 同 key、同 locale 值相同 | 保持不变 |
-| 同 key、同 locale 值不同 | 普通命令返回 `1`，所有所选项目数据均不写，包括计划新增与删除 |
-| `--force` / `-f` | 允许处理冲突，默认 `--prefer excel`；两方向默认均如此 |
-| export `--force --prefer json` | 将 JSON 冲突值写入 Excel |
-| import `--force --prefer excel` | 将 Excel 冲突值写入 JSON |
-| export `--force --prefer excel` | 保留目标 Excel 冲突值，仍补新 key，不回写 JSON |
-| import `--force --prefer json` | 保留目标 JSON 冲突值，仍补新 key，不回写 Excel |
-| Excel 空单元格 / 空字符串 | import 保留 JSON 原值，不新增空值，不按整行缺失删除 |
+| 情况                            | 行为                                                         |
+| ------------------------------- | ------------------------------------------------------------ |
+| 来源新增 key / 目标缺值         | 按命令方向补入目标，不属于值冲突                             |
+| 同 key、同 locale 值相同        | 保持不变                                                     |
+| 同 key、同 locale 值不同        | 普通命令返回 `1`，所有所选项目数据均不写，包括计划新增与删除 |
+| `--force` / `-f`                | 允许处理冲突，默认 `--prefer excel`；两方向默认均如此        |
+| export `--force --prefer json`  | 将 JSON 冲突值写入 Excel                                     |
+| import `--force --prefer excel` | 将 Excel 冲突值写入 JSON                                     |
+| export `--force --prefer excel` | 保留目标 Excel 冲突值，仍补新 key，不回写 JSON               |
+| import `--force --prefer json`  | 保留目标 JSON 冲突值，仍补新 key，不回写 Excel               |
+| Excel 空单元格 / 空字符串       | import 保留 JSON 原值，不新增空值，不按整行缺失删除          |
 
 `--prefer` 必须搭配 `--force`。强制选择只影响冲突值，命令仅写目标端，不按修改时间判断，也不同时同步两边。选择目标端值后，两边可能仍不同，再次运行普通命令仍会报告冲突。
+
+## Excel 单元格格式与报错排查
+
+key 列（A 列）和本次所选语言列的非空单元格必须是**实际字符串**。数字、布尔值、日期、公式、富文本或超链接单元格均不合法，即使 Excel 显示的内容看起来像文字。此校验同时适用于 `excel import` 和 `excel export`；导出也会先读取并校验已有工作簿，`--force` 只解决值冲突，不能绕过类型限制。
+
+填写或粘贴词条前，将 key 列和语言列设置为“文本”格式。尤其注意纯数字（`123`）、日期样式（`2026-10-12`）、带前导零（`00123`）和以 `=` 开头的字面内容，避免被 Excel 自动转换为数值、日期或公式。**只修改已有单元格的显示格式，不一定改变其实际类型**；应在设为文本后重新输入，或粘贴需要保留的值并确认其实际保存为文本。手工输入时也可加英文单引号前缀，例如 `'00123`，单引号作为 Excel 的文本输入标记，不是 key 的一部分。
+
+遇到以下报错：
+
+```text
+Error: Invalid key cell at translations!A4 in "path/to/portal.xlsx"; only text and blank cells are supported.
+```
+
+1. 打开报错中的文件，定位 `translations` 工作表的 `A4`（第 4 行、第 1 列）；`Invalid translation (...) cell` 则定位对应语言单元格。
+2. 保留原本需要的 key 或译文，将单元格设为文本后重新输入；若原值是公式，将需要保留的结果重新输入为纯文本，不能保留公式本身。前导零等已被自动转换丢失的内容需按原词条恢复。
+3. 若该记录无用，删除整行或清空整行。只清空 A4 而保留译文、备注等内容会触发 `Empty key`；只有整行完全空白时才忽略。
+4. 保存工作簿后重试原命令，无需通过 `--force` 修复单元格类型。
 
 ## Excel 范围与删除
 
@@ -161,9 +184,9 @@ pnpm exec bubbles-i18n excel import --project web --locale en-US --prune --dry-r
 
 `--dry-run` 不修改 JSON 语言包或 XLSX 数据、不创建数据备份，**仍写报告**。默认 Markdown 报告会更新：
 
-| 命令 | 路径（相对配置目录） |
-| --- | --- |
-| sync | `.bubbles-i18n/reports/sync.md` |
+| 命令         | 路径（相对配置目录）                    |
+| ------------ | --------------------------------------- |
+| sync         | `.bubbles-i18n/reports/sync.md`         |
 | excel export | `.bubbles-i18n/reports/excel-export.md` |
 | excel import | `.bubbles-i18n/reports/excel-import.md` |
 
