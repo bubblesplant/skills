@@ -10,7 +10,7 @@ description: 在 Vue 3、React 和普通 JavaScript/TypeScript 项目中接入�
 ## 先确认上下文
 
 - 查看目标项目的 `package.json`、锁文件、现有初始化模块、Provider 和语言包。根据任务选择 runtime 或 CLI，二者可独立安装。
-- 本技能依据 [bubblesplant/i18n](https://github.com/bubblesplant/i18n) 在 2026-10-10 的源码快照 `d5deed3b859838e63a9542df9d42d8156fa53f5f`，四个公开包版本均为 `0.0.2`。它是该快照的使用指南，不代表任意已安装版本都具备相同功能。
+- 本技能基础 API 依据 [bubblesplant/i18n](https://github.com/bubblesplant/i18n) 在 2026-10-10 的源码快照 `d5deed3b859838e63a9542df9d42d8156fa53f5f`，该快照四个公开包版本均为 `0.0.2`。CLI 报告规则于 2026-10-12 同步本地工作区变更，不代表目标项目已安装的 npm 包包含这些变更。
 - 遇到版本差异，优先核实已安装包的导出、类型、README 和 `bubbles-i18n --help`；必要时查 [GitHub Releases](https://github.com/bubblesplant/i18n/releases)。尤其不要仅凭版本号假定 npm 产物支持本地源码里的 Excel 命令。
 - React peer 要求 `>=18.0.0`；Vue peer 当前为 `^3.5.43`；CLI 文档要求 Node.js `>=22.18.0`。接入前核对目标环境。
 
@@ -42,4 +42,4 @@ description: 在 Vue 3、React 和普通 JavaScript/TypeScript 项目中接入�
 
 按改动验证实际行为：默认语言显示正确、插值有效、切换后组件更新；涉及局部作用域时验证语言独立；SSR 核对服务端与水合初值一致。使用项目已有类型检查、构建或相关测试完成必要检查。
 
-词条维护先查看 `sync --dry-run` 或相应 Excel 预览，再执行用户要求的写入。预览仍写报告；`check` 也可能写配置的 JSON 报告。汇报修改位置、验证结果，以及仍需人工填写的译文或未解决冲突。
+词条维护先查看 `sync --dry-run` 或相应 Excel 预览，再执行用户要求的写入。预览仍写报告；`sync`（含预览）和 `check` 默认写扫描 JSON 报告，路径与关闭方式见 [CLI 参考](references/cli.md#报告退出码与操作限制)。汇报修改位置、验证结果，以及仍需人工填写的译文或未解决冲突。

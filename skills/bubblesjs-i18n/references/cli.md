@@ -2,6 +2,8 @@
 
 本参考基于 BubblesJS i18n 本地源码快照：四个公开包版本 `0.0.2`，Git 提交 `d5deed3b859838e63a9542df9d42d8156fa53f5f`。仓库为 [bubblesplant/i18n](https://github.com/bubblesplant/i18n)。版本号来自本地 `package.json`，不表示已安装 npm 产物一定包含本地全部功能，尤其是 Excel 命令。操作前查看目标项目依赖版本与 `pnpm exec bubbles-i18n --help`，以实际支持的命令为准。
 
+报告规则于 `2026-10-12` 同步自本地 `C:/malei/stu/i18n` 工作区变更；其余基础 API 保留上述 `0.0.2` 快照来源。此报告规则更新描述本地工作区行为，不表示对应改动已发布到 npm。用于已安装包时，应核实该包实际支持的 `report` 默认值与配置类型。
+
 CLI 独立于运行时，只维护词条文件，不创建 Provider、切换语言或生成 `generated.ts`。以下假设项目使用 pnpm；其他包管理器使用项目已有的等价执行方式。
 
 ## 安装与配置
@@ -33,7 +35,9 @@ export default defineConfig({
       },
     },
   },
-  report: ".bubbles-i18n/report.json",
+  // 默认写入 .bubbles-i18n/report.json；可选择以下一种覆盖方式：
+  // report: false, // 关闭扫描 JSON 报告
+  // report: "reports/i18n.json", // 自定义扫描 JSON 报告路径
 });
 ```
 
@@ -155,7 +159,7 @@ pnpm exec bubbles-i18n excel import --project web --locale en-US --prune --dry-r
 
 ## 报告、退出码与操作限制
 
-`--dry-run` 不写 JSON / XLSX、不创建数据备份，**仍写报告**。默认 Markdown 报告会更新：
+`--dry-run` 不修改 JSON 语言包或 XLSX 数据、不创建数据备份，**仍写报告**。默认 Markdown 报告会更新：
 
 | 命令 | 路径（相对配置目录） |
 | --- | --- |
@@ -163,13 +167,15 @@ pnpm exec bubbles-i18n excel import --project web --locale en-US --prune --dry-r
 | excel export | `.bubbles-i18n/reports/excel-export.md` |
 | excel import | `.bubbles-i18n/reports/excel-import.md` |
 
-`report` 配置可选控制扫描 JSON 报告，`sync`、`sync --dry-run`、`check` 按配置写出。省略它不取消 sync Markdown；Excel 不使用扫描 JSON 报告。`check` 无自动 Markdown，不接受 `--dry-run`、`--prune`、`--clean`；`--locale`、`--force`、`--prefer` 仅适用于 Excel，`--fail-on-stale` 仅适用于 check。
+`sync`、`sync --dry-run` 和 `check` 默认将扫描 JSON 报告写入配置文件所在目录下的 `.bubbles-i18n/report.json`。顶层 `report` 省略时使用此默认路径，设为 `false` 关闭 JSON 报告，设为字符串自定义路径；相对路径以配置文件所在目录为基准。扫描 JSON 报告中的 `added` 是缺失项，`unused` 是保留的多余项，`deleted` 是清理项；预览时这些变更列表表示计划。
+
+`report` 不影响自动 Markdown 报告；Excel 命令只生成 Markdown 报告，不读取或写入扫描 JSON 报告。`check` 无自动 Markdown，不接受 `--dry-run`、`--prune`、`--clean`；`--locale`、`--force`、`--prefer` 仅适用于 Excel，`--fail-on-stale` 仅适用于 check。
 
 退出码：`0` 成功 / 帮助；`1` check 失败、Excel 未解决值冲突或未提供命令；`2` 参数、配置、格式、文件操作错误。若使用编程入口，`runCli` 抛异常，`main` 捕获并转换为 `2`。
 
 操作限制：
 
-- JSON 同步保留已有 BOM、LF / CRLF、缩进和末尾换行，使用同目录临时文件原子替换；多文件操作不是事务。
+- JSON 语言包同步保留已有 BOM、LF / CRLF、缩进和末尾换行，使用同目录临时文件原子替换；多文件操作不是事务。
 - Excel 实际改写现有目标文件时，备份到目标同目录 `.bubbles-i18n-backups/<runId>/<filename>`，报告列出备份路径。先准备临时文件与备份，再提交；失败尽力回滚，不保证所有文件完全恢复。
 - Excel 仅 `.xlsx`。locale 不得叫 `key`。key / 译文精确匹配，不 trim。重复 key / 非空表头、缺所选语言列、托管 key / 所选语言合并单元格、非字符串译文均报错，force 不绕过。
 - 空 key 行只在整行完全空白时忽略；仅备注列有内容也报错。所有非空表头，包括备注列、未选语言，也必须是唯一字符串。
