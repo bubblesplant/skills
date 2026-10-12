@@ -1,5 +1,7 @@
 # bubblesplant's AI Skills
 
+English | [简体中文](./README.zh-CN.md)
+
 A collection of reusable agent skills for frontend development, project AI rules, operating-system reminders, and BlackHole Engine API lookup.
 
 > [!IMPORTANT]
@@ -7,7 +9,7 @@ A collection of reusable agent skills for frontend development, project AI rules
 
 ## Installation
 
-Install this skill collection:
+Interactively choose skills to install:
 
 ```bash
 pnpx skills add bubblesplant/skills
@@ -19,17 +21,15 @@ Install all skills:
 pnpx skills add bubblesplant/skills --skill='*'
 ```
 
-Install globally:
+Install all skills globally:
 
 ```bash
 pnpx skills add bubblesplant/skills --skill='*' -g
 ```
 
-Install a specific skill:
+Each skill below includes its own project and global installation commands. Run project installation commands from the target project's root directory; choose the global command to make a skill available across projects.
 
-```bash
-pnpx skills add bubblesplant/skills --skill bubblesjs-i18n
-```
+Installing all skills also includes the testing-only `manage-prefixed-schedules` skill; see its status below.
 
 Learn more about the skills CLI at [vercel-labs/skills](https://github.com/vercel-labs/skills).
 
@@ -39,29 +39,107 @@ The collection currently includes six skills. Each lives under `skills/<skill-na
 
 ### Frontend Skills
 
-| Name | Description |
-| --- | --- |
-| [create-bubbles](./skills/create-bubbles/SKILL.md) | Create, customize, and validate frontend apps with the `create-bubbles` CLI. Compare Vue, React, Taro, NextJS, Electron, and React + NestJS monorepo templates, scaffold the confirmed template and directory, complete pages and app states, and maintain CLI templates. |
-| [bubblesjs-i18n](./skills/bubblesjs-i18n/SKILL.md) | Integrate and troubleshoot BubblesJS i18n in Vue 3, React, and JavaScript/TypeScript apps. Handle reactive locale switching, interpolation, loading, persistence, local scopes, and SSR; use the CLI to scan static translation keys, maintain JSON catalogs, check key presence, and synchronize Excel translation sheets. Applies to BubblesJS i18n tasks. |
-| [vue-vapor](./skills/vue-vapor/SKILL.md) | Develop, migrate, review, and troubleshoot Vue Vapor components. Confirm the target's compilation mode, then consult SPA/CSR or SSR/SSG/hydration guidance for configuration, components, runtime behavior, and ecosystem integration. Applies when Vapor is requested or the current task has Vapor-related evidence. Reference baseline: Vue `3.6.0-rc.10`. |
+#### [create-bubbles](./skills/create-bubbles/SKILL.md)
+
+Create, customize, and validate frontend apps with the `create-bubbles` CLI. Compare Vue, React, Taro, NextJS, Electron, and React + NestJS monorepo templates, scaffold the confirmed template and directory, complete pages and app states, and maintain CLI templates.
+
+Use for new frontend projects, existing generated apps, or `create-bubbles` template changes. Edits stay within the target app or relevant template directory; overwriting an existing non-empty directory requires an explicit user request.
+
+**Installation:**
+
+```bash
+# Install in the current project
+pnpx skills add bubblesplant/skills --skill create-bubbles
+
+# Install globally
+pnpx skills add bubblesplant/skills --skill create-bubbles -g
+```
+
+#### [bubblesjs-i18n](./skills/bubblesjs-i18n/SKILL.md)
+
+Integrate and troubleshoot BubblesJS i18n in Vue 3, React, and JavaScript/TypeScript apps. Handle reactive locale switching, interpolation, loading, persistence, local scopes, and SSR; use the CLI to scan static translation keys, maintain JSON catalogs, check key presence, and synchronize Excel translation sheets. Applies to BubblesJS i18n tasks.
+
+Use for BubblesJS i18n runtime, framework adapters, and CLI tasks. With an existing i18n solution, handle only the requested integration or migration scope. CLI `check` checks key presence, not translation completeness. Base APIs use a `0.0.2` source snapshot, and CLI guidance includes local source changes; verify the target project's installed features.
+
+**Installation:**
+
+```bash
+# Install in the current project
+pnpx skills add bubblesplant/skills --skill bubblesjs-i18n
+
+# Install globally
+pnpx skills add bubblesplant/skills --skill bubblesjs-i18n -g
+```
+
+#### [vue-vapor](./skills/vue-vapor/SKILL.md)
+
+Develop, migrate, review, and troubleshoot Vue Vapor components. Confirm the target's compilation mode, then consult SPA/CSR or SSR/SSG/hydration guidance for configuration, components, runtime behavior, and ecosystem integration. Applies when Vapor is requested or the current task has Vapor-related evidence. Reference baseline: Vue `3.6.0-rc.10`.
+
+Ordinary Vue tasks without Vapor-related evidence do not trigger this skill. Vapor use elsewhere in the repository does not prove the current component uses Vapor. Check compilation mode, type mode, and runtime interoperability separately; verify other Vue versions against their official tags.
+
+**Installation:**
+
+```bash
+# Install in the current project
+pnpx skills add bubblesplant/skills --skill vue-vapor
+
+# Install globally
+pnpx skills add bubblesplant/skills --skill vue-vapor -g
+```
 
 ### Workflow Skills
 
-| Name | Description |
-| --- | --- |
-| [init-agent-rules](./skills/init-agent-rules/SKILL.md) | Initialize or fill gaps in project `AGENTS.md` and `.agents/rules` using bundled personal rule templates. Select assets for the actual scope of a single project or monorepo package, merge existing rules by meaning, adapt links, and condition React-specific rules on the project's configuration. Changes stay within rule documents and their necessary links. |
+#### [init-agent-rules](./skills/init-agent-rules/SKILL.md)
+
+Initialize or fill gaps in project `AGENTS.md` and `.agents/rules` using bundled personal rule templates. Select assets for the actual scope of a single project or monorepo package, merge existing rules by meaning, adapt links, and condition React-specific rules on the project's configuration. Changes stay within rule documents and their necessary links.
+
+Use for initial setup or explicitly requested missing rules. The skill does not change business code, dependencies, or build configuration. Template upgrades and existing rule migrations require an explicit request; later template changes do not automatically update initialized projects.
+
+**Installation:**
+
+```bash
+# Install in the current project
+pnpx skills add bubblesplant/skills --skill init-agent-rules
+
+# Install globally
+pnpx skills add bubblesplant/skills --skill init-agent-rules -g
+```
 
 ### Automation Skills
 
-| Name | Description |
-| --- | --- |
-| [manage-prefixed-schedules](./skills/manage-prefixed-schedules/SKILL.md) | **Testing only; installation is not recommended.** Manage operating-system reminders across Windows, macOS, and Linux within a directory explicitly provided by the user. Only manage resources associated with that directory and owned by the `AI-Reminders` namespace or `AI-Reminder-` prefix. Defines scheduling, visible system notification, and safety rules; implementation commands depend on the platform. |
+#### [manage-prefixed-schedules](./skills/manage-prefixed-schedules/SKILL.md)
+
+**Testing only; installation is not recommended.** Manage operating-system reminders across Windows, macOS, and Linux within a directory explicitly provided by the user. Only manage resources associated with that directory and owned by the `AI-Reminders` namespace or `AI-Reminder-` prefix. Defines scheduling, visible system notification, and safety rules; implementation commands depend on the platform.
+
+The user must explicitly provide the reminder management directory in the conversation. Unrelated system tasks are outside the scope. This skill manages operating-system reminders and does not substitute chat reminders or host-app automations.
+
+**Installation (for testing):**
+
+```bash
+# Install in the current project
+pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules
+
+# Install globally
+pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules -g
+```
 
 ### Documentation Skills
 
-| Name | Description |
-| --- | --- |
-| [blackhole-engine-api-query](./skills/blackhole-engine-api-query/SKILL.md) | Query BlackHole Engine Plus / BlackHole3D JavaScript methods, parameters, return values, events, and examples; guide model resource URL discovery; consult official SDK upgrade notes for compatibility and migration issues. Bundled API reference: `SDK_V3.2.0.3808` (`2026-07-20`). |
+#### [blackhole-engine-api-query](./skills/blackhole-engine-api-query/SKILL.md)
+
+Query BlackHole Engine Plus / BlackHole3D JavaScript methods, parameters, return values, events, and examples; guide model resource URL discovery; consult official SDK upgrade notes for compatibility and migration issues. Bundled API reference: `SDK_V3.2.0.3808` (`2026-07-20`).
+
+Use for BlackHole Engine, BlackHole3D, and related BIM/GIS engine API tasks. Ordinary lookup uses the bundled default reference; SDK errors, upgrade regressions, deprecations, and behavior changes also require upgrade-note checks. The bundled version identifies a documentation snapshot, not the latest online SDK.
+
+**Installation:**
+
+```bash
+# Install in the current project
+pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query
+
+# Install globally
+pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query -g
+```
 
 ## FAQ
 
