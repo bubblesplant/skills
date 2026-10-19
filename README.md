@@ -104,9 +104,9 @@ pnpx skills add bubblesplant/skills --skill vue-vapor -g
 
 #### [setup-project-agents](./skills/setup-project-agents/SKILL.md)
 
-Set up agent instructions and development rules in new or existing frontend and Node.js backend projects through `AGENTS.md` and `.agents/rules` using bundled personal rule templates. Select assets for the actual scope of a single project or monorepo package, merge existing rules by meaning, adapt links, and condition React-specific rules on the project's configuration. Node.js backend projects currently use common code-design and shared-code rules; frontend rules apply only to frontend scopes.
+Set up agent instructions and development rules in new or existing frontend and Node.js backend projects through `AGENTS.md` and `.agents/rules` using bundled personal rule templates. Support single projects, full-stack applications, ordinary repositories with separate frontend and backend directories, and monorepos. Select assets by project, package, directory, or code responsibility, merge existing rules by meaning, adapt links, and condition React-specific rules on the project's configuration. Node.js backend projects currently use common code-design and shared-code rules; frontend rules apply only to frontend responsibilities.
 
-Use for initial setup, adoption in existing projects, or explicitly requested missing rules. The skill does not change business code, dependencies, or build configuration. Template upgrades and existing rule migrations require an explicit request; later template changes do not automatically update configured projects.
+Use for initial setup, adoption in existing projects, or explicitly requested missing rules; each request compares the current applicable personal baseline and adds missing requirements. The skill does not change business code, dependencies, or build configuration. Moving or deleting existing rules requires an explicit request; later template changes do not automatically update configured projects.
 
 **Installation:**
 
