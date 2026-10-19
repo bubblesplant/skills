@@ -1,6 +1,12 @@
 # 规则选择清单
 
-本文件是初始化器的资产清单和放置指导，不复制到目标项目，也不替代 `assets/` 中的个人规则正文。
+本文件是项目 Agent 配置的资产清单和放置指导，首次初始化和接入已有项目均按此选择，不复制到目标项目，也不替代 `assets/` 中的个人规则正文。
+
+## 当前项目类型
+
+主要面向前端项目、Node.js 后端项目及包含两者的 monorepo。前端按实际职责选择通用规则与前端规则；Node.js 后端和工具包当前使用 `root-common` 中的通用规则，没有内置后端专属规则资产。纯后端项目不选择 `frontend-*` 或 `react-*` 组合。
+
+单体 Node.js 后端将通用规则放在项目根；前后端 monorepo 将通用规则放在仓库根，前端规则放在对应前端包。后端包已有的局部规则继续保留；没有包专属规则时，不为后端包创建空入口或复制根规则。
 
 ## 选择单位
 
@@ -41,8 +47,10 @@ monorepo 的通用规则放根目录，包专属规则放实际包内：
 | `frontend-file-split` | [文件拆分](../assets/rules/frontend/文件拆分.md) | [前端入口](../assets/AGENTS.frontend.md)中的“文件拆分”行 | 前端应用、UI 组件包 | 纯后端或工具包排除 | 当前前端范围的 `AGENTS.md` 与 `.agents/rules/` |
 | `frontend-page-api` | [页面接口](../assets/rules/frontend/页面接口.md) | [前端入口](../assets/AGENTS.frontend.md)中的“页面接口”行 | 有页面或页面 API 职责的前端应用 | 纯 UI 组件包排除 | 当前前端范围 |
 | `frontend-component-reuse` | [组件复用](../assets/rules/frontend/组件复用.md) | [前端入口](../assets/AGENTS.frontend.md)中的“组件复用”行 | 前端应用、UI 组件包 | 无前端组件职责的包排除 | 当前前端范围 |
+| `frontend-public-capability-index` | [公共能力索引](../assets/rules/frontend/公共能力索引.md) | [前端入口](../assets/AGENTS.frontend.md)中的“公共能力索引”行 | 前端应用、UI 组件包 | 纯后端或工具包排除 | 当前前端范围 |
 | `frontend-component-name` | [组件命名](../assets/rules/frontend/组件命名.md) | [前端入口](../assets/AGENTS.frontend.md)中的“组件命名”行 | 前端应用、UI 组件包 | 无前端组件职责的包排除 | 当前前端范围 |
 | `frontend-dialog` | [弹窗组件](../assets/rules/frontend/弹窗组件.md) | [前端入口](../assets/AGENTS.frontend.md)中的“弹窗组件”行 | 前端应用、UI 组件包 | 纯后端或工具包排除 | 当前前端范围 |
+| `frontend-style-convention` | [样式方案与命名](../assets/rules/frontend/样式方案与命名.md) | [前端入口](../assets/AGENTS.frontend.md)中的“样式方案与命名”行 | Vue / React Web 应用、UI 组件包 | 纯后端、工具包及非 Web 渲染目标排除 | 当前 Vue / React Web 前端范围 |
 | `frontend-interaction-style` | [交互状态样式](../assets/rules/frontend/交互状态样式.md) | [前端入口](../assets/AGENTS.frontend.md)中的“交互状态样式”行 | Web 前端应用、渲染浏览器元素的 UI 组件包 | 纯后端、工具包及无浏览器样式职责的包排除 | 当前 Web 前端范围 |
 | `react-web-svg` | [React SVG 使用](../assets/rules/frontend/ReactSVG使用.md) | [React SVG 入口行](../assets/entries/frontend/ReactSVG使用.row.md) | 渲染 DOM 的 React Web 应用或 UI 包 | Vue、React Native、Taro 小程序排除 | 当前 React Web 范围 |
 | `react-manual-memo` | [React 手动记忆化](../assets/rules/frontend/React手动记忆化.md) | [React 手动记忆化入口行](../assets/entries/frontend/React手动记忆化.row.md) | React 应用或 React UI 包 | 仅 React Compiler 确认未启用时选择 | 当前 React 范围 |
@@ -50,6 +58,8 @@ monorepo 的通用规则放根目录，包专属规则放实际包内：
 源码全部位于子包中的 monorepo 根仍属于“管理代码工作区的项目根”，应选择 `root-common`。根入口不仅承载按需规则表，还包含“功能文件归入子目录”的个人强制规则；合并 [AGENTS.root.md](../assets/AGENTS.root.md) 时须一并处理该条款，不能只提取表格行。
 
 `AGENTS.frontend.md` 是前端入口行的来源，不要求整份盲目复制。按已选组合合并相应行，例如纯 UI 组件包不合入页面接口行。`组件复用.md` 中的 React 条款已在正文中限定 React 语境，其他框架仍保留同文件内适用的通用组件规则，不需要在初始化时改写个人规则。
+
+`frontend-public-capability-index` 合入公共能力索引的维护规则及按需入口。仅接入规则时，不根据示例创建业务目录、虚构能力或生成空索引，也不要求为每个公共能力新增详细使用文档。已有索引沿用真实位置和作用范围，能力条目及目录链接以实际代码为准。
 
 ## 入口合并
 

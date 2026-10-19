@@ -13,7 +13,7 @@
 | [create-bubbles](#create-bubbles) | 创建、定制和验证 BubblesJS 前端项目。 | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
 | [bubblesjs-i18n](#bubblesjs-i18n) | 接入 BubblesJS 国际化，维护 JSON 和 Excel 翻译表。 | `pnpx skills add bubblesplant/skills --skill bubblesjs-i18n` |
 | [vue-vapor](#vue-vapor) | 开发、迁移和排查 Vue Vapor 组件。 | `pnpx skills add bubblesplant/skills --skill vue-vapor` |
-| [init-agent-rules](#init-agent-rules) | 初始化并合并项目 `AGENTS.md` 与 `.agents/rules`。 | `pnpx skills add bubblesplant/skills --skill init-agent-rules` |
+| [setup-project-agents](#setup-project-agents) | 初始化或接入前端与 Node.js 后端项目的 Agent 指令与规则。 | `pnpx skills add bubblesplant/skills --skill setup-project-agents` |
 | [manage-prefixed-schedules](#manage-prefixed-schedules) | **测试中，不建议安装。** 管理 AI 自有的操作系统提醒。 | `pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules` |
 | [blackhole-engine-api-query](#blackhole-engine-api-query) | 查询 BlackHole3D API、模型资源 URL 和 SDK 升级说明。 | `pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query` |
 
@@ -100,20 +100,20 @@ pnpx skills add bubblesplant/skills --skill vue-vapor -g
 
 ### 工作流技能
 
-#### [init-agent-rules](./skills/init-agent-rules/SKILL.md)
+#### [setup-project-agents](./skills/setup-project-agents/SKILL.md)
 
-使用内置个人规则模板初始化或补齐项目的 `AGENTS.md` 与 `.agents/rules`。根据单体项目或 monorepo 包的真实作用范围选择资产，逐条语义合并已有规则，适配路径与入口链接，并依据项目配置选择 React 条件规则。
+使用内置个人规则模板，为前端和 Node.js 后端项目初始化或接入 Agent 指令与开发规则，写入或补齐 `AGENTS.md` 与 `.agents/rules`。根据单体项目或前后端 monorepo 包的真实作用范围选择资产，逐条语义合并已有约定，适配路径与入口链接，并依据项目配置选择 React 条件规则。Node.js 后端目前使用代码设计、共享代码等通用规则，前端规则仅应用于对应前端范围。
 
-适用于首次接入或明确要求补齐缺失规则。修改范围仅限目标规则文档及必要链接，不修改业务代码、依赖或构建配置；未经明确要求，不执行模板升级或已有规则迁移，也不会因模板后续变化自动回写项目。
+适用于首次初始化、接入已有项目或明确要求补齐缺失规则。修改范围仅限目标规则文档及必要链接，不修改业务代码、依赖或构建配置；未经明确要求，不执行模板升级或已有规则迁移，也不会因模板后续变化自动回写项目。
 
 **安装方式：**
 
 ```bash
 # 安装到当前项目
-pnpx skills add bubblesplant/skills --skill init-agent-rules
+pnpx skills add bubblesplant/skills --skill setup-project-agents
 
 # 全局安装
-pnpx skills add bubblesplant/skills --skill init-agent-rules -g
+pnpx skills add bubblesplant/skills --skill setup-project-agents -g
 ```
 
 ### 自动化技能

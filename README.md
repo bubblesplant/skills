@@ -13,7 +13,7 @@ Click a skill name for details. Run the commands below from the target project's
 | [create-bubbles](#create-bubbles) | Create, customize, and validate BubblesJS frontend projects. | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
 | [bubblesjs-i18n](#bubblesjs-i18n) | Integrate BubblesJS i18n and maintain JSON and Excel translation catalogs. | `pnpx skills add bubblesplant/skills --skill bubblesjs-i18n` |
 | [vue-vapor](#vue-vapor) | Develop, migrate, and troubleshoot Vue Vapor components. | `pnpx skills add bubblesplant/skills --skill vue-vapor` |
-| [init-agent-rules](#init-agent-rules) | Initialize and merge project `AGENTS.md` and `.agents/rules`. | `pnpx skills add bubblesplant/skills --skill init-agent-rules` |
+| [setup-project-agents](#setup-project-agents) | Set up agent instructions and rules in new or existing frontend and Node.js backend projects. | `pnpx skills add bubblesplant/skills --skill setup-project-agents` |
 | [manage-prefixed-schedules](#manage-prefixed-schedules) | **Testing only; installation is not recommended.** Manage AI-owned operating-system reminders. | `pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules` |
 | [blackhole-engine-api-query](#blackhole-engine-api-query) | Query BlackHole3D APIs, model resource URLs, and SDK upgrade notes. | `pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query` |
 
@@ -102,20 +102,20 @@ pnpx skills add bubblesplant/skills --skill vue-vapor -g
 
 ### Workflow Skills
 
-#### [init-agent-rules](./skills/init-agent-rules/SKILL.md)
+#### [setup-project-agents](./skills/setup-project-agents/SKILL.md)
 
-Initialize or fill gaps in project `AGENTS.md` and `.agents/rules` using bundled personal rule templates. Select assets for the actual scope of a single project or monorepo package, merge existing rules by meaning, adapt links, and condition React-specific rules on the project's configuration. Changes stay within rule documents and their necessary links.
+Set up agent instructions and development rules in new or existing frontend and Node.js backend projects through `AGENTS.md` and `.agents/rules` using bundled personal rule templates. Select assets for the actual scope of a single project or monorepo package, merge existing rules by meaning, adapt links, and condition React-specific rules on the project's configuration. Node.js backend projects currently use common code-design and shared-code rules; frontend rules apply only to frontend scopes.
 
-Use for initial setup or explicitly requested missing rules. The skill does not change business code, dependencies, or build configuration. Template upgrades and existing rule migrations require an explicit request; later template changes do not automatically update initialized projects.
+Use for initial setup, adoption in existing projects, or explicitly requested missing rules. The skill does not change business code, dependencies, or build configuration. Template upgrades and existing rule migrations require an explicit request; later template changes do not automatically update configured projects.
 
 **Installation:**
 
 ```bash
 # Install in the current project
-pnpx skills add bubblesplant/skills --skill init-agent-rules
+pnpx skills add bubblesplant/skills --skill setup-project-agents
 
 # Install globally
-pnpx skills add bubblesplant/skills --skill init-agent-rules -g
+pnpx skills add bubblesplant/skills --skill setup-project-agents -g
 ```
 
 ### Automation Skills
