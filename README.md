@@ -10,7 +10,7 @@ Click a skill name for details. Run the commands below from the target project's
 
 | Skill | Brief description | Project installation |
 | --- | --- | --- |
-| [create-bubbles](#create-bubbles) | Create, customize, and validate BubblesJS frontend projects. | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
+| [create-bubbles](#create-bubbles) | Select and fetch BubblesJS project templates directly. | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
 | [bubblesjs-i18n](#bubblesjs-i18n) | Integrate BubblesJS i18n and maintain JSON and Excel translation catalogs. | `pnpx skills add bubblesplant/skills --skill bubblesjs-i18n` |
 | [vue-vapor](#vue-vapor) | Develop, migrate, and troubleshoot Vue Vapor components. | `pnpx skills add bubblesplant/skills --skill vue-vapor` |
 | [setup-project-agents](#setup-project-agents) | Set up agent instructions and rules in new or existing frontend and Node.js backend projects. | `pnpx skills add bubblesplant/skills --skill setup-project-agents` |
@@ -54,9 +54,9 @@ The collection currently includes six skills. Each lives under `skills/<skill-na
 
 #### [create-bubbles](./skills/create-bubbles/SKILL.md)
 
-Create, customize, and validate frontend apps with the `create-bubbles` CLI. Compare Vue, React, Taro, NextJS, Electron, and React + NestJS monorepo templates, scaffold the confirmed template and directory, complete pages and app states, and maintain CLI templates.
+Guide AI agents to fetch BubblesJS project templates from a local directory or Git repository without running a scaffolding CLI. When users have no stack preference, recommend `template-vue-vp-eslint` for web projects and `template-taro-vue-eslint` for mini-programs. Honor explicit framework and project requirements, with Vue Vapor, React, Next.js, and monorepo options available.
 
-Use for new frontend projects, existing generated apps, or `create-bubbles` template changes. Edits stay within the target app or relevant template directory; overwriting an existing non-empty directory requires an explicit user request.
+Use for project creation, template retrieval, and template comparisons. Copy, initialize, and validate as requested without requiring users to choose from every framework. Preserve source templates and existing target files; overwriting conflicts requires explicit authorization. Ordinary page changes in existing projects do not trigger reinitialization.
 
 **Installation:**
 

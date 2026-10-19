@@ -10,7 +10,7 @@
 
 | 技能 | 简要介绍 | 项目安装命令 |
 | --- | --- | --- |
-| [create-bubbles](#create-bubbles) | 创建、定制和验证 BubblesJS 前端项目。 | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
+| [create-bubbles](#create-bubbles) | 选择并直接拉取 BubblesJS 项目模板。 | `pnpx skills add bubblesplant/skills --skill create-bubbles` |
 | [bubblesjs-i18n](#bubblesjs-i18n) | 接入 BubblesJS 国际化，维护 JSON 和 Excel 翻译表。 | `pnpx skills add bubblesplant/skills --skill bubblesjs-i18n` |
 | [vue-vapor](#vue-vapor) | 开发、迁移和排查 Vue Vapor 组件。 | `pnpx skills add bubblesplant/skills --skill vue-vapor` |
 | [setup-project-agents](#setup-project-agents) | 初始化或接入前端与 Node.js 后端项目的 Agent 指令与规则。 | `pnpx skills add bubblesplant/skills --skill setup-project-agents` |
@@ -52,9 +52,9 @@ pnpx skills add bubblesplant/skills --skill='*' -g
 
 #### [create-bubbles](./skills/create-bubbles/SKILL.md)
 
-使用 `create-bubbles` CLI 和 BubblesJS 模板创建、定制并验证前端应用。比较 Vue、React、Taro、NextJS、Electron 及 React + NestJS monorepo 模板，在确认模板和目标目录后生成项目，继续完成页面、组件、路由与应用状态，也支持维护 CLI 模板。
+指导 AI 从本地目录或 Git 仓库直接获取 BubblesJS 项目模板，无需运行脚手架 CLI。用户没有技术偏好时，普通前端项目默认推荐 `template-vue-vp-eslint`，小程序默认推荐 `template-taro-vue-eslint`；明确指定框架或项目类型时按需求选择，也支持 Vue Vapor、React、Next.js 和 monorepo 模板。
 
-适用于创建前端项目、完善已生成应用或修改 `create-bubbles` 模板。修改范围限于目标应用或相关模板目录；覆盖已有非空目录需要用户明确要求。
+适用于创建项目、获取模板或比较模板选型。按请求完成模板复制、初始化与验证，不强制用户逐项选择框架；保留模板源目录和目标目录中的原有文件，覆盖冲突需要已有明确授权。已有项目的普通页面修改不触发重新初始化。
 
 **安装方式：**
 
