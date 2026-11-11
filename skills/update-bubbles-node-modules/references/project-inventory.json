@@ -1,0 +1,3029 @@
+{
+  "scanned_at": "2026-11-11T14:42:38+08:00",
+  "roots": [
+    "C:\\malei\\job",
+    "C:\\malei\\stu"
+  ],
+  "full_upgrade_roots": [
+    "C:\\malei\\stu\\antv-next-pro",
+    "C:\\malei\\stu\\bubbles",
+    "C:\\malei\\stu\\i18n",
+    "C:\\malei\\stu\\workflow"
+  ],
+  "scanner": "rg",
+  "manifest_count": 837,
+  "full_upgrades": [
+    {
+      "path": "C:\\malei\\stu\\antv-next-pro",
+      "manifest_count": 4,
+      "installation_units": [
+        "C:\\malei\\stu\\antv-next-pro"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles",
+      "manifest_count": 30,
+      "installation_units": [
+        "C:\\malei\\stu\\bubbles",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-nextjs-vinext-eslint",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-react-rsbuild-biome",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-taro-react-oxc",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-taro-vue-eslint",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\i18n",
+      "manifest_count": 9,
+      "installation_units": [
+        "C:\\malei\\stu\\i18n"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\workflow",
+      "manifest_count": 8,
+      "installation_units": [
+        "C:\\malei\\stu\\workflow"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "path": "C:\\malei\\job\\bee\\bee-charger-admin",
+      "repository_root": "C:\\malei\\job\\bee\\bee-charger-admin",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\server",
+        "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web",
+        "C:\\malei\\job\\bee\\bee-charger-admin",
+        "C:\\malei\\job\\bee\\bee-charger-admin\\packages\\shared"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\server\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\packages\\shared\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 86,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 89,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\server\\package.json",
+          "script": "format",
+          "command": "vp fmt"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\server\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "lint",
+          "command": "vp lint && pnpm run lint:vue"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "lint:fix",
+          "command": "vp lint --fix && pnpm run lint:vue --fix"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "fmt",
+          "command": "vp fmt --write"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "fmt:check",
+          "command": "vp fmt --check"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\apps\\web\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "ready",
+          "command": "vp check && pnpm run lint:vue && vp run -r test && vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "lint",
+          "command": "vp lint && pnpm run lint:vue"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "lint:fix",
+          "command": "vp lint --fix && pnpm run lint:vue --fix"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "fmt",
+          "command": "vp fmt --write"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "fmt:check",
+          "command": "vp fmt --check"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\package.json",
+          "script": "reinstall",
+          "command": "vp install --force"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\packages\\shared\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\packages\\shared\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-charger-admin\\packages\\shared\\package.json",
+          "script": "test",
+          "command": "vp test"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-charger-admin\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本",
+      "repository_root": null,
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash - 副本\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude",
+      "repository_root": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-claude\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini",
+      "repository_root": null,
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-gemini\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj",
+      "repository_root": null,
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash-lj\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash",
+      "repository_root": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-drama\\bee-drama-flash\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\bee\\bee-screen",
+      "repository_root": "C:\\malei\\job\\bee\\bee-screen",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\bee\\bee-screen"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "dev:prod",
+          "command": "vp dev --mode prod"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "build",
+          "command": "vp build --mode prod"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "build:prod",
+          "command": "vp build --mode prod"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "build:dev",
+          "command": "vp build --mode dev"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "reinstall",
+          "command": "vp install --force"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "lint",
+          "command": "vp lint"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "lint:fix",
+          "command": "vp lint --fix"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "format",
+          "command": "vp fmt"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "format:check",
+          "command": "vp fmt --check"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "check",
+          "command": "vp check"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "check:fix",
+          "command": "vp check --fix"
+        },
+        {
+          "file": "C:\\malei\\job\\bee\\bee-screen\\package.json",
+          "script": "prepare",
+          "command": "vp config --no-agent"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\bee\\bee-screen\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\iglobal-platform\\apps\\portal",
+      "repository_root": "C:\\malei\\job\\iglobal-platform",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\iglobal-platform\\apps\\portal"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\apps\\portal\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\apps\\portal\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\apps\\portal\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\apps\\portal\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\apps\\portal\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\apps\\portal\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\iglobal-platform\\apps\\portal\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\iglobal-platform",
+      "repository_root": "C:\\malei\\job\\iglobal-platform",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\iglobal-platform"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 34,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 36,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "build",
+          "command": "vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "check",
+          "command": "vp run quality"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "dev",
+          "command": "vp run web#dev"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "format",
+          "command": "vp fmt --write ."
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "format:check",
+          "command": "vp fmt --check ."
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "hooks:install",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "lint",
+          "command": "vp lint ."
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "preview",
+          "command": "vp run web#preview"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "test",
+          "command": "vp run -r test"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "typecheck",
+          "command": "tsc -p tsconfig.json --noEmit && vp run -r typecheck"
+        },
+        {
+          "file": "C:\\malei\\job\\iglobal-platform\\package.json",
+          "script": "verify:packages",
+          "command": "vp run -r verify:package"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\iglobal-platform\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe",
+      "repository_root": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": []
+    },
+    {
+      "path": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web",
+      "repository_root": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test",
+      "repository_root": null,
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": []
+    },
+    {
+      "path": "C:\\malei\\stu\\antv-next-pro",
+      "repository_root": "C:\\malei\\stu\\antv-next-pro",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\antv-next-pro\\apps\\docs",
+        "C:\\malei\\stu\\antv-next-pro\\apps\\playground",
+        "C:\\malei\\stu\\antv-next-pro",
+        "C:\\malei\\stu\\antv-next-pro\\packages"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\apps\\docs\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\apps\\playground\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 26,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 27,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\apps\\playground\\package.json",
+          "script": "build",
+          "command": "vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\apps\\playground\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "build",
+          "command": "vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "check",
+          "command": "vp run quality"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "ci",
+          "command": "vp run quality"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "dev",
+          "command": "vp run playground#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "docs:build",
+          "command": "vp run docs#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "docs:dev",
+          "command": "vp run docs#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "format",
+          "command": "vp fmt --write ."
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "format:check",
+          "command": "vp fmt --check ."
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "lint:ox",
+          "command": "vp lint ."
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "prepare",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "test",
+          "command": "vp run -r test"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "test:browser",
+          "command": "vp run @bubblesjs/antdv-next-pro#test:browser"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "test:coverage",
+          "command": "vp run @bubblesjs/antdv-next-pro#test:coverage"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\package.json",
+          "script": "typecheck",
+          "command": "vp run -r typecheck"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "script": "build:browser",
+          "command": "vp build --config vite.browser.config.ts"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "script": "build:modules",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "script": "test",
+          "command": "vp test run --project unit"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "script": "test:browser",
+          "command": "vp test run --project browser"
+        },
+        {
+          "file": "C:\\malei\\stu\\antv-next-pro\\packages\\package.json",
+          "script": "test:coverage",
+          "command": "vp test run --project unit --coverage"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\antv-next-pro\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles",
+      "repository_root": "C:\\malei\\stu\\bubbles",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles",
+        "C:\\malei\\stu\\bubbles\\packages\\request",
+        "C:\\malei\\stu\\bubbles\\packages\\utils",
+        "C:\\malei\\stu\\bubbles\\packages\\vue-ai-chart",
+        "C:\\malei\\stu\\bubbles\\packages\\vue-annotator",
+        "C:\\malei\\stu\\bubbles\\packages\\vue-infinite-scroll",
+        "C:\\malei\\stu\\bubbles\\packages\\ws"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\request\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\utils\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-ai-chart\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-annotator\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-infinite-scroll\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\ws\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "line": 37,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.1",
+          "line": 38,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\package.json",
+          "script": "prepare",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\package.json",
+          "script": "hooks:install",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\package.json",
+          "script": "format",
+          "command": "vp fmt --write ."
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\package.json",
+          "script": "lint",
+          "command": "vp lint ."
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\package.json",
+          "script": "check",
+          "command": "vp check"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\request\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\request\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\request\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\request\\package.json",
+          "script": "test:coverage",
+          "command": "vp test --coverage --run"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\utils\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\utils\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-ai-chart\\package.json",
+          "script": "build",
+          "command": "unocss \"src/**/*.vue\" -o dist/style.css && vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-ai-chart\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-ai-chart\\package.json",
+          "script": "play",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-ai-chart\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-annotator\\package.json",
+          "script": "build",
+          "command": "unocss \"src/**/*.vue\" -o dist/style.css && vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-annotator\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-annotator\\package.json",
+          "script": "play",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-annotator\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-infinite-scroll\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-infinite-scroll\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-infinite-scroll\\package.json",
+          "script": "play",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\vue-infinite-scroll\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\ws\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\ws\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\ws\\package.json",
+          "script": "prepublishOnly",
+          "command": "vp run typecheck && vp run build"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\bubbles\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo",
+      "repository_root": "C:\\malei\\stu\\bubbles",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\docs",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\playground",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\packages\\utils"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\docs\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\playground\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\packages\\utils\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "line": 16,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.1",
+          "line": 17,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\docs\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\playground\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\playground\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\apps\\playground\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "build",
+          "command": "vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "check",
+          "command": "vp run quality"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "dev",
+          "command": "vp run playground#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "docs:build",
+          "command": "vp run docs#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "docs:dev",
+          "command": "vp run docs#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "docs:preview",
+          "command": "vp run docs#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "format",
+          "command": "vp fmt --write ."
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "format:check",
+          "command": "vp fmt --check ."
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "hooks:install",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "lint:ox",
+          "command": "vp lint ."
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "preview",
+          "command": "vp run playground#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "test",
+          "command": "vp run -r test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "typecheck",
+          "command": "tsc -p tsconfig.json --noEmit && vp run -r typecheck"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\package.json",
+          "script": "verify:packages",
+          "command": "vp run -r verify:package"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\packages\\utils\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\packages\\utils\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\packages\\utils\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\packages\\utils\\package.json",
+          "script": "verify:package",
+          "command": "vp pack && tsc -p tests/consumer/tsconfig.json --noEmit && node scripts/verify-package.mjs"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs",
+      "repository_root": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\server",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web-vue",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\cli",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\core",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\react",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\vue",
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\shared"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\server\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web-vue\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\cli\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\core\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\react\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\vue\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\shared\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "line": 102,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.1",
+          "line": 106,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\server\\package.json",
+          "script": "format",
+          "command": "vp fmt"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\server\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web-vue\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web-vue\\package.json",
+          "script": "build",
+          "command": "vue-tsc -b && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web-vue\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web\\package.json",
+          "script": "build",
+          "command": "tsc && vp build --mode dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\apps\\web\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\package.json",
+          "script": "ready",
+          "command": "vp check && vp run -r test && vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\package.json",
+          "script": "reinstall",
+          "command": "vp install --force"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\cli\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\cli\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\core\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\react\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\i18n\\vue\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\shared\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\shared\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\packages\\shared\\package.json",
+          "script": "test",
+          "command": "vp test"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn",
+      "repository_root": "C:\\malei\\stu\\bubbles",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.1",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\pnpm-workspace.yaml",
+          "key": "overrides.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "line": 10,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react",
+      "repository_root": "C:\\malei\\stu\\bubbles",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.1",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\pnpm-workspace.yaml",
+          "key": "overrides.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "line": 6,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": []
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor",
+      "repository_root": "C:\\malei\\stu\\bubbles",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.1",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint",
+      "repository_root": "C:\\malei\\stu\\bubbles",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.1",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.1",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\core",
+      "repository_root": "C:\\malei\\stu\\core",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\core",
+        "C:\\malei\\stu\\core\\packages-private\\sfc-playground",
+        "C:\\malei\\stu\\core\\packages-private\\vapor-e2e-test"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 10,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "lint",
+          "command": "vp lint"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "format",
+          "command": "vp fmt"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "format-check",
+          "command": "vp fmt --check"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "test-unit",
+          "command": "vp test --project unit*"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "test-e2e",
+          "command": "node scripts/build.js -e vue -f global+esm-browser-vapor -d && vp test --project e2e"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "test-e2e-vapor",
+          "command": "vp run prepare-e2e-vapor && VAPOR_E2E=1 vp test --project e2e-vapor"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "prepare-e2e-vapor",
+          "command": "node scripts/build.js -e -f cjs+esm-bundler+esm-bundler-runtime && vp build packages-private/vapor-e2e-test"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "test-coverage",
+          "command": "vp test --ui --project unit* --coverage.enabled=true"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "bench",
+          "command": "vp test bench --project=unit --outputJson=temp/bench.json"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "bench-compare",
+          "command": "vp test bench --project=unit --compare=temp/bench.json"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "dev-sfc-serve",
+          "command": "vp dev packages-private/sfc-playground"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "dev-vapor",
+          "command": "vp dev packages-private/local-playground"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "build-sfc-playground-self",
+          "command": "vp build packages-private/sfc-playground"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\package.json",
+          "script": "prepare",
+          "command": "vp config --hooks-dir .vite-hooks"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\packages-private\\sfc-playground\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\packages-private\\sfc-playground\\package.json",
+          "script": "build",
+          "command": "vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\packages-private\\sfc-playground\\package.json",
+          "script": "serve",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\packages-private\\vapor-e2e-test\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\core\\packages-private\\vapor-e2e-test\\package.json",
+          "script": "build",
+          "command": "vp build"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\core\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\dark-mode",
+      "repository_root": null,
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\dark-mode"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\dark-mode\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\dark-mode\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\i18n",
+      "repository_root": "C:\\malei\\stu\\i18n",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\i18n\\apps\\docs",
+        "C:\\malei\\stu\\i18n\\apps\\playground\\hono",
+        "C:\\malei\\stu\\i18n\\apps\\playground\\react",
+        "C:\\malei\\stu\\i18n\\apps\\playground\\vue",
+        "C:\\malei\\stu\\i18n",
+        "C:\\malei\\stu\\i18n\\packages\\i18n-cli",
+        "C:\\malei\\stu\\i18n\\packages\\i18n-core",
+        "C:\\malei\\stu\\i18n\\packages\\i18n-react",
+        "C:\\malei\\stu\\i18n\\packages\\i18n-vue"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\docs\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\hono\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\react\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\vue\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-cli\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-core\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-react\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-vue\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 41,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 42,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\docs\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\hono\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\hono\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\hono\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\react\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\react\\package.json",
+          "script": "build",
+          "command": "vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\react\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\react\\package.json",
+          "script": "check",
+          "command": "vp check"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\vue\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\vue\\package.json",
+          "script": "build",
+          "command": "vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\apps\\playground\\vue\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "build",
+          "command": "vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "check",
+          "command": "vp run quality"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "dev:hono",
+          "command": "vp run playground-hono#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "dev:react",
+          "command": "vp run playground-react#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "dev:vue",
+          "command": "vp run playground-vue#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "docs:build",
+          "command": "vp run docs#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "docs:dev",
+          "command": "vp run docs#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "docs:preview",
+          "command": "vp run docs#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "format",
+          "command": "vp fmt --write ."
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "format:check",
+          "command": "vp fmt --check ."
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "hooks:install",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "lint",
+          "command": "vp lint . --max-warnings=0 && pnpm --filter playground-vue lint"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "lint:fix",
+          "command": "vp lint . --fix --max-warnings=0 && pnpm --filter playground-vue exec eslint . --fix --max-warnings=0"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "preview:hono",
+          "command": "vp run playground-hono#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "preview:react",
+          "command": "vp run playground-react#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "preview:vue",
+          "command": "vp run playground-vue#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "test",
+          "command": "vp run -r test"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "typecheck",
+          "command": "tsc -p tsconfig.json --noEmit && vp run -r typecheck"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\package.json",
+          "script": "verify:packages",
+          "command": "vp run -r verify:package"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-cli\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-cli\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-core\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-core\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-react\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-react\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-vue\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\i18n\\packages\\i18n-vue\\package.json",
+          "script": "test",
+          "command": "vp test run"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\i18n\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\lowercode\\bubbles-project",
+      "repository_root": "C:\\malei\\stu\\lowercode",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\lowercode\\bubbles-project"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\bubbles-project\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\lowercode\\bubbles-project\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo",
+      "repository_root": "C:\\malei\\stu\\lowercode",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\apps\\website",
+        "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo",
+        "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\packages\\utils"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\apps\\website\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\packages\\utils\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 11,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 13,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\apps\\website\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\apps\\website\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\apps\\website\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\package.json",
+          "script": "ready",
+          "command": "vp fmt && vp lint && vp run test -r && vp run build -r"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\package.json",
+          "script": "dev",
+          "command": "vp run website#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\packages\\utils\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\packages\\utils\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\packages\\utils\\package.json",
+          "script": "test",
+          "command": "vp test"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project",
+      "repository_root": "C:\\malei\\stu\\stu-repository",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\stu-repository\\blackhole\\bubbles-project\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\stu-repository",
+      "repository_root": "C:\\malei\\stu\\stu-repository",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\stu-repository"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\package.json",
+          "script": "fix",
+          "command": "vp fmt . --write"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\package.json",
+          "script": "format",
+          "command": "vp fmt . --write"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\package.json",
+          "script": "format:check",
+          "command": "vp fmt . --check"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\package.json",
+          "script": "prepare",
+          "command": "vp config --no-agent"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\stu-repository\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\stu-repository\\react\\zustand-store",
+      "repository_root": "C:\\malei\\stu\\stu-repository",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\stu-repository\\react\\zustand-store"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\stu-repository\\react\\zustand-store\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\test\\黑洞预加载",
+      "repository_root": "C:\\malei\\stu\\test\\黑洞预加载",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\test\\黑洞预加载"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\test\\黑洞预加载\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\test\\黑洞预加载\\package.json",
+          "script": "dev",
+          "command": "vp dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\test\\黑洞预加载\\package.json",
+          "script": "build",
+          "command": "tsc && vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\test\\黑洞预加载\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\test\\黑洞预加载\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        },
+        {
+          "file": "C:\\malei\\stu\\test\\黑洞预加载\\package.json",
+          "script": "check",
+          "command": "vp check"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\test\\黑洞预加载\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\tiny-engine-stu\\child1",
+      "repository_root": "C:\\malei\\stu\\tiny-engine-stu",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\tiny-engine-stu\\child1"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 8,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 9,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "script": "lint",
+          "command": "vp lint && eslint"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "script": "lint:fix",
+          "command": "vp lint && eslint --fix"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\child1\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\tiny-engine-stu\\child1\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\tiny-engine-stu\\parent",
+      "repository_root": "C:\\malei\\stu\\tiny-engine-stu",
+      "mode": "vite-plus-only",
+      "members": [
+        "C:\\malei\\stu\\tiny-engine-stu\\parent"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\parent\\package.json",
+          "key": "devDependencies.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\parent\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "1.5.0",
+          "kind": "dependency"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\parent\\package.json",
+          "script": "dev",
+          "command": "vp dev --mode development"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\parent\\package.json",
+          "script": "build",
+          "command": "vp build && vue-tsc -b"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\parent\\package.json",
+          "script": "preview",
+          "command": "vp preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\tiny-engine-stu\\parent\\package.json",
+          "script": "prepare",
+          "command": "vp config"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\tiny-engine-stu\\parent\\pnpm-lock.yaml"
+      ]
+    },
+    {
+      "path": "C:\\malei\\stu\\workflow",
+      "repository_root": "C:\\malei\\stu\\workflow",
+      "mode": "all-dependencies",
+      "members": [
+        "C:\\malei\\stu\\workflow\\apps\\docs",
+        "C:\\malei\\stu\\workflow\\apps\\playgroud\\react",
+        "C:\\malei\\stu\\workflow\\apps\\playgroud\\vue",
+        "C:\\malei\\stu\\workflow",
+        "C:\\malei\\stu\\workflow\\packages\\react\\core",
+        "C:\\malei\\stu\\workflow\\packages\\react\\history",
+        "C:\\malei\\stu\\workflow\\packages\\vue\\core",
+        "C:\\malei\\stu\\workflow\\packages\\vue\\history"
+      ],
+      "declarations": [
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\docs\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\react\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\vue\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\core\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\history\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\core\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\history\\package.json",
+          "key": "devDependencies.vite-plus",
+          "spec": "catalog:",
+          "kind": "dependency"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\pnpm-workspace.yaml",
+          "key": "catalog.vite",
+          "spec": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+          "line": 35,
+          "kind": "workspace-scalar-candidate"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\pnpm-workspace.yaml",
+          "key": "catalog.vite-plus",
+          "spec": "1.5.0",
+          "line": 36,
+          "kind": "workspace-scalar-candidate"
+        }
+      ],
+      "script_hints": [
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\docs\\package.json",
+          "script": "build",
+          "command": "vp run bundle"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\react\\package.json",
+          "script": "build",
+          "command": "vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\react\\package.json",
+          "script": "dev",
+          "command": "vp dev --port 5175 --strictPort"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\react\\package.json",
+          "script": "preview",
+          "command": "vp preview --port 4175 --strictPort"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\vue\\package.json",
+          "script": "build",
+          "command": "vp build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\vue\\package.json",
+          "script": "dev",
+          "command": "vp dev --port 5173 --strictPort"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\apps\\playgroud\\vue\\package.json",
+          "script": "preview",
+          "command": "vp preview --port 4173 --strictPort"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "build",
+          "command": "vp run -r build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "build:core",
+          "command": "vp run @bubblesjs/workflow-vue-core#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "build:history",
+          "command": "vp run @bubblesjs/workflow-vue-history#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "build:react:core",
+          "command": "vp run @bubblesjs/workflow-react-core#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "build:react:history",
+          "command": "vp run @bubblesjs/workflow-react-history#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "check",
+          "command": "vp run quality"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "dev",
+          "command": "vp run vue-playground#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "dev:core",
+          "command": "vp run @bubblesjs/workflow-vue-core#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "dev:history",
+          "command": "vp run @bubblesjs/workflow-vue-history#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "dev:vue",
+          "command": "vp run vue-playground#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "dev:react",
+          "command": "vp run react-playground#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "docs:build",
+          "command": "vp run docs#build"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "docs:dev",
+          "command": "vp run docs#dev"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "docs:preview",
+          "command": "vp run docs#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "format",
+          "command": "vp fmt --write ."
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "format:check",
+          "command": "vp fmt --check ."
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "hooks:install",
+          "command": "vp config --hooks-dir .vite-hooks --no-agent"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "lint:ox",
+          "command": "vp lint ."
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "lint:ox:fix",
+          "command": "vp lint . --fix"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "preview",
+          "command": "vp run vue-playground#preview"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "test",
+          "command": "vp run -r test"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "typecheck",
+          "command": "tsc -p tsconfig.json --noEmit && vp run -r typecheck"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\package.json",
+          "script": "verify:packages",
+          "command": "vp run -r verify:package"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\core\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\core\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\core\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\history\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\history\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\react\\history\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\core\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\core\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\core\\package.json",
+          "script": "test",
+          "command": "vp test"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\history\\package.json",
+          "script": "build",
+          "command": "vp pack"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\history\\package.json",
+          "script": "dev",
+          "command": "vp pack --watch"
+        },
+        {
+          "file": "C:\\malei\\stu\\workflow\\packages\\vue\\history\\package.json",
+          "script": "test",
+          "command": "vp test"
+        }
+      ],
+      "lockfiles": [
+        "C:\\malei\\stu\\workflow\\pnpm-lock.yaml"
+      ]
+    }
+  ],
+  "script_only_candidates": [],
+  "workspace_files_for_review": [
+    "C:\\malei\\job\\bee\\bee-charger-admin\\pnpm-workspace.yaml",
+    "C:\\malei\\job\\bee\\bee-screen\\pnpm-workspace.yaml",
+    "C:\\malei\\job\\iglobal-platform\\pnpm-workspace.yaml",
+    "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\ad-eplmbi-fe\\pnpm-workspace.yaml",
+    "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\web\\pnpm-workspace.yaml",
+    "C:\\malei\\job\\liangjiang-engineering-project-lifecycle\\workflow-test\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\antv-next-pro\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-pnpm-vp-monorepo\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-monorepo-react-nestjs\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react-shadcn\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-react\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vp-vue-eslint-vapor\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\packages\\create-bubbles\\template-vue-vp-eslint\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\bubbles\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\core\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\i18n\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\lowercode\\codex\\monorepo-demo\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\tiny-engine-stu\\child1\\pnpm-workspace.yaml",
+    "C:\\malei\\stu\\workflow\\pnpm-workspace.yaml"
+  ],
+  "workspace_only_review_candidates": [],
+  "errors": [],
+  "notes": [
+    "Installation roots are candidates: verify workspace membership before updating.",
+    "Workspace YAML uses conservative block-scalar extraction; review listed YAML files for aliases, anchors and flow mappings.",
+    "No project code was executed; lockfile content is not used as evidence of direct Vite+ use."
+  ]
+}

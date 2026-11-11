@@ -1,0 +1,4 @@
+interface:
+  display_name: "update bubbles node_modules"
+  short_description: "Bubbles、antv-next-pro、workflow、i18n 全依赖升级，其它项目仅升级 Vite+"
+  default_prompt: "使用 $update-bubbles-node-modules，升级 bubbles、antv-next-pro、workflow、i18n 的全部兼容依赖，并扫描 C:\\malei\\job、C:\\malei\\stu，将其余使用 Vite+ 的项目升级到我指定的版本。"
