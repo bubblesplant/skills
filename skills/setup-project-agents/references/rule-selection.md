@@ -51,6 +51,7 @@
 | `root-common` | [代码设计](../assets/rules/common/代码设计.md)、[共享代码](../assets/rules/common/共享代码.md) | [根入口](../assets/AGENTS.root.md) | 承载代码，或管理代码工作区的项目根 | 无 | 根 `AGENTS.md` 与根 `.agents/rules/` |
 | `scope-entry` | 无固定规则；承载已选局部规则 | [局部入口](../assets/AGENTS.package.md) | 确有局部规则但缺少入口的包或目录 | 不为没有适用规则的范围选择 | 对应范围的 `AGENTS.md` |
 | `frontend-file-split` | [文件拆分](../assets/rules/frontend/文件拆分.md) | [前端入口](../assets/AGENTS.frontend.md)中的“文件拆分”行 | 前端应用、UI 组件包 | 纯后端或工具包排除 | 当前前端范围的 `AGENTS.md` 与 `.agents/rules/` |
+| `frontend-config-data` | [配置与静态数据](../assets/rules/frontend/配置与静态数据.md) | [前端入口](../assets/AGENTS.frontend.md)中的“配置与静态数据”行 | 前端应用、UI 组件包，不限框架 | 纯后端或工具包排除 | 当前前端范围 |
 | `frontend-page-api` | [页面接口](../assets/rules/frontend/页面接口.md) | [前端入口](../assets/AGENTS.frontend.md)中的“页面接口”行 | 有页面或页面 API 职责的前端应用 | 纯 UI 组件包排除 | 当前前端范围 |
 | `frontend-component-reuse` | [组件复用](../assets/rules/frontend/组件复用.md) | [前端入口](../assets/AGENTS.frontend.md)中的“组件复用”行 | 前端应用、UI 组件包 | 无前端组件职责的包排除 | 当前前端范围 |
 | `frontend-public-capability-index` | [公共能力索引](../assets/rules/frontend/公共能力索引.md) | [前端入口](../assets/AGENTS.frontend.md)中的“公共能力索引”行 | 前端应用、UI 组件包 | 纯后端或工具包排除 | 当前前端范围 |
@@ -60,7 +61,6 @@
 | `frontend-style-convention` | [样式方案与命名](../assets/rules/frontend/样式方案与命名.md) | [前端入口](../assets/AGENTS.frontend.md)中的“样式方案与命名”行 | Vue / React Web 应用、UI 组件包 | 纯后端、工具包及非 Web 渲染目标排除 | 当前 Vue / React Web 前端范围 |
 | `frontend-interaction-style` | [交互状态样式](../assets/rules/frontend/交互状态样式.md) | [前端入口](../assets/AGENTS.frontend.md)中的“交互状态样式”行 | Web 前端应用、渲染浏览器元素的 UI 组件包 | 纯后端、工具包及无浏览器样式职责的包排除 | 当前 Web 前端范围 |
 | `react-web-svg` | [React SVG 使用](../assets/rules/frontend/ReactSVG使用.md) | [React SVG 入口行](../assets/entries/frontend/ReactSVG使用.row.md) | 渲染 DOM 的 React Web 应用或 UI 包 | Vue、React Native、Taro 小程序排除 | 当前 React Web 范围 |
-| `react-manual-memo` | [React 手动记忆化](../assets/rules/frontend/React手动记忆化.md) | [React 手动记忆化入口行](../assets/entries/frontend/React手动记忆化.row.md) | React 应用或 React UI 包 | 仅 React Compiler 确认未启用时选择 | 当前 React 范围 |
 
 源码全部位于子包中的 monorepo 根仍属于“管理代码工作区的项目根”，应选择 `root-common`。根入口不仅承载按需规则表，还包含“功能文件归入子目录”的个人强制规则；合并 [AGENTS.root.md](../assets/AGENTS.root.md) 时须一并处理该条款，不能只提取表格行。
 
@@ -94,4 +94,3 @@
 ## React 条件资产
 
 - `react-web-svg` 只沿用目标构建工具和类型声明已经支持的 SVG 使用方式，不为套用规则新增依赖、别名或不存在的封装组件。
-- 选择 `react-manual-memo` 前按 [React Compiler 检测](react-compiler-detection.md) 独立判断当前 React 范围；Vue 等非 React 范围不参与检测。
