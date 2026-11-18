@@ -2,7 +2,7 @@
 
 [English](./README.md) | 简体中文
 
-一组可复用的 AI Agent 技能，涵盖前端开发、项目 AI 规则、操作系统定时提醒和 BlackHole Engine API 查询。
+一组可复用的 AI Agent 技能，涵盖前端开发、项目 AI 规则、操作系统定时提醒、BlackHole Engine API 查询和 ChatGPT 本地图片交付。
 
 ## 技能总览
 
@@ -16,6 +16,7 @@
 | [setup-project-agents](#setup-project-agents) | 初始化或接入前端与 Node.js 后端项目的 Agent 指令与规则。 | `pnpx skills add bubblesplant/skills --skill setup-project-agents` |
 | [manage-prefixed-schedules](#manage-prefixed-schedules) | **测试中，不建议安装。** 管理 AI 自有的操作系统提醒。 | `pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules` |
 | [blackhole-engine-api-query](#blackhole-engine-api-query) | 查询 BlackHole3D API、模型资源 URL 和 SDK 升级说明。 | `pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query` |
+| [deliver-local-images](#deliver-local-images) | **暂仅供 ChatGPT 使用。** 保存并检查最终图片，在回复中显示图片并附原图链接。 | 见[使用说明](#deliver-local-images)。 |
 
 > [!IMPORTANT]
 > 本仓库提供以文档为依据的 AI Agent 技能。用于生产决策时，请通过原始文档或实际运行结果核实关键 API 行为。
@@ -40,13 +41,15 @@ pnpx skills add bubblesplant/skills --skill='*'
 pnpx skills add bubblesplant/skills --skill='*' -g
 ```
 
-下方每个技能均提供项目安装和全局安装命令。项目安装命令应在目标项目根目录运行；全局安装使用 `-g`。批量安装全部技能时，也会包含仍在测试中的 `manage-prefixed-schedules`，请留意其说明。
+下方列有 CLI 安装命令的技能，可以在目标项目根目录运行项目安装命令，也可以用 `-g` 全局安装。
+
+安装全部技能会包含仍在测试中的 `manage-prefixed-schedules` 和暂仅供 ChatGPT 使用的 `deliver-local-images`。为其他 Agent 安装时，请按需单独选择，不要选 `deliver-local-images`。
 
 更多 CLI 用法见 [vercel-labs/skills](https://github.com/vercel-labs/skills)。
 
 ## 技能详解
 
-当前包含六个技能。每个技能位于 `skills/<skill-name>`，以 `SKILL.md` 为入口，并可附带参考文档、规则模板、Agent 元数据或辅助脚本。下方链接指向各技能的使用说明。
+每个技能位于 `skills/<skill-name>`，以 `SKILL.md` 为入口，并可附带参考文档、规则模板、Agent 元数据或辅助脚本。下方链接指向各技能的使用说明。
 
 ### 前端技能
 
@@ -154,6 +157,14 @@ pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query
 pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query -g
 ```
 
+### ChatGPT 技能
+
+#### [deliver-local-images](./skills/deliver-local-images/SKILL.md)
+
+**暂仅供 ChatGPT 使用。** 适用于能访问本地文件的 ChatGPT 工作区，用于交付生成、编辑或渲染后的图片。该技能会把最终图片保存到可访问的位置，确认文件能打开且画面正常，再将图片直接嵌入回复并附上原图链接。
+
+需要直接看到成品并打开原图，或之前的图片没有显示时，可以请 ChatGPT 使用 `deliver-local-images`。临时预览不能替代已保存的图片文件。
+
 ## 常见问题
 
 ### 这是什么？
@@ -162,7 +173,7 @@ pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query -g
 
 ### 哪些 AI 工具可以使用这些技能？
 
-任何支持 Agent Skills 目录格式的助手或 Agent 运行环境都可以使用。这些技能不绑定特定 AI 产品。
+大多数技能可用于支持 Agent Skills 目录格式的助手或 Agent 运行环境。`deliver-local-images` 暂仅供 ChatGPT 使用。
 
 ### 如何使用与版本相关的说明？
 

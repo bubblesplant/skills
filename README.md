@@ -2,7 +2,7 @@
 
 English | [简体中文](./README.zh-CN.md)
 
-A collection of reusable agent skills for frontend development, project AI rules, operating-system reminders, and BlackHole Engine API lookup.
+A collection of reusable agent skills for frontend development, project AI rules, operating-system reminders, BlackHole Engine API lookup, and local image delivery in ChatGPT.
 
 ## Skills at a glance
 
@@ -16,6 +16,7 @@ Click a skill name for details. Run the commands below from the target project's
 | [setup-project-agents](#setup-project-agents) | Set up agent instructions and rules in new or existing frontend and Node.js backend projects. | `pnpx skills add bubblesplant/skills --skill setup-project-agents` |
 | [manage-prefixed-schedules](#manage-prefixed-schedules) | **Testing only; installation is not recommended.** Manage AI-owned operating-system reminders. | `pnpx skills add bubblesplant/skills --skill manage-prefixed-schedules` |
 | [blackhole-engine-api-query](#blackhole-engine-api-query) | Query BlackHole3D APIs, model resource URLs, and SDK upgrade notes. | `pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query` |
+| [deliver-local-images](#deliver-local-images) | **ChatGPT only for now.** Save, verify, and show final images with a link to the original file. | See [usage](#deliver-local-images). |
 
 > [!IMPORTANT]
 > This repository bundles documentation-backed skills for AI agents. For production decisions, verify critical API behavior against the source documentation or runtime.
@@ -40,15 +41,15 @@ Install all skills globally:
 pnpx skills add bubblesplant/skills --skill='*' -g
 ```
 
-Each skill below includes its own project and global installation commands. Run project installation commands from the target project's root directory; choose the global command to make a skill available across projects.
+Where a skill lists CLI installation commands, run its project command from the target project's root directory or use its global command to make it available across projects.
 
-Installing all skills also includes the testing-only `manage-prefixed-schedules` skill; see its status below.
+Installing all skills includes the testing-only `manage-prefixed-schedules` and the ChatGPT-only `deliver-local-images`. For other agents, select the skills you need individually and omit `deliver-local-images`.
 
 Learn more about the skills CLI at [vercel-labs/skills](https://github.com/vercel-labs/skills).
 
 ## Skill details
 
-The collection currently includes six skills. Each lives under `skills/<skill-name>` with a `SKILL.md` entry point and may include references, rule templates, agent metadata, or helper scripts. The links below open each skill's instructions.
+Each skill lives under `skills/<skill-name>` with a `SKILL.md` entry point and may include references, rule templates, agent metadata, or helper scripts. The links below open each skill's instructions.
 
 ### Frontend Skills
 
@@ -154,6 +155,14 @@ pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query
 pnpx skills add bubblesplant/skills --skill blackhole-engine-api-query -g
 ```
 
+### ChatGPT Skills
+
+#### [deliver-local-images](./skills/deliver-local-images/SKILL.md)
+
+**Currently for ChatGPT only.** Use it in a ChatGPT workspace with access to local files when generating, editing, or rendering images. The skill saves the final images to an accessible location and checks that each file opens and looks correct before embedding it in the reply with a link to the original file.
+
+Ask ChatGPT to use `deliver-local-images` when you want to see the final image and open the original, or when an earlier image did not appear. A temporary preview does not replace the saved file.
+
 ## FAQ
 
 ### What is this?
@@ -162,7 +171,7 @@ This repository stores reusable skills that AI assistants can load when they nee
 
 ### Which AI tools can use these skills?
 
-Any assistant or agent runtime that supports the Agent Skills directory format can use them. The skills are not tied to a specific AI product.
+Most skills can be used by assistants and agent runtimes that support the Agent Skills directory format. For now, `deliver-local-images` is intended only for ChatGPT.
 
 ### How should I use version-specific guidance?
 
